@@ -1,6 +1,7 @@
 import { MagicCardResult, MagicGenerator } from '@/services/MagicGenerator';
 import { useStore } from '@/store/useStore';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
 import React, { useEffect, useState } from 'react';
@@ -95,7 +96,15 @@ export default function DeckDetailScreen() {
   };
 
   const speak = (text: string) => {
-    Speech.speak(text, { language: 'en-US' });
+    if (!text) return;
+    console.log('Speaking:', text);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Speech.stop();
+    Speech.speak(text, { 
+      language: 'en-US',
+      pitch: 1.0,
+      rate: 0.9,
+    });
   };
 
   return (
@@ -116,9 +125,9 @@ export default function DeckDetailScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* Deck Banner */}
-        <View style={styles.bannerCard}>
+        <TouchableOpacity style={styles.bannerCard}>
           <View style={styles.iconContainer}>
-            <Text style={styles.iconEmoji}>🇯🇵</Text>
+            <Ionicons name="language" size={32} color="#10b981" />
           </View>
           <Text style={styles.deckTitle}>{deck.title}</Text>
           <Text style={styles.cardCount}>{currentCards.length} Cards Total</Text>
@@ -127,7 +136,7 @@ export default function DeckDetailScreen() {
             <Ionicons name="play-circle-outline" size={24} color="white" />
             <Text style={styles.startButtonText}>Start Session</Text>
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
@@ -254,12 +263,12 @@ export default function DeckDetailScreen() {
                   <View style={styles.wordHeroContainer}>
                     <Text style={styles.previewWordMain}>{magicWord}</Text>
                     
-                    <View style={styles.phoneticRow}>
-                      <TouchableOpacity onPress={() => speak(magicWord)} style={styles.audioButtonPreview}>
+                    <TouchableOpacity onPress={() => speak(magicWord)} style={styles.phoneticRow}>
+                      <View style={styles.audioButtonPreview}>
                           <Ionicons name="volume-medium" size={18} color="#10b981" />
-                      </TouchableOpacity>
+                      </View>
                       <Text style={styles.phoneticTextPreview}>{generatedResult?.phonetic}</Text>
-                    </View>
+                    </TouchableOpacity>
                   </View>
 
                   <View style={styles.divider} />

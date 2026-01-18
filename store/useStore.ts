@@ -8,11 +8,13 @@ import { Card, Deck } from '../types';
 interface StoreState {
   decks: Deck[];
   currentCards: Card[];
+  allCards: Card[];
   session: Session | null;
   isLoading: boolean;
   loadDecks: () => Promise<void>;
   createDeck: (title: string) => Promise<void>;
   loadCards: (deckId: string) => Promise<void>;
+  loadAllCards: () => Promise<void>;
   addCard: (card: Omit<Card, 'id' | 'created_at'>) => Promise<void>;
   deleteDeck: (id: string) => Promise<void>;
   checkSession: () => Promise<void>;
@@ -22,6 +24,7 @@ interface StoreState {
 export const useStore = create<StoreState>((set, get) => ({
   decks: [],
   currentCards: [],
+  allCards: [],
   session: null,
   isLoading: false,
 
@@ -46,6 +49,18 @@ export const useStore = create<StoreState>((set, get) => ({
         console.error('Failed to load cards', error);
     } finally {
         set({ isLoading: false });
+    }
+  },
+
+  loadAllCards: async () => {
+    set({ isLoading: true });
+    try {
+      const cards = await DataService.getAllCards();
+      set({ allCards: cards });
+    } catch (error) {
+      console.error('Failed to load all cards', error);
+    } finally {
+      set({ isLoading: false });
     }
   },
 

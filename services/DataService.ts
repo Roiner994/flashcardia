@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { supabase } from '../lib/supabase';
-import { Deck, Card } from '../types';
+import { Card, Deck } from '../types';
 
 const LOCAL_DECKS_KEY = 'local_decks';
 const LOCAL_CARDS_KEY = 'local_cards';
@@ -94,6 +94,20 @@ export const DataService = {
     }
   },
 
+  async getAllCards(): Promise<Card[]> {
+    const userId = await this.getUserId();
+
+    if (userId) {
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*');
+      if (error) throw error;
+      return data || [];
+    } else {
+      return await this.getAllLocalCards();
+    }
+  },
+
   // Helper for local cards
   async getAllLocalCards(): Promise<Card[]> {
     const json = await AsyncStorage.getItem(LOCAL_CARDS_KEY);
@@ -125,6 +139,37 @@ export const DataService = {
       cards.unshift(newCard);
       await AsyncStorage.setItem(LOCAL_CARDS_KEY, JSON.stringify(cards));
       return newCard;
+    }
+  },
+  async deleteCard(id: string): Promise<void> {
+    const userId = await this.getUserId();
+
+    if (userId) {
+      const { error } = await supabase.from('cards').delete().eq('id', id);
+      if (error) throw error;
+    } else {
+      const cards = await this.getAllLocalCards();
+      const filtered = cards.filter(c => c.id !== id);
+      await AsyncStorage.setItem(LOCAL_CARDS_KEY, JSON.stringify(filtered));
+    }
+  },
+
+  async updateCardStatus(id: string, status: Card['status']): Promise<void> {
+    const userId = await this.getUserId();
+
+    if (userId) {
+      const { error } = await supabase
+        .from('cards')
+        .update({ status })
+        .eq('id', id);
+      if (error) throw error;
+    } else {
+      const cards = await this.getAllLocalCards();
+      const index = cards.findIndex(c => c.id === id);
+      if (index !== -1) {
+        cards[index].status = status;
+        await AsyncStorage.setItem(LOCAL_CARDS_KEY, JSON.stringify(cards));
+      }
     }
   },
   

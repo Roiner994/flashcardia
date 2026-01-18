@@ -47,17 +47,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Browse',
-          tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "search" : "search-outline"} size={24} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="stats"
         options={{
           title: 'Stats',
-          tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} size={24} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} size={26} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -119,17 +112,15 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   fabContainer: {
     position: 'absolute',
-    bottom: 40,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
+    bottom: 90, // Above the tab bar
+    right: 24,
     pointerEvents: 'box-none',
   },
   fab: {
     backgroundColor: '#10b981',
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#10b981',
@@ -137,8 +128,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-    borderWidth: 4,
-    borderColor: 'white',
   },
   modalOverlay: {
     flex: 1,
