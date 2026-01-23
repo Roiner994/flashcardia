@@ -57,6 +57,25 @@ export const DataService = {
     }
   },
 
+  async updateDeck(id: string, deckData: Partial<Deck>): Promise<void> {
+    const userId = await this.getUserId();
+
+    if (userId) {
+      const { error } = await supabase
+        .from('decks')
+        .update(deckData)
+        .eq('id', id);
+      if (error) throw error;
+    } else {
+      const decks = await this.getDecks();
+      const index = decks.findIndex(d => d.id === id);
+      if (index !== -1) {
+        decks[index] = { ...decks[index], ...deckData };
+        await AsyncStorage.setItem(LOCAL_DECKS_KEY, JSON.stringify(decks));
+      }
+    }
+  },
+
   async deleteDeck(id: string): Promise<void> {
     const userId = await this.getUserId();
 
@@ -132,6 +151,10 @@ export const DataService = {
       const newCard: Card = {
         ...cardData,
         id: Crypto.randomUUID(),
+        status: cardData.status || 'new',
+        next_review_at: null,
+        interval: 0,
+        ease_factor: 2.5,
         created_at: new Date().toISOString(),
       };
       
@@ -141,6 +164,26 @@ export const DataService = {
       return newCard;
     }
   },
+
+  async updateCardSRS(id: string, srsData: Partial<Pick<Card, 'status' | 'next_review_at' | 'interval' | 'ease_factor'>>): Promise<void> {
+    const userId = await this.getUserId();
+
+    if (userId) {
+      const { error } = await supabase
+        .from('cards')
+        .update(srsData)
+        .eq('id', id);
+      if (error) throw error;
+    } else {
+      const cards = await this.getAllLocalCards();
+      const index = cards.findIndex(c => c.id === id);
+      if (index !== -1) {
+        cards[index] = { ...cards[index], ...srsData };
+        await AsyncStorage.setItem(LOCAL_CARDS_KEY, JSON.stringify(cards));
+      }
+    }
+  },
+
   async deleteCard(id: string): Promise<void> {
     const userId = await this.getUserId();
 

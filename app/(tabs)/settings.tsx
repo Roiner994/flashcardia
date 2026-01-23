@@ -7,7 +7,7 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, Touc
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
-  const { session, signOut, checkSession } = useStore();
+  const { session, signOut, checkSession, dailyNewLimit, setDailyLimit } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -83,6 +83,33 @@ export default function SettingsScreen() {
           </View>
 
           {/* Settings Groups */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Learning Rules</Text>
+            <View style={styles.card}>
+              <View style={styles.settingItem}>
+                <View style={[styles.settingIconContainer, { backgroundColor: '#eff6ff' }]}>
+                  <Ionicons name="calendar-outline" size={20} color="#3b82f6" />
+                </View>
+                <Text style={styles.settingLabel}>Daily New Limit</Text>
+                <View style={styles.limitControls}>
+                    <TouchableOpacity 
+                        onPress={() => setDailyLimit(Math.max(1, dailyNewLimit - 5))}
+                        style={styles.controlButton}
+                    >
+                        <Ionicons name="remove" size={20} color="#64748b" />
+                    </TouchableOpacity>
+                    <Text style={styles.limitValue}>{dailyNewLimit}</Text>
+                    <TouchableOpacity 
+                        onPress={() => setDailyLimit(dailyNewLimit + 5)}
+                        style={styles.controlButton}
+                    >
+                        <Ionicons name="add" size={20} color="#64748b" />
+                    </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Preferences</Text>
             <View style={styles.card}>
@@ -495,5 +522,33 @@ const styles = StyleSheet.create({
   toggleHighlight: {
     color: '#10b981',
     fontWeight: '700',
+  },
+  limitControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    padding: 4,
+  },
+  controlButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  limitValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginHorizontal: 16,
+    minWidth: 24,
+    textAlign: 'center',
   },
 });

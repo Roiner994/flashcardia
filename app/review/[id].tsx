@@ -1,5 +1,5 @@
-
 import { DataService } from '@/services/DataService';
+import { useStore } from '@/store/useStore';
 import { Card } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -13,6 +13,7 @@ const { width } = Dimensions.get('window');
 export default function ReviewScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { currentCards, loadCards, updateCardSRS } = useStore();
   const [cards, setCards] = useState<Card[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -23,23 +24,27 @@ export default function ReviewScreen() {
 
   // Animation values
   const animatedValue = useRef(new Animated.Value(0)).current;
-
+  
   useEffect(() => {
-    loadCards();
+    async function initCards() {
+        if (!id) return;
+        setLoading(true);
+        try {
+            await loadCards(id);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+    initCards();
   }, [id]);
 
-  async function loadCards() {
-    if (!id) return;
-    setLoading(true);
-    try {
-      const data = await DataService.getCards(id);
-      setCards(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-        setLoading(false);
+  useEffect(() => {
+    if (cards.length === 0 && currentCards.length > 0) {
+        setCards(currentCards);
     }
-  }
+  }, [currentCards]);
 
   const flipCard = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -52,6 +57,7 @@ export default function ReviewScreen() {
     setIsFlipped(!isFlipped);
   };
 
+
   // Calculate stats for Anki-style progress (Remaining unique cards in session)
   const remainingInQueue = cards.slice(currentIndex);
   
@@ -62,42 +68,44 @@ export default function ReviewScreen() {
 
   const newCount = uniqueRemaining.filter(c => c.status === 'new').length;
   const learningCount = uniqueRemaining.filter(c => c.status === 'learning').length;
-  const reviewCount = uniqueRemaining.filter(c => c.status === 'mastered').length;
+  const reviewCount = uniqueRemaining.filter(c => c.status === 'review' || c.status === 'mastered').length;
 
   const handleRating = async (rating: 'again' | 'hard' | 'good' | 'easy') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const currentCard = cards[currentIndex];
     if (!currentCard) return;
 
-    let newStatus: Card['status'] = 'learning';
-    if (rating === 'good' || rating === 'easy') {
-      newStatus = 'mastered';
-    }
-
-    // Create updated cards array
+    // 1. Prepare updated cards array (Local session state)
     const updatedCards = [...cards];
-    updatedCards[currentIndex] = { ...currentCard, status: newStatus };
+    const nextStatus = rating === 'again' || rating === 'hard' ? 'learning' : (rating === 'easy' ? 'mastered' : 'review');
+    
+    // Update the current instance in the history
+    updatedCards[currentIndex] = { ...currentCard, status: nextStatus };
 
-    // Re-queue if Again or Hard
+    // Re-queue if Again or Hard (Immediate session feedback)
     if (rating === 'again' || rating === 'hard') {
       updatedCards.push({ ...currentCard, status: 'learning' });
     }
 
-    setCards(updatedCards);
-
-    // Persist status change
+    // 2. Persist status change via Store (SM-2 Logic)
+    // We do this BEFORE updating the UI index to ensure store is in sync
     try {
-      await DataService.updateCardStatus(currentCard.id, newStatus);
+      updateCardSRS(currentCard.id, rating); // No await here to avoid blocking UI transition
     } catch (e) {
       console.error("Failed to update card status:", e);
     }
 
-    // Move to next card
+    // 3. Move to next card - Consolidate to prevent flicker
     if (currentIndex < updatedCards.length - 1) {
-       setIsFlipped(false);
+       // Reset flip state BEFORE changing the index
        animatedValue.setValue(0);
+       setIsFlipped(false);
+       
+       // Small batch update
+       setCards(updatedCards);
        setCurrentIndex(prev => prev + 1);
     } else {
+      setCards(updatedCards);
       Alert.alert("Session Complete", "You've reviewed all cards!", [
         { text: "Back to Deck", onPress: () => router.back() }
       ]);
@@ -403,11 +411,12 @@ const styles = StyleSheet.create({
     },
     statsContainer: {
         flexDirection: 'row',
-        gap: 16,
+        alignItems: 'center',
     },
     statCount: {
         fontSize: 16,
         fontWeight: 'bold',
+        marginHorizontal: 4,
         minWidth: 20,
         textAlign: 'center',
     },

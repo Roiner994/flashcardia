@@ -8,15 +8,36 @@ import '../../global.css';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { decks, allCards, loadDecks, loadAllCards, isLoading } = useStore();
+  const { decks, allCards, loadDecks, loadAllCards, isLoading, dailyNewLimit } = useStore();
 
   useEffect(() => {
     loadDecks();
     loadAllCards();
   }, []);
 
-  const dueToday = allCards.filter(c => c.status === 'new' || c.status === 'learning').length;
-  const learnedWords = allCards.filter(c => c.status === 'mastered').length;
+  // Calculate Due Today based on SRS/Daily Limits per deck
+  let dueToday = 0;
+  const now = new Date();
+  
+  decks.forEach(deck => {
+      const deckCards = allCards.filter(c => c.deck_id === deck.id);
+      
+      // 1. Due reviews (Learning, Review, Mastered)
+      const reviewsDue = deckCards.filter(c => {
+          if (c.status === 'new') return false;
+          if (!c.next_review_at) return true;
+          return new Date(c.next_review_at) <= now;
+      }).length;
+
+      // 2. New cards allowed (capped by deck-specific limit or global default)
+      const limit = deck.daily_new_limit ?? dailyNewLimit;
+      const newAllowed = deckCards.filter(c => c.status === 'new').slice(0, limit).length;
+      
+      dueToday += reviewsDue + newAllowed;
+  });
+
+  // Learned = Any card that is no longer 'new'
+  const learnedWords = allCards.filter(c => c.status !== 'new').length;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -235,11 +256,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    width: 32,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    minWidth: 44,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   badgeBlue: {
     backgroundColor: '#dbeafe',

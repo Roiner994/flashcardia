@@ -11,9 +11,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function DeckDetailScreen() {
   const { id, initialMagicWord } = useLocalSearchParams<{ id: string, initialMagicWord?: string }>();
   const router = useRouter();
-  const { decks, currentCards, loadCards, addCard, isLoading } = useStore();
+  const { decks, currentCards, loadCards, addCard, updateDeck, isLoading } = useStore();
   
-  // Magic Creation State
+  // Settings/Menu State
+  const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [creationStep, setCreationStep] = useState<'input' | 'preview'>('input');
   const [magicWord, setMagicWord] = useState('');
@@ -48,7 +49,7 @@ export default function DeckDetailScreen() {
   const getCount = (status: string) => currentCards.filter(c => (c.status || 'new') === status).length;
   const newCount = getCount('new');
   const learningCount = getCount('learning');
-  const reviewCount = getCount('mastered');
+  const reviewCount = currentCards.filter(c => c.status === 'review' || c.status === 'mastered').length;
 
   // Magic Logic
   async function handleMagicGenerate() {
@@ -75,6 +76,9 @@ export default function DeckDetailScreen() {
       phonetic: generatedResult.phonetic || null,
       examples: generatedResult.examples,
       status: 'new',
+      next_review_at: null,
+      interval: 0,
+      ease_factor: 2.5,
     });
     setModalVisible(false);
     resetCreation();
@@ -114,8 +118,8 @@ export default function DeckDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#111827" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuButton}>
-          <Ionicons name="ellipsis-horizontal" size={24} color="#111827" />
+        <TouchableOpacity style={styles.menuButton} onPress={() => setSettingsVisible(true)}>
+          <Ionicons name="settings-outline" size={24} color="#111827" />
         </TouchableOpacity>
       </View>
 
@@ -194,6 +198,78 @@ export default function DeckDetailScreen() {
           ))
         )}
       </ScrollView>
+
+      {/* Settings Modal */}
+      <Modal visible={isSettingsVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.inputModalContent}>
+            <View style={styles.modalGrabber} />
+            <TouchableOpacity 
+              style={styles.closeModalButton} 
+              onPress={() => setSettingsVisible(false)}
+            >
+              <Ionicons name="close" size={20} color="#6b7280" />
+            </TouchableOpacity>
+
+            <View style={styles.inputModalHeader}>
+              <Text style={styles.inputModalTitle}>Deck Settings</Text>
+              <Text style={styles.inputModalSub}>
+                  Customize the learning rules for this specific deck.
+              </Text>
+            </View>
+
+            <View style={styles.settingItemRow}>
+              <View style={styles.settingIconCol}>
+                <Ionicons name="calendar-outline" size={20} color="#3b82f6" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.settingLabel}>Daily New Limit</Text>
+                <Text style={styles.settingHint}>How many new cards to see per session</Text>
+              </View>
+              <View style={styles.limitControls}>
+                <TouchableOpacity 
+                  onPress={() => updateDeck(deck.id, { daily_new_limit: Math.max(1, (deck.daily_new_limit ?? 10) - 5) })}
+                  style={styles.controlButton}
+                >
+                  <Ionicons name="remove" size={20} color="#475569" />
+                </TouchableOpacity>
+                <Text style={styles.limitValue}>{deck.daily_new_limit ?? 10}</Text>
+                <TouchableOpacity 
+                  onPress={() => updateDeck(deck.id, { daily_new_limit: Math.min(100, (deck.daily_new_limit ?? 10) + 5) })}
+                  style={styles.controlButton}
+                >
+                  <Ionicons name="add" size={20} color="#475569" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.deleteDeckButton}
+              onPress={() => {
+                Alert.alert(
+                  'Delete Deck',
+                  'Are you sure you want to delete this deck and all its cards?',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { 
+                      text: 'Delete', 
+                      style: 'destructive', 
+                      onPress: async () => {
+                        await useStore.getState().deleteDeck(deck.id);
+                        setSettingsVisible(false);
+                        router.back();
+                      }
+                    }
+                  ]
+                );
+              }}
+            >
+              <Ionicons name="trash-outline" size={20} color="#ef4444" />
+              <Text style={styles.deleteDeckText}>Delete Deck</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Magic Creation Modal */}
       <Modal visible={isModalVisible} animationType="slide" transparent={creationStep === 'input'}>
@@ -782,5 +858,74 @@ const styles = StyleSheet.create({
     color: '#64748b',
     fontSize: 14,
     fontWeight: '600',
+  },
+  // Settings Menu Styles
+  settingItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  settingIconCol: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  settingLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  settingHint: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  limitControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    padding: 4,
+  },
+  controlButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  limitValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginHorizontal: 12,
+    minWidth: 24,
+    textAlign: 'center',
+  },
+  deleteDeckButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    marginTop: 24,
+    backgroundColor: '#fef2f2',
+    borderRadius: 12,
+  },
+  deleteDeckText: {
+    color: '#ef4444',
+    fontWeight: '700',
+    marginLeft: 8,
   },
 });
