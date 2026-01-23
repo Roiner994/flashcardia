@@ -9,8 +9,8 @@ import React, { useEffect } from "react";
 import "react-native-reanimated";
 import "../global.css";
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useStore } from "@/store/useStore";
+import { useColorScheme } from "react-native";
 
 export const unstable_settings = {
   anchor: "(tabs)",

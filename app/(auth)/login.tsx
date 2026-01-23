@@ -1,8 +1,10 @@
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/hooks/useThemeColor";
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -19,6 +21,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const colors = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,13 +69,13 @@ export default function LoginScreen() {
               onPress={() => router.replace("/(tabs)")}
               style={styles.backButton}
             >
-              <Ionicons name="close" size={24} color="#64748b" />
+              <Ionicons name="close" size={24} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.authHeader}>
             <View style={styles.logoPill}>
-              <Ionicons name="sparkles" size={32} color="#10b981" />
+              <Ionicons name="sparkles" size={32} color={colors.primary} />
             </View>
             <Text style={styles.authTitle}>
               {isLogin ? "Welcome Back" : "Join MagicDeck"}
@@ -105,13 +109,13 @@ export default function LoginScreen() {
                 <Ionicons
                   name="mail-outline"
                   size={20}
-                  color="#94a3b8"
+                  color={colors.textSecondary}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="email@example.com"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor={colors.textSecondary}
                   value={email}
                   onChangeText={setEmail}
                   autoCapitalize="none"
@@ -126,13 +130,13 @@ export default function LoginScreen() {
                 <Ionicons
                   name="lock-closed-outline"
                   size={20}
-                  color="#94a3b8"
+                  color={colors.textSecondary}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="••••••••"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor={colors.textSecondary}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
@@ -181,169 +185,170 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: "center",
-  },
-  header: {
-    alignItems: "flex-end",
-    marginBottom: 20,
-  },
-  backButton: {
-    padding: 8,
-    backgroundColor: "#f1f5f9",
-    borderRadius: 20,
-  },
-  authHeader: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logoPill: {
-    width: 64,
-    height: 64,
-    borderRadius: 24,
-    backgroundColor: "white",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-    shadowColor: "#10b981",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  authTitle: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#0f172a",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  authSubtitle: {
-    fontSize: 16,
-    color: "#64748b",
-    textAlign: "center",
-    lineHeight: 24,
-    paddingHorizontal: 20,
-  },
-  authForm: {
-    width: "100%",
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#475569",
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 56,
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: "#0f172a",
-    fontWeight: "500",
-  },
-  googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "white",
-    height: 56,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    marginBottom: 24,
-  },
-  googleIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 12,
-  },
-  googleButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#0f172a",
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  smallDivider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#f1f5f9",
-  },
-  dividerText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#94a3b8",
-    marginHorizontal: 12,
-    textTransform: "uppercase",
-  },
-  authButton: {
-    backgroundColor: "#10b981",
-    height: 56,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 12,
-    shadowColor: "#10b981",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  authButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  toggleButton: {
-    marginTop: 24,
-    alignItems: "center",
-  },
-  toggleText: {
-    fontSize: 14,
-    color: "#64748b",
-    textAlign: "center",
-  },
-  toggleHighlight: {
-    color: "#10b981",
-    fontWeight: "700",
-  },
-  guestButton: {
-    marginTop: 32,
-    alignItems: "center",
-    padding: 12,
-  },
-  guestButtonText: {
-    fontSize: 14,
-    color: "#94a3b8",
-    fontWeight: "600",
-  },
-});
+const createStyles = (colors: typeof Colors.light) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      padding: 24,
+      justifyContent: "center",
+    },
+    header: {
+      alignItems: "flex-end",
+      marginBottom: 20,
+    },
+    backButton: {
+      padding: 8,
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+    },
+    authHeader: {
+      alignItems: "center",
+      marginBottom: 40,
+    },
+    logoPill: {
+      width: 64,
+      height: 64,
+      borderRadius: 24,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 20,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 5,
+    },
+    authTitle: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    authSubtitle: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: "center",
+      lineHeight: 24,
+      paddingHorizontal: 20,
+    },
+    authForm: {
+      width: "100%",
+    },
+    inputGroup: {
+      marginBottom: 20,
+    },
+    inputLabel: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      marginBottom: 8,
+      marginLeft: 4,
+    },
+    inputWrapper: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 16,
+      paddingHorizontal: 16,
+      height: 56,
+    },
+    inputIcon: {
+      marginRight: 12,
+    },
+    input: {
+      flex: 1,
+      fontSize: 16,
+      color: colors.text,
+      fontWeight: "500",
+    },
+    googleButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.surface,
+      height: 56,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 24,
+    },
+    googleIcon: {
+      width: 20,
+      height: 20,
+      marginRight: 12,
+    },
+    googleButtonText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    dividerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 24,
+    },
+    smallDivider: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    dividerText: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      marginHorizontal: 12,
+      textTransform: "uppercase",
+    },
+    authButton: {
+      backgroundColor: colors.primary,
+      height: 56,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 12,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    authButtonText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "700",
+    },
+    buttonDisabled: {
+      opacity: 0.7,
+    },
+    toggleButton: {
+      marginTop: 24,
+      alignItems: "center",
+    },
+    toggleText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: "center",
+    },
+    toggleHighlight: {
+      color: colors.primary,
+      fontWeight: "700",
+    },
+    guestButton: {
+      marginTop: 32,
+      alignItems: "center",
+      padding: 12,
+    },
+    guestButtonText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      fontWeight: "600",
+    },
+  });
