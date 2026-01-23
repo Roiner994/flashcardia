@@ -1,173 +1,278 @@
-import { supabase } from '@/lib/supabase';
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { supabase } from "@/lib/supabase";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
 
   async function handleAuth() {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     setLoading(true);
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        Alert.alert('Success', 'Check your email for confirmation!');
-      } else {
+      if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (error) throw error;
-        // Navigation handled by auth listener in layout or store
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        Alert.alert("Success", "Check your email for the confirmation link!");
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.logoPill}>
-          <Ionicons name="sparkles" size={32} color="white" />
-        </View>
-        <Text style={styles.title}>Magic Deck</Text>
-        <Text style={styles.subtitle}>Master any language with AI</Text>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => router.replace("/(tabs)")}
+              style={styles.backButton}
+            >
+              <Ionicons name="close" size={24} color="#64748b" />
+            </TouchableOpacity>
+          </View>
 
-      <View style={styles.formCard}>
-        <Text style={styles.formTitle}>{isSignUp ? 'Create an Account' : 'Welcome Back'}</Text>
-        
-        <TouchableOpacity style={styles.googleButton}>
-          <Image 
-            source="https://e7.pngegg.com/pngimages/114/607/png-clipart-g-suite-pearl-river-middle-school-google-software-suite-email-sign-up-button-text-logo.png" 
-            style={styles.googleIcon} 
-            contentFit="contain"
-          />
-          <Text style={styles.googleButtonText}>Continue with Google</Text>
-        </TouchableOpacity>
+          <View style={styles.authHeader}>
+            <View style={styles.logoPill}>
+              <Ionicons name="sparkles" size={32} color="#10b981" />
+            </View>
+            <Text style={styles.authTitle}>
+              {isLogin ? "Welcome Back" : "Join MagicDeck"}
+            </Text>
+            <Text style={styles.authSubtitle}>
+              {isLogin
+                ? "Sign in to sync your decks across devices."
+                : "Create an account to start your learning journey."}
+            </Text>
+          </View>
 
-        <View style={styles.dividerRow}>
-          <View style={styles.smallDivider} />
-          <Text style={styles.dividerText}>or use email</Text>
-          <View style={styles.smallDivider} />
-        </View>
+          <View style={styles.authForm}>
+            <TouchableOpacity style={styles.googleButton}>
+              <Image
+                source="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.png/1200px-Google_%22G%22_logo.png"
+                style={styles.googleIcon}
+                contentFit="contain"
+              />
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </TouchableOpacity>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="hello@example.com"
-            placeholderTextColor="#64748b"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-          />
-        </View>
+            <View style={styles.dividerRow}>
+              <View style={styles.smallDivider} />
+              <Text style={styles.dividerText}>or continue with email</Text>
+              <View style={styles.smallDivider} />
+            </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="********"
-            placeholderTextColor="#64748b"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email Address</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color="#94a3b8"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="email@example.com"
+                  placeholderTextColor="#94a3b8"
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+            </View>
 
-        <TouchableOpacity 
-          style={styles.submitButton}
-          onPress={handleAuth}
-          disabled={loading}
-        >
-          {loading ? <ActivityIndicator color="white" /> : <Text style={styles.submitButtonText}>{isSignUp ? 'Sign Up' : 'Log In'}</Text>}
-        </TouchableOpacity>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#94a3b8"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="••••••••"
+                  placeholderTextColor="#94a3b8"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                />
+              </View>
+            </View>
 
-        <TouchableOpacity style={styles.toggleButton} onPress={() => setIsSignUp(!isSignUp)}>
-          <Text style={styles.toggleText}>
-            {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-            <Text style={styles.toggleHighlight}>{isSignUp ? 'Log In' : 'Sign Up'}</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+            <TouchableOpacity
+              style={[styles.authButton, loading && styles.buttonDisabled]}
+              onPress={handleAuth}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={styles.authButtonText}>
+                  {isLogin ? "Sign In" : "Create Account"}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.toggleButton}
+              onPress={() => setIsLogin(!isLogin)}
+            >
+              <Text style={styles.toggleText}>
+                {isLogin
+                  ? "Small steps today, big results tomorrow. "
+                  : "Join thousands of successful learners. "}
+                <Text style={styles.toggleHighlight}>
+                  {isLogin ? "Sign Up" : "Log In"}
+                </Text>
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.guestButton}
+              onPress={() => router.replace("/(tabs)")}
+            >
+              <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    backgroundColor: "#f8fafc",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 24,
+    justifyContent: "center",
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 48,
+    alignItems: "flex-end",
+    marginBottom: 20,
+  },
+  backButton: {
+    padding: 8,
+    backgroundColor: "#f1f5f9",
+    borderRadius: 20,
+  },
+  authHeader: {
+    alignItems: "center",
+    marginBottom: 40,
   },
   logoPill: {
     width: 64,
     height: 64,
     borderRadius: 24,
-    backgroundColor: '#334155',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
-    shadowColor: '#6366f1',
+    shadowColor: "#10b981",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
+    elevation: 5,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: 'white',
-    textAlign: 'center',
+  authTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#0f172a",
+    textAlign: "center",
+    marginBottom: 8,
   },
-  subtitle: {
+  authSubtitle: {
     fontSize: 16,
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginTop: 8,
+    color: "#64748b",
+    textAlign: "center",
+    lineHeight: 24,
+    paddingHorizontal: 20,
   },
-  formCard: {
-    backgroundColor: '#1e293b',
-    padding: 24,
-    borderRadius: 32,
+  authForm: {
+    width: "100%",
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#475569",
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: "#e2e8f0",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
   },
-  formTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 24,
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#0f172a",
+    fontWeight: "500",
   },
   googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
     height: 56,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
     marginBottom: 24,
   },
   googleIcon: {
@@ -177,74 +282,68 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#0f172a',
+    fontWeight: "600",
+    color: "#0f172a",
   },
   dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 24,
   },
   smallDivider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#334155',
+    backgroundColor: "#f1f5f9",
   },
   dividerText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#64748b',
+    fontWeight: "600",
+    color: "#94a3b8",
     marginHorizontal: 12,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#94a3b8',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginLeft: 4,
-  },
-  input: {
-    backgroundColor: '#0f172a',
-    borderWidth: 1,
-    borderColor: '#334155',
-    color: 'white',
-    padding: 16,
-    borderRadius: 16,
-    fontSize: 16,
-  },
-  submitButton: {
-    backgroundColor: '#6366f1',
+  authButton: {
+    backgroundColor: "#10b981",
     height: 56,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 12,
-    shadowColor: '#6366f1',
+    shadowColor: "#10b981",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
+    elevation: 4,
   },
-  submitButtonText: {
-    color: 'white',
+  authButtonText: {
+    color: "white",
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   toggleButton: {
     marginTop: 24,
-    alignItems: 'center',
+    alignItems: "center",
   },
   toggleText: {
-    color: '#94a3b8',
     fontSize: 14,
+    color: "#64748b",
+    textAlign: "center",
   },
   toggleHighlight: {
-    color: '#818cf8',
-    fontWeight: '700',
+    color: "#10b981",
+    fontWeight: "700",
+  },
+  guestButton: {
+    marginTop: 32,
+    alignItems: "center",
+    padding: 12,
+  },
+  guestButtonText: {
+    fontSize: 14,
+    color: "#94a3b8",
+    fontWeight: "600",
   },
 });

@@ -46,7 +46,7 @@ export const DataService = {
         // For this demo, let's let Supabase return the object.
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     } else {
@@ -86,7 +86,7 @@ export const DataService = {
       const decks = await this.getDecks();
       const filtered = decks.filter(d => d.id !== id);
       await AsyncStorage.setItem(LOCAL_DECKS_KEY, JSON.stringify(filtered));
-      
+
       // Cascade delete cards
       const cards = await this.getAllLocalCards();
       const filteredCards = cards.filter(c => c.deck_id !== id);
@@ -135,10 +135,10 @@ export const DataService = {
 
   async createCard(cardData: Omit<Card, 'id' | 'created_at'>): Promise<Card> {
     const userId = await this.getUserId();
-    
+
     // Note: Supabase implementation usually relies on DB defaults for ID/Created_at 
     // but the input might vary.
-    
+
     if (userId) {
       const { data, error } = await supabase
         .from('cards')
@@ -151,13 +151,9 @@ export const DataService = {
       const newCard: Card = {
         ...cardData,
         id: Crypto.randomUUID(),
-        status: cardData.status || 'new',
-        next_review_at: null,
-        interval: 0,
-        ease_factor: 2.5,
         created_at: new Date().toISOString(),
       };
-      
+
       const cards = await this.getAllLocalCards();
       cards.unshift(newCard);
       await AsyncStorage.setItem(LOCAL_CARDS_KEY, JSON.stringify(cards));
@@ -215,15 +211,15 @@ export const DataService = {
       }
     }
   },
-  
+
   // Expose pure local getters for MigrationService
   async getLocalDecks(): Promise<Deck[]> {
-      const json = await AsyncStorage.getItem(LOCAL_DECKS_KEY);
-      return json ? JSON.parse(json) : [];
+    const json = await AsyncStorage.getItem(LOCAL_DECKS_KEY);
+    return json ? JSON.parse(json) : [];
   },
-  
+
   async clearLocalData(): Promise<void> {
-      await AsyncStorage.removeItem(LOCAL_DECKS_KEY);
-      await AsyncStorage.removeItem(LOCAL_CARDS_KEY);
+    await AsyncStorage.removeItem(LOCAL_DECKS_KEY);
+    await AsyncStorage.removeItem(LOCAL_CARDS_KEY);
   }
 };

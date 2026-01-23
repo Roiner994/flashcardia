@@ -1,14 +1,43 @@
-import { useStore } from '@/store/useStore';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import '../../global.css';
+import { useStore } from "@/store/useStore";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useEffect } from "react";
+import {
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import "../../global.css";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { decks, allCards, loadDecks, loadAllCards, isLoading, dailyNewLimit } = useStore();
+  const [isModalVisible, setModalVisible] = React.useState(false);
+  const [newDeckTitle, setNewDeckTitle] = React.useState("");
+  const {
+    decks,
+    allCards,
+    loadDecks,
+    loadAllCards,
+    isLoading,
+    dailyNewLimit,
+    session,
+    createDeck,
+  } = useStore();
+
+  const handleCreateDeck = async () => {
+    if (!newDeckTitle.trim()) return;
+    await createDeck(newDeckTitle);
+    setNewDeckTitle("");
+    setModalVisible(false);
+  };
+
+  console.log("HomeScreen rendering. Session exists:", !!session);
 
   useEffect(() => {
     loadDecks();
@@ -18,42 +47,65 @@ export default function HomeScreen() {
   // Calculate Due Today based on SRS/Daily Limits per deck
   let dueToday = 0;
   const now = new Date();
-  
-  decks.forEach(deck => {
-      const deckCards = allCards.filter(c => c.deck_id === deck.id);
-      
-      // 1. Due reviews (Learning, Review, Mastered)
-      const reviewsDue = deckCards.filter(c => {
-          if (c.status === 'new') return false;
-          if (!c.next_review_at) return true;
-          return new Date(c.next_review_at) <= now;
-      }).length;
 
-      // 2. New cards allowed (capped by deck-specific limit or global default)
-      const limit = deck.daily_new_limit ?? dailyNewLimit;
-      const newAllowed = deckCards.filter(c => c.status === 'new').slice(0, limit).length;
-      
-      dueToday += reviewsDue + newAllowed;
+  decks.forEach((deck) => {
+    const deckCards = allCards.filter((c) => c.deck_id === deck.id);
+
+    // 1. Due reviews (Learning, Review, Mastered)
+    const reviewsDue = deckCards.filter((c) => {
+      if (c.status === "new") return false;
+      if (!c.next_review_at) return true;
+      return new Date(c.next_review_at) <= now;
+    }).length;
+
+    // 2. New cards allowed (capped by deck-specific limit or global default)
+    const limit = deck.daily_new_limit ?? dailyNewLimit;
+    const newAllowed = deckCards
+      .filter((c) => c.status === "new")
+      .slice(0, limit).length;
+
+    dueToday += reviewsDue + newAllowed;
   });
 
   // Learned = Any card that is no longer 'new'
-  const learnedWords = allCards.filter(c => c.status !== 'new').length;
+  const learnedWords = allCards.filter((c) => c.status !== "new").length;
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-            <View style={styles.headerLeft}>
-                <Ionicons name="sparkles" size={24} color="#10b981" />
-                <Text style={styles.headerTitle}>MagicDeck</Text>
-            </View>
+          <View style={styles.headerLeft}>
+            <Ionicons name="sparkles" size={24} color="#10b981" />
+            <Text style={styles.headerTitle}>MagicDeck</Text>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <TouchableOpacity
+              onPress={() => {
+                if (!session) router.push("/(auth)/login");
+              }}
+              style={{
+                padding: 8,
+                backgroundColor: session ? "#dcfce7" : "#f1f5f9",
+                borderRadius: 20,
+              }}
+            >
+              <Ionicons
+                name={session ? "cloud-done" : "cloud-offline-outline"}
+                size={20}
+                color={session ? "#16a34a" : "#64748b"}
+              />
+            </TouchableOpacity>
+
             <View style={styles.avatar}>
-                <Image 
-                    source={{ uri: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' }} 
-                    style={styles.avatarImage}
-                />
+              <Image
+                source={{
+                  uri: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+                }}
+                style={styles.avatarImage}
+              />
             </View>
+          </View>
         </View>
 
         <FlatList
@@ -63,64 +115,88 @@ export default function HomeScreen() {
             <>
               {/* Stats Dashboard */}
               <View style={styles.statsDashboard}>
-                  <View style={styles.statBox}>
-                      <View style={styles.statHeader}>
-                          <Ionicons name="time-outline" size={20} color="#ef4444" />
-                          <Text style={styles.statLabel}>Due Today</Text>
-                      </View>
-                      <Text style={styles.statValue}>{dueToday} Cards</Text>
+                <View style={styles.statBox}>
+                  <View style={styles.statHeader}>
+                    <Ionicons name="time-outline" size={20} color="#ef4444" />
+                    <Text style={styles.statLabel}>Due Today</Text>
                   </View>
+                  <Text style={styles.statValue}>{dueToday} Cards</Text>
+                </View>
 
-                  <View style={styles.statBox}>
-                      <View style={styles.statHeader}>
-                          <Ionicons name="trending-up-outline" size={20} color="#10b981" />
-                          <Text style={styles.statLabel}>Learned</Text>
-                      </View>
-                      <Text style={styles.statValue}>{learnedWords} Words</Text>
+                <View style={styles.statBox}>
+                  <View style={styles.statHeader}>
+                    <Ionicons
+                      name="trending-up-outline"
+                      size={20}
+                      color="#10b981"
+                    />
+                    <Text style={styles.statLabel}>Learned</Text>
                   </View>
+                  <Text style={styles.statValue}>{learnedWords} Words</Text>
+                </View>
               </View>
-
 
               <Text style={styles.sectionTitle}>Your Decks</Text>
             </>
           }
           renderItem={({ item, index }) => {
-              const deckCards = allCards.filter(c => c.deck_id === item.id);
-              const newCards = deckCards.filter(c => c.status === 'new').length;
-              const learningCards = deckCards.filter(c => c.status === 'learning').length;
-              const masteredCards = deckCards.filter(c => c.status === 'mastered').length;
-              const totalCards = deckCards.length;
+            const deckCards = allCards.filter((c) => c.deck_id === item.id);
+            const newCards = deckCards.filter((c) => c.status === "new").length;
+            const learningCards = deckCards.filter(
+              (c) => c.status === "learning",
+            ).length;
+            const masteredCards = deckCards.filter(
+              (c) => c.status === "mastered",
+            ).length;
+            const totalCards = deckCards.length;
 
-              const iconBgColors = ['#dcfce7', '#ffedd5', '#dbeafe', '#f3e8ff'];
-              const iconColors = ['#16a34a', '#ea580c', '#2563eb', '#9333ea'];
+            const iconBgColors = ["#dcfce7", "#ffedd5", "#dbeafe", "#f3e8ff"];
+            const iconColors = ["#16a34a", "#ea580c", "#2563eb", "#9333ea"];
 
-              const colorIndex = index % iconBgColors.length;
+            const colorIndex = index % iconBgColors.length;
 
-              return (
-                <TouchableOpacity 
-                   onPress={() => router.push(`/deck/${item.id}`)}
-                   style={styles.deckItem}
+            return (
+              <TouchableOpacity
+                onPress={() => router.push(`/deck/${item.id}`)}
+                style={styles.deckItem}
+              >
+                <View
+                  style={[
+                    styles.deckIcon,
+                    { backgroundColor: iconBgColors[colorIndex] },
+                  ]}
                 >
-                    <View style={[styles.deckIcon, { backgroundColor: iconBgColors[colorIndex] }]}>
-                        <Ionicons name="language" size={24} color={iconColors[colorIndex]} />
-                    </View>
-                    
-                    <View style={styles.deckInfo}>
-                        <Text style={styles.deckTitle}>{item.title}</Text>
-                        <Text style={styles.deckSubtitle}>Total: {totalCards} cards</Text>
-                    </View>
-                    
-                    <View style={styles.badges}>
-                        <View style={[styles.badge, styles.badgeBlue]}><Text style={styles.badgeTextBlue}>{newCards}</Text></View>
-                        <View style={[styles.badge, styles.badgeRed]}><Text style={styles.badgeTextRed}>{learningCards}</Text></View>
-                        <View style={[styles.badge, styles.badgeGreen]}><Text style={styles.badgeTextGreen}>{masteredCards}</Text></View>
-                    </View>
-                </TouchableOpacity>
-              );
+                  <Ionicons
+                    name="language"
+                    size={24}
+                    color={iconColors[colorIndex]}
+                  />
+                </View>
+
+                <View style={styles.deckInfo}>
+                  <Text style={styles.deckTitle}>{item.title}</Text>
+                  <Text style={styles.deckSubtitle}>
+                    Total: {totalCards} cards
+                  </Text>
+                </View>
+
+                <View style={styles.badges}>
+                  <View style={[styles.badge, styles.badgeBlue]}>
+                    <Text style={styles.badgeTextBlue}>{newCards}</Text>
+                  </View>
+                  <View style={[styles.badge, styles.badgeRed]}>
+                    <Text style={styles.badgeTextRed}>{learningCards}</Text>
+                  </View>
+                  <View style={[styles.badge, styles.badgeGreen]}>
+                    <Text style={styles.badgeTextGreen}>{masteredCards}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
           }}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-               <Text style={styles.emptyText}>No decks found.</Text>
+              <Text style={styles.emptyText}>No decks found.</Text>
             </View>
           }
           showsVerticalScrollIndicator={false}
@@ -129,6 +205,51 @@ export default function HomeScreen() {
           onRefresh={loadDecks}
         />
       </View>
+      {/* Floating Add Button */}
+      {session && (
+        <View style={styles.fabContainer}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => setModalVisible(true)}
+            style={styles.fab}
+          >
+            <Ionicons name="add" size={32} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Create Deck Modal */}
+      <Modal visible={isModalVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>New Collection</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Ionicons name="close-circle" size={28} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Deck Title</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. Spanish Basics"
+                placeholderTextColor="#9ca3af"
+                value={newDeckTitle}
+                onChangeText={setNewDeckTitle}
+                autoFocus
+              />
+            </View>
+
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={handleCreateDeck}
+            >
+              <Text style={styles.createButtonText}>Create Deck</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -136,7 +257,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
   },
   content: {
     flex: 1,
@@ -144,88 +265,88 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 24,
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '800',
-    color: '#111827',
+    fontWeight: "800",
+    color: "#111827",
     marginLeft: 8,
   },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 2,
-    borderColor: 'white',
-    shadowColor: '#000',
+    borderColor: "white",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   avatarImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   statsDashboard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 16,
     marginBottom: 32,
   },
   statBox: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#f3f4f6',
-    shadowColor: '#000',
+    borderColor: "#f3f4f6",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
   statHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   statLabel: {
-    color: '#6b7280',
+    color: "#6b7280",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
   statValue: {
     fontSize: 24,
-    fontWeight: '800',
-    color: '#111827',
+    fontWeight: "800",
+    color: "#111827",
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111827',
+    fontWeight: "bold",
+    color: "#111827",
     marginRight: 8,
     marginBottom: 16,
   },
   deckItem: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#f3f4f6',
-    shadowColor: '#000',
+    borderColor: "#f3f4f6",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -234,8 +355,8 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 16,
   },
   deckInfo: {
@@ -243,16 +364,16 @@ const styles = StyleSheet.create({
   },
   deckTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111827',
+    fontWeight: "bold",
+    color: "#111827",
     marginBottom: 4,
   },
   deckSubtitle: {
-    color: '#9ca3af',
+    color: "#9ca3af",
     fontSize: 12,
   },
   badges: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   badge: {
@@ -260,38 +381,109 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 12,
     minWidth: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   badgeBlue: {
-    backgroundColor: '#dbeafe',
+    backgroundColor: "#dbeafe",
   },
   badgeRed: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: "#fee2e2",
   },
   badgeGreen: {
-    backgroundColor: '#dcfce7',
+    backgroundColor: "#dcfce7",
   },
   badgeTextBlue: {
-    color: '#2563eb',
-    fontWeight: 'bold',
+    color: "#2563eb",
+    fontWeight: "bold",
     fontSize: 12,
   },
   badgeTextRed: {
-    color: '#ef4444',
-    fontWeight: 'bold',
+    color: "#ef4444",
+    fontWeight: "bold",
     fontSize: 12,
   },
   badgeTextGreen: {
-    color: '#16a34a',
-    fontWeight: 'bold',
+    color: "#16a34a",
+    fontWeight: "bold",
     fontSize: 12,
   },
   emptyState: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   emptyText: {
-    color: '#9ca3af',
+    color: "#9ca3af",
+  },
+
+  // FAB & Modal Styles
+  fabContainer: {
+    position: "absolute",
+    bottom: 24, // Adjusted since it's inside SafeAreaView or relative to it
+    right: 24,
+  },
+  fab: {
+    backgroundColor: "#10b981",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#10b981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 32,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  inputContainer: {
+    backgroundColor: "#f3f4f6",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  inputLabel: {
+    color: "#6b7280",
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    marginBottom: 8,
+  },
+  input: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  createButton: {
+    backgroundColor: "#10b981",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  createButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 18,
   },
 });
