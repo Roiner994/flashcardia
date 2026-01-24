@@ -1,8 +1,10 @@
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/hooks/useThemeColor";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -14,8 +16,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { session, signOut, checkSession, dailyNewLimit, setDailyLimit } =
-    useStore();
+  const colors = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const {
+    session,
+    signOut,
+    checkSession,
+    dailyNewLimit,
+    setDailyLimit,
+    themeMode,
+    setThemeMode,
+  } = useStore();
   useEffect(() => {
     checkSession();
   }, [checkSession]);
@@ -24,7 +35,7 @@ export default function SettingsScreen() {
     icon,
     label,
     value,
-    color = "#64748b",
+    color = colors.textSecondary,
     onPress,
     isDestructive = false,
   }: any) => (
@@ -32,24 +43,28 @@ export default function SettingsScreen() {
       <View
         style={[
           styles.settingIconContainer,
-          { backgroundColor: isDestructive ? "#fef2f2" : "#f1f5f9" },
+          {
+            backgroundColor: isDestructive
+              ? colors.error + "20"
+              : colors.background,
+          },
         ]}
       >
         <Ionicons
           name={icon}
           size={20}
-          color={isDestructive ? "#ef4444" : color}
+          color={isDestructive ? colors.error : color}
         />
       </View>
       <Text
-        style={[styles.settingLabel, isDestructive && { color: "#ef4444" }]}
+        style={[styles.settingLabel, isDestructive && { color: colors.error }]}
       >
         {label}
       </Text>
       {value ? (
         <Text style={styles.settingValue}>{value}</Text>
       ) : (
-        <Ionicons name="chevron-forward" size={18} color="#cbd5e1" />
+        <Ionicons name="chevron-forward" size={18} color={colors.icon} />
       )}
     </TouchableOpacity>
   );
@@ -71,7 +86,7 @@ export default function SettingsScreen() {
               <Ionicons
                 name="cloud-offline-outline"
                 size={32}
-                color="#64748b"
+                color={colors.textSecondary}
               />
             </View>
             <View style={styles.guestInfo}>
@@ -95,21 +110,31 @@ export default function SettingsScreen() {
               <SettingItem
                 icon="notifications-outline"
                 label="Notifications"
-                color="#3b82f6"
+                color={colors.info}
               />
               <View style={styles.divider} />
               <SettingItem
                 icon="moon-outline"
                 label="Dark Mode"
-                value="System"
+                value={themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}
                 color="#6366f1"
+                onPress={() => {
+                  const modes: ("system" | "light" | "dark")[] = [
+                    "system",
+                    "light",
+                    "dark",
+                  ];
+                  const next =
+                    modes[(modes.indexOf(themeMode) + 1) % modes.length];
+                  setThemeMode(next);
+                }}
               />
               <View style={styles.divider} />
               <SettingItem
                 icon="language-outline"
                 label="Language"
                 value="English"
-                color="#f59e0b"
+                color={colors.warning}
               />
             </View>
           </View>
@@ -120,13 +145,13 @@ export default function SettingsScreen() {
               <SettingItem
                 icon="help-circle-outline"
                 label="Help Center"
-                color="#64748b"
+                color={colors.textSecondary}
               />
               <View style={styles.divider} />
               <SettingItem
                 icon="star-outline"
                 label="Rate MagicDeck"
-                color="#f59e0b"
+                color={colors.warning}
               />
             </View>
           </View>
@@ -161,7 +186,7 @@ export default function SettingsScreen() {
             <Text style={styles.profileEmail}>{session.user.email}</Text>
           </View>
           <TouchableOpacity style={styles.editButton}>
-            <Ionicons name="pencil" size={16} color="#10b981" />
+            <Ionicons name="pencil" size={16} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -173,10 +198,14 @@ export default function SettingsScreen() {
               <View
                 style={[
                   styles.settingIconContainer,
-                  { backgroundColor: "#eff6ff" },
+                  { backgroundColor: colors.info + "20" },
                 ]}
               >
-                <Ionicons name="calendar-outline" size={20} color="#3b82f6" />
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color={colors.info}
+                />
               </View>
               <Text style={styles.settingLabel}>Daily New Limit</Text>
               <View style={styles.limitControls}>
@@ -184,14 +213,18 @@ export default function SettingsScreen() {
                   onPress={() => setDailyLimit(Math.max(1, dailyNewLimit - 1))}
                   style={styles.controlButton}
                 >
-                  <Ionicons name="remove" size={20} color="#64748b" />
+                  <Ionicons
+                    name="remove"
+                    size={20}
+                    color={colors.textSecondary}
+                  />
                 </TouchableOpacity>
                 <Text style={styles.limitValue}>{dailyNewLimit}</Text>
                 <TouchableOpacity
                   onPress={() => setDailyLimit(dailyNewLimit + 1)}
                   style={styles.controlButton}
                 >
-                  <Ionicons name="add" size={20} color="#64748b" />
+                  <Ionicons name="add" size={20} color={colors.textSecondary} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -204,21 +237,34 @@ export default function SettingsScreen() {
             <SettingItem
               icon="notifications-outline"
               label="Notifications"
-              color="#3b82f6"
+              color={colors.info}
             />
             <View style={styles.divider} />
             <SettingItem
               icon="moon-outline"
               label="Dark Mode"
-              value="System"
+              value={
+                useStore.getState().themeMode.charAt(0).toUpperCase() +
+                useStore.getState().themeMode.slice(1)
+              }
               color="#6366f1"
+              onPress={() => {
+                const modes: ("system" | "light" | "dark")[] = [
+                  "system",
+                  "light",
+                  "dark",
+                ];
+                const current = useStore.getState().themeMode;
+                const next = modes[(modes.indexOf(current) + 1) % modes.length];
+                useStore.getState().setThemeMode(next);
+              }}
             />
             <View style={styles.divider} />
             <SettingItem
               icon="language-outline"
               label="Language"
               value="English"
-              color="#f59e0b"
+              color={colors.warning}
             />
           </View>
         </View>
@@ -230,13 +276,13 @@ export default function SettingsScreen() {
               icon="cloud-upload-outline"
               label="Automatic Sync"
               value="ON"
-              color="#10b981"
+              color={colors.success}
             />
             <View style={styles.divider} />
             <SettingItem
               icon="lock-closed-outline"
               label="Change Password"
-              color="#64748b"
+              color={colors.textSecondary}
             />
           </View>
         </View>
@@ -247,13 +293,13 @@ export default function SettingsScreen() {
             <SettingItem
               icon="help-circle-outline"
               label="Help Center"
-              color="#64748b"
+              color={colors.textSecondary}
             />
             <View style={styles.divider} />
             <SettingItem
               icon="star-outline"
               label="Rate MagicDeck"
-              color="#f59e0b"
+              color={colors.warning}
             />
           </View>
         </View>
@@ -279,212 +325,213 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#0f172a",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  // Guest Card Styles
-  guestCard: {
-    backgroundColor: "white",
-    margin: 20,
-    padding: 24,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "#f1f5f9",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-  },
-  guestIconBg: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#f1f5f9",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  guestInfo: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  guestTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#0f172a",
-    marginBottom: 8,
-  },
-  guestSubtitle: {
-    fontSize: 14,
-    color: "#64748b",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  signInButton: {
-    backgroundColor: "#10b981",
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 12,
-    width: "100%",
-    alignItems: "center",
-  },
-  signInButtonText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  // Profile Card
-  profileCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    margin: 20,
-    padding: 20,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "#f1f5f9",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#f1f5f9",
-  },
-  profileInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  profileName: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0f172a",
-    marginBottom: 4,
-  },
-  profileEmail: {
-    fontSize: 14,
-    color: "#64748b",
-  },
-  editButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#ecfdf5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  section: {
-    marginBottom: 24,
-    paddingHorizontal: 20,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#94a3b8",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginLeft: 8,
-    marginBottom: 8,
-  },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#f1f5f9",
-    overflow: "hidden",
-  },
-  settingItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-  },
-  settingIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 16,
-  },
-  settingLabel: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#334155",
-  },
-  settingValue: {
-    fontSize: 14,
-    color: "#94a3b8",
-    marginRight: 4,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#f1f5f9",
-    marginLeft: 72,
-  },
-  footer: {
-    alignItems: "center",
-    paddingVertical: 32,
-    paddingBottom: 48,
-  },
-  versionText: {
-    fontSize: 12,
-    color: "#94a3b8",
-    marginBottom: 4,
-  },
-  madeWith: {
-    fontSize: 12,
-    color: "#cbd5e1",
-    fontWeight: "500",
-  },
-  limitControls: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f1f5f9",
-    borderRadius: 12,
-    padding: 4,
-  },
-  controlButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: "white",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  limitValue: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0f172a",
-    marginHorizontal: 16,
-    minWidth: 24,
-    textAlign: "center",
-  },
-});
+const createStyles = (colors: typeof Colors.light) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: 24,
+      paddingVertical: 16,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    // Guest Card Styles
+    guestCard: {
+      backgroundColor: colors.surface,
+      margin: 20,
+      padding: 24,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 10,
+    },
+    guestIconBg: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 16,
+    },
+    guestInfo: {
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    guestTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      marginBottom: 8,
+    },
+    guestSubtitle: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: "center",
+      lineHeight: 20,
+    },
+    signInButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 32,
+      paddingVertical: 12,
+      borderRadius: 12,
+      width: "100%",
+      alignItems: "center",
+    },
+    signInButtonText: {
+      color: "white",
+      fontWeight: "700",
+      fontSize: 16,
+    },
+    // Profile Card
+    profileCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      margin: 20,
+      padding: 20,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 10,
+      elevation: 2,
+    },
+    profileImage: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: colors.background,
+    },
+    profileInfo: {
+      flex: 1,
+      marginLeft: 16,
+    },
+    profileName: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: colors.text,
+      marginBottom: 4,
+    },
+    profileEmail: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    editButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.primary + "20",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    section: {
+      marginBottom: 24,
+      paddingHorizontal: 20,
+    },
+    sectionTitle: {
+      fontSize: 13,
+      fontWeight: "700",
+      color: colors.textSecondary,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      marginLeft: 8,
+      marginBottom: 8,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: "hidden",
+    },
+    settingItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 16,
+    },
+    settingIconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 16,
+    },
+    settingLabel: {
+      flex: 1,
+      fontSize: 16,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    settingValue: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginRight: 4,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginLeft: 72,
+    },
+    footer: {
+      alignItems: "center",
+      paddingVertical: 32,
+      paddingBottom: 48,
+    },
+    versionText: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    madeWith: {
+      fontSize: 12,
+      color: colors.icon,
+      fontWeight: "500",
+    },
+    limitControls: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.background,
+      borderRadius: 12,
+      padding: 4,
+    },
+    controlButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    limitValue: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+      marginHorizontal: 16,
+      minWidth: 24,
+      textAlign: "center",
+    },
+  });

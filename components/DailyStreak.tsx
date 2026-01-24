@@ -1,34 +1,123 @@
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Text, View } from 'react-native';
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/hooks/useThemeColor";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useMemo } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 export const DailyStreak = () => {
+  const colors = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
-    <View className="bg-white dark:bg-gray-800 p-4 rounded-2xl mb-8 shadow-sm border border-gray-100 dark:border-gray-700">
-      <View className="flex-row justify-between items-start mb-3">
+    <View style={styles.card}>
+      <View style={styles.header}>
         <View>
-           <Text className="text-gray-900 dark:text-white font-bold text-lg">Daily Streak</Text>
-           <Text className="text-gray-500 text-sm">You're 57% through today's goal!</Text>
+          <Text style={styles.title}>Daily Streak</Text>
+          <Text style={styles.subtitle}>You're 57% through today's goal!</Text>
         </View>
-        <View className="flex-row items-center bg-orange-100 px-2 py-1 rounded-lg">
-           <Ionicons name="flame" size={16} color="#f97316" />
-           <Text className="text-orange-600 font-bold ml-1">12 Days</Text>
+        <View style={styles.streakBadge}>
+          <Ionicons name="flame" size={16} color={colors.warning} />
+          <Text style={styles.streakText}>12 Days</Text>
         </View>
       </View>
-      
+
       {/* Week Days Visual */}
-      <View className="flex-row justify-between mt-2">
-        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => {
-            const isActive = index < 3; // Mock active state
-            const isToday = index === 3;
-            
-            return (
-                <View key={index} className={`items-center justify-center w-8 h-8 rounded-full ${isActive ? 'bg-purple-600' : isToday ? 'bg-purple-100 border-2 border-purple-600' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                    <Text className={`font-semibold ${isActive ? 'text-white' : 'text-gray-400'}`}>{day}</Text>
-                </View>
-            )
+      <View style={styles.daysRow}>
+        {["M", "T", "W", "T", "F", "S", "S"].map((day, index) => {
+          const isActive = index < 3; // Mock active state
+          const isToday = index === 3;
+
+          return (
+            <View
+              key={index}
+              style={[
+                styles.dayCircle,
+                isActive
+                  ? { backgroundColor: colors.primary }
+                  : isToday
+                    ? {
+                        backgroundColor: colors.primary + "20",
+                        borderColor: colors.primary,
+                        borderWidth: 2,
+                      }
+                    : { backgroundColor: colors.background },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.dayText,
+                  isActive
+                    ? { color: "white" }
+                    : { color: colors.textSecondary },
+                ]}
+              >
+                {day}
+              </Text>
+            </View>
+          );
         })}
       </View>
     </View>
   );
 };
+
+const createStyles = (colors: typeof Colors.light) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      padding: 16,
+      borderRadius: 16,
+      marginBottom: 24, // Was 8 (mb-8 often larger)
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: 12,
+    },
+    title: {
+      color: colors.text,
+      fontWeight: "bold",
+      fontSize: 18,
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+    streakBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.warning + "20",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    streakText: {
+      color: colors.warning,
+      fontWeight: "bold",
+      marginLeft: 4,
+    },
+    daysRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 8,
+    },
+    dayCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dayText: {
+      fontWeight: "600",
+      fontSize: 14,
+    },
+  });
