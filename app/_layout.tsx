@@ -17,14 +17,17 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const { session, checkSession } = useStore();
+  const { session, checkSession, loadSettings, themeMode } = useStore();
+  const systemColorScheme = useColorScheme();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     checkSession();
-  }, []);
+    loadSettings();
+  }, [checkSession, loadSettings]);
+
+  const effectiveTheme = themeMode === "system" ? systemColorScheme : themeMode;
 
   useEffect(() => {
     if (!session) return;
@@ -37,7 +40,7 @@ export default function RootLayout() {
   }, [session, segments]);
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={effectiveTheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />

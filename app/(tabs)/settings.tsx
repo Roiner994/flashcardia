@@ -18,8 +18,15 @@ export default function SettingsScreen() {
   const router = useRouter();
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { session, signOut, checkSession, dailyNewLimit, setDailyLimit } =
-    useStore();
+  const {
+    session,
+    signOut,
+    checkSession,
+    dailyNewLimit,
+    setDailyLimit,
+    themeMode,
+    setThemeMode,
+  } = useStore();
   useEffect(() => {
     checkSession();
   }, [checkSession]);
@@ -109,8 +116,18 @@ export default function SettingsScreen() {
               <SettingItem
                 icon="moon-outline"
                 label="Dark Mode"
-                value="System"
-                color="#6366f1" // Indigo
+                value={themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}
+                color="#6366f1"
+                onPress={() => {
+                  const modes: ("system" | "light" | "dark")[] = [
+                    "system",
+                    "light",
+                    "dark",
+                  ];
+                  const next =
+                    modes[(modes.indexOf(themeMode) + 1) % modes.length];
+                  setThemeMode(next);
+                }}
               />
               <View style={styles.divider} />
               <SettingItem
@@ -226,8 +243,21 @@ export default function SettingsScreen() {
             <SettingItem
               icon="moon-outline"
               label="Dark Mode"
-              value="System"
+              value={
+                useStore.getState().themeMode.charAt(0).toUpperCase() +
+                useStore.getState().themeMode.slice(1)
+              }
               color="#6366f1"
+              onPress={() => {
+                const modes: ("system" | "light" | "dark")[] = [
+                  "system",
+                  "light",
+                  "dark",
+                ];
+                const current = useStore.getState().themeMode;
+                const next = modes[(modes.indexOf(current) + 1) % modes.length];
+                useStore.getState().setThemeMode(next);
+              }}
             />
             <View style={styles.divider} />
             <SettingItem

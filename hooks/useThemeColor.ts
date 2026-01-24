@@ -1,11 +1,15 @@
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from 'react-native';
+import { useStore } from '@/store/useStore';
+import { useColorScheme as useSystemColorScheme } from 'react-native';
 
 export function useThemeColor(
     props: { light?: string; dark?: string },
     colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-    const theme = useColorScheme() ?? 'light';
+    const systemTheme = useSystemColorScheme() ?? 'light';
+    const themeMode = useStore((state) => state.themeMode);
+
+    const theme = themeMode === 'system' ? systemTheme : themeMode;
     const colorFromProps = props[theme];
 
     if (colorFromProps) {
@@ -16,6 +20,9 @@ export function useThemeColor(
 }
 
 export function useTheme() {
-    const theme = useColorScheme() ?? 'light';
+    const systemTheme = useSystemColorScheme() ?? 'light';
+    const themeMode = useStore((state) => state.themeMode);
+
+    const theme = themeMode === 'system' ? systemTheme : themeMode;
     return Colors[theme];
 }
