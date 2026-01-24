@@ -107,7 +107,9 @@ export default function HomeScreen() {
             <View style={styles.avatar}>
               <Image
                 source={{
-                  uri: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+                  uri:
+                    session?.user?.user_metadata?.avatar_url ||
+                    "https://i.pravatar.cc/150?u=a042581f4e29026704d",
                 }}
                 style={styles.avatarImage}
               />
