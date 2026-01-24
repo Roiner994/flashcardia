@@ -50,6 +50,20 @@ export default function RootLayout() {
           name="modal"
           options={{ presentation: "modal", title: "Modal" }}
         />
+        <Stack.Screen
+          name="edit-profile"
+          options={{
+            title: "Edit Profile",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="change-password"
+          options={{
+            title: "Change Password",
+            headerShown: false,
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

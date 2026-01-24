@@ -3,7 +3,7 @@ import { useTheme } from "@/hooks/useThemeColor";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import React, { useEffect, useMemo } from "react";
 import {
   ScrollView,
@@ -178,16 +178,24 @@ export default function SettingsScreen() {
         {/* Profile Section */}
         <View style={styles.profileCard}>
           <Image
-            source={{ uri: "https://i.pravatar.cc/150?u=" + session.user.id }}
+            source={{
+              uri:
+                session?.user?.user_metadata?.avatar_url ||
+                "https://i.pravatar.cc/150?u=" + session.user.id,
+            }}
             style={styles.profileImage}
           />
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Premium Member</Text>
+            <Text style={styles.profileName}>
+              {session?.user?.user_metadata?.full_name || "Premium Member"}
+            </Text>
             <Text style={styles.profileEmail}>{session.user.email}</Text>
           </View>
-          <TouchableOpacity style={styles.editButton}>
-            <Ionicons name="pencil" size={16} color={colors.primary} />
-          </TouchableOpacity>
+          <Link href="/edit-profile" asChild>
+            <TouchableOpacity style={styles.editButton}>
+              <Ionicons name="pencil" size={16} color={colors.primary} />
+            </TouchableOpacity>
+          </Link>
         </View>
 
         {/* Settings Groups */}
@@ -283,6 +291,7 @@ export default function SettingsScreen() {
               icon="lock-closed-outline"
               label="Change Password"
               color={colors.textSecondary}
+              onPress={() => router.push("/change-password")}
             />
           </View>
         </View>
@@ -334,9 +343,7 @@ const createStyles = (colors: typeof Colors.light) =>
     header: {
       paddingHorizontal: 24,
       paddingVertical: 16,
-      backgroundColor: colors.surface,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      // Removed background/border for cleaner look
     },
     headerTitle: {
       fontSize: 24,

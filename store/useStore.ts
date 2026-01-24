@@ -28,6 +28,8 @@ interface StoreState {
   loadSettings: () => Promise<void>;
   checkSession: () => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (updates: { full_name?: string; avatar_url?: string }) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -236,5 +238,30 @@ export const useStore = create<StoreState>((set, get) => ({
 
   signOut: async () => {
     await supabase.auth.signOut();
-  }
+  },
+
+  updateProfile: async (updates) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: updates,
+      });
+      if (error) throw error;
+      await get().checkSession();
+    } catch (error) {
+      console.error('Failed to update profile', error);
+      throw error;
+    }
+  },
+
+  updatePassword: async (password) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: password,
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Failed to update password', error);
+      throw error;
+    }
+  },
 }));
