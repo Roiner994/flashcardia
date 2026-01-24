@@ -4,6 +4,7 @@ import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FlatList,
   Image,
@@ -22,6 +23,7 @@ export default function HomeScreen() {
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
+  const { t } = useTranslation();
   const [isModalVisible, setModalVisible] = React.useState(false);
   const [newDeckTitle, setNewDeckTitle] = React.useState("");
   const {
@@ -41,8 +43,6 @@ export default function HomeScreen() {
     setNewDeckTitle("");
     setModalVisible(false);
   };
-
-  console.log("HomeScreen rendering. Session exists:", !!session);
 
   useEffect(() => {
     loadDecks();
@@ -82,7 +82,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Ionicons name="sparkles" size={24} color={colors.primary} />
-            <Text style={styles.headerTitle}>MagicDeck</Text>
+            <Text style={styles.headerTitle}>{t("home.title")}</Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <TouchableOpacity
@@ -107,7 +107,9 @@ export default function HomeScreen() {
             <View style={styles.avatar}>
               <Image
                 source={{
-                  uri: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+                  uri:
+                    session?.user?.user_metadata?.avatar_url ||
+                    "https://i.pravatar.cc/150?u=a042581f4e29026704d",
                 }}
                 style={styles.avatarImage}
               />
@@ -129,9 +131,11 @@ export default function HomeScreen() {
                       size={20}
                       color={colors.error}
                     />
-                    <Text style={styles.statLabel}>Due Today</Text>
+                    <Text style={styles.statLabel}>{t("home.dueToday")}</Text>
                   </View>
-                  <Text style={styles.statValue}>{dueToday} Cards</Text>
+                  <Text style={styles.statValue}>
+                    {dueToday} {t("home.cards")}
+                  </Text>
                 </View>
 
                 <View style={styles.statBox}>
@@ -141,13 +145,15 @@ export default function HomeScreen() {
                       size={20}
                       color={colors.success}
                     />
-                    <Text style={styles.statLabel}>Learned</Text>
+                    <Text style={styles.statLabel}>{t("home.learned")}</Text>
                   </View>
-                  <Text style={styles.statValue}>{learnedWords} Words</Text>
+                  <Text style={styles.statValue}>
+                    {learnedWords} {t("home.words")}
+                  </Text>
                 </View>
               </View>
 
-              <Text style={styles.sectionTitle}>Your Decks</Text>
+              <Text style={styles.sectionTitle}>{t("home.yourDecks")}</Text>
             </>
           }
           renderItem={({ item, index }) => {
@@ -197,7 +203,7 @@ export default function HomeScreen() {
                 <View style={styles.deckInfo}>
                   <Text style={styles.deckTitle}>{item.title}</Text>
                   <Text style={styles.deckSubtitle}>
-                    Total: {totalCards} cards
+                    Total: {totalCards} {t("home.cards").toLowerCase()}
                   </Text>
                 </View>
 
@@ -217,7 +223,7 @@ export default function HomeScreen() {
           }}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No decks found.</Text>
+              <Text style={styles.emptyText}>{t("home.noDecks")}</Text>
             </View>
           }
           showsVerticalScrollIndicator={false}
@@ -244,7 +250,7 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Collection</Text>
+              <Text style={styles.modalTitle}>{t("home.newCollection")}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Ionicons
                   name="close-circle"
@@ -255,10 +261,10 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Deck Title</Text>
+              <Text style={styles.inputLabel}>{t("home.deckTitle")}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g. Spanish Basics"
+                placeholder={t("home.deckTitlePlaceholder")}
                 placeholderTextColor={colors.textSecondary}
                 value={newDeckTitle}
                 onChangeText={setNewDeckTitle}
@@ -270,7 +276,9 @@ export default function HomeScreen() {
               style={styles.createButton}
               onPress={handleCreateDeck}
             >
-              <Text style={styles.createButtonText}>Create Deck</Text>
+              <Text style={styles.createButtonText}>
+                {t("home.createDeck")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

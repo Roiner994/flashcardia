@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -21,6 +22,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DeckDetailScreen() {
+  const { t } = useTranslation();
   const { id, initialMagicWord } = useLocalSearchParams<{
     id: string;
     initialMagicWord?: string;
@@ -61,7 +63,7 @@ export default function DeckDetailScreen() {
   if (!deck) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Deck not found</Text>
+        <Text style={styles.loadingText}>{t("deck.notFound")}</Text>
       </View>
     );
   }
@@ -84,7 +86,7 @@ export default function DeckDetailScreen() {
       setGeneratedResult(result);
       setCreationStep("preview");
     } catch (error) {
-      Alert.alert("Error", "Failed to generate card. Please try again.");
+      Alert.alert(t("magic.errorTitle"), t("magic.errorBody"));
     } finally {
       setIsGenerating(false);
     }
@@ -117,7 +119,7 @@ export default function DeckDetailScreen() {
 
   const handleStartSession = () => {
     if (currentCards.length === 0) {
-      Alert.alert("No Cards", "Add some cards first to start a study session.");
+      Alert.alert(t("deck.noCardsAlertTitle"), t("deck.noCardsAlertBody"));
       return;
     }
     router.push(`/review/${id}`);
@@ -165,7 +167,7 @@ export default function DeckDetailScreen() {
           </View>
           <Text style={styles.deckTitle}>{deck.title}</Text>
           <Text style={styles.cardCount}>
-            {currentCards.length} Cards Total
+            {currentCards.length} {t("deck.cardsTotal")}
           </Text>
 
           <TouchableOpacity
@@ -173,7 +175,7 @@ export default function DeckDetailScreen() {
             onPress={handleStartSession}
           >
             <Ionicons name="play-circle-outline" size={24} color="white" />
-            <Text style={styles.startButtonText}>Start Session</Text>
+            <Text style={styles.startButtonText}>{t("deck.startSession")}</Text>
           </TouchableOpacity>
         </TouchableOpacity>
 
@@ -183,24 +185,24 @@ export default function DeckDetailScreen() {
             <Text style={[styles.statNumber, { color: colors.info }]}>
               {newCount}
             </Text>
-            <Text style={styles.statLabel}>New</Text>
+            <Text style={styles.statLabel}>{t("deck.new")}</Text>
           </View>
           <View style={styles.statBox}>
             <Text style={[styles.statNumber, { color: colors.error }]}>
               {learningCount}
             </Text>
-            <Text style={styles.statLabel}>Learning</Text>
+            <Text style={styles.statLabel}>{t("deck.learning")}</Text>
           </View>
           <View style={styles.statBox}>
             <Text style={[styles.statNumber, { color: colors.success }]}>
               {reviewCount}
             </Text>
-            <Text style={styles.statLabel}>Review</Text>
+            <Text style={styles.statLabel}>{t("deck.review")}</Text>
           </View>
         </View>
 
         {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <Text style={styles.sectionTitle}>{t("deck.quickActions")}</Text>
         <TouchableOpacity
           style={styles.actionCard}
           onPress={() => setModalVisible(true)}
@@ -208,23 +210,21 @@ export default function DeckDetailScreen() {
           <View style={styles.actionIcon}>
             <Ionicons name="sparkles" size={20} color={colors.primary} />
           </View>
-          <Text style={styles.actionText}>Create card with AI...</Text>
+          <Text style={styles.actionText}>{t("deck.createCardAI")}</Text>
           <Ionicons name="arrow-forward" size={20} color={colors.icon} />
         </TouchableOpacity>
 
         {/* Recent Cards */}
         <View style={styles.recentHeader}>
-          <Text style={styles.sectionTitle}>Recent Cards</Text>
+          <Text style={styles.sectionTitle}>{t("deck.recentCards")}</Text>
           <TouchableOpacity>
-            <Text style={styles.seeAll}>See All</Text>
+            <Text style={styles.seeAll}>{t("deck.seeAll")}</Text>
           </TouchableOpacity>
         </View>
 
         {currentCards.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>
-              No cards yet. Create your first card!
-            </Text>
+            <Text style={styles.emptyText}>{t("deck.noCards")}</Text>
           </View>
         ) : (
           currentCards.slice(0, 5).map((card) => (
@@ -264,9 +264,11 @@ export default function DeckDetailScreen() {
             </TouchableOpacity>
 
             <View style={styles.inputModalHeader}>
-              <Text style={styles.inputModalTitle}>Deck Settings</Text>
+              <Text style={styles.inputModalTitle}>
+                {t("deckSettings.title")}
+              </Text>
               <Text style={styles.inputModalSub}>
-                Customize the learning rules for this specific deck.
+                {t("deckSettings.subtitle")}
               </Text>
             </View>
 
@@ -279,9 +281,11 @@ export default function DeckDetailScreen() {
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.settingLabel}>Daily New Limit</Text>
+                <Text style={styles.settingLabel}>
+                  {t("deckSettings.dailyLimit")}
+                </Text>
                 <Text style={styles.settingHint}>
-                  How many new cards to see per session
+                  {t("deckSettings.dailyLimitHint")}
                 </Text>
               </View>
               <View style={styles.limitControls}>
@@ -325,12 +329,12 @@ export default function DeckDetailScreen() {
               style={styles.deleteDeckButton}
               onPress={() => {
                 Alert.alert(
-                  "Delete Deck",
-                  "Are you sure you want to delete this deck and all its cards?",
+                  t("deckSettings.deleteConfirmTitle"),
+                  t("deckSettings.deleteConfirmBody"),
                   [
-                    { text: "Cancel", style: "cancel" },
+                    { text: t("common.cancel"), style: "cancel" },
                     {
-                      text: "Delete",
+                      text: t("deckSettings.delete"),
                       style: "destructive",
                       onPress: async () => {
                         await useStore.getState().deleteDeck(deck.id);
@@ -343,7 +347,9 @@ export default function DeckDetailScreen() {
               }}
             >
               <Ionicons name="trash-outline" size={20} color={colors.error} />
-              <Text style={styles.deleteDeckText}>Delete Deck</Text>
+              <Text style={styles.deleteDeckText}>
+                {t("deckSettings.deleteDeck")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -373,19 +379,16 @@ export default function DeckDetailScreen() {
               </TouchableOpacity>
 
               <View style={styles.inputModalHeader}>
-                <Text style={styles.inputModalTitle}>Create Magic Card</Text>
-                <Text style={styles.inputModalSub}>
-                  Type a word or phrase and we'll generate meaning, Spanish
-                  translation, examples, and pronunciation.
-                </Text>
+                <Text style={styles.inputModalTitle}>{t("magic.title")}</Text>
+                <Text style={styles.inputModalSub}>{t("magic.subtitle")}</Text>
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Word or phrase</Text>
+                <Text style={styles.inputLabel}>{t("magic.inputLabel")}</Text>
                 <View style={styles.inputWrapper}>
                   <TextInput
                     style={styles.magicInputMain}
-                    placeholder="e.g. Serendipity"
+                    placeholder={t("magic.placeholder")}
                     placeholderTextColor={colors.textSecondary}
                     value={magicWord}
                     onChangeText={setMagicWord}
@@ -399,9 +402,7 @@ export default function DeckDetailScreen() {
                     />
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.inputNote}>
-                  You can also paste a short sentence or expression.
-                </Text>
+                <Text style={styles.inputNote}>{t("magic.note")}</Text>
               </View>
 
               <TouchableOpacity
@@ -418,7 +419,7 @@ export default function DeckDetailScreen() {
                   <>
                     <Ionicons name="sparkles" size={20} color="white" />
                     <Text style={styles.mainGenerateButtonText}>
-                      Generate with AI
+                      {t("magic.generate")}
                     </Text>
                   </>
                 )}
@@ -437,7 +438,9 @@ export default function DeckDetailScreen() {
                     color={colors.primary}
                   />
                 </TouchableOpacity>
-                <Text style={styles.previewHeaderTitle}>Card Preview</Text>
+                <Text style={styles.previewHeaderTitle}>
+                  {t("magic.previewTitle")}
+                </Text>
                 <View style={{ width: 40 }} />
               </View>
 
@@ -469,14 +472,18 @@ export default function DeckDetailScreen() {
                   <View style={styles.divider} />
 
                   <View style={styles.contentBlock}>
-                    <Text style={styles.contentLabel}>CONCEPT</Text>
+                    <Text style={styles.contentLabel}>
+                      {t("magic.concept")}
+                    </Text>
                     <Text style={styles.contentText}>
                       {generatedResult?.definition}
                     </Text>
                   </View>
 
                   <View style={styles.contentBlock}>
-                    <Text style={styles.contentLabel}>MEANING</Text>
+                    <Text style={styles.contentLabel}>
+                      {t("magic.meaning")}
+                    </Text>
                     <View style={styles.meaningBox}>
                       <Text style={styles.contentText}>
                         {generatedResult?.spanish_meaning}
@@ -485,7 +492,9 @@ export default function DeckDetailScreen() {
                   </View>
 
                   <View style={styles.contentBlock}>
-                    <Text style={styles.contentLabel}>USAGE EXAMPLES</Text>
+                    <Text style={styles.contentLabel}>
+                      {t("magic.examples")}
+                    </Text>
                     {generatedResult?.examples.map((ex, idx) => (
                       <View key={idx} style={styles.exampleListItem}>
                         <View style={styles.bullet} />
@@ -502,14 +511,14 @@ export default function DeckDetailScreen() {
                   onPress={handleSaveCard}
                 >
                   <Ionicons name="checkmark" size={24} color="white" />
-                  <Text style={styles.saveToDeckText}>Save Card to Deck</Text>
+                  <Text style={styles.saveToDeckText}>{t("magic.save")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.deleteTryAgain}
                   onPress={resetCreation}
                 >
                   <Text style={styles.deleteTryAgainText}>
-                    Delete & Try Again
+                    {t("magic.tryAgain")}
                   </Text>
                 </TouchableOpacity>
               </View>

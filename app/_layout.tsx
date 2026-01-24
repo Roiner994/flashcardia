@@ -1,3 +1,4 @@
+import "@/i18n";
 import {
   DarkTheme,
   DefaultTheme,
@@ -49,6 +50,20 @@ export default function RootLayout() {
         <Stack.Screen
           name="modal"
           options={{ presentation: "modal", title: "Modal" }}
+        />
+        <Stack.Screen
+          name="edit-profile"
+          options={{
+            title: "Edit Profile",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="change-password"
+          options={{
+            title: "Change Password",
+            headerShown: false,
+          }}
         />
       </Stack>
       <StatusBar style="auto" />
