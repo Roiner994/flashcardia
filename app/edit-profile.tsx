@@ -6,6 +6,7 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -20,6 +21,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditProfileScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const colors = useTheme();
   const { session, updateProfile } = useStore();
@@ -76,7 +78,7 @@ export default function EditProfileScreen() {
         setAvatarUrl(result.assets[0].uri);
       }
     } catch (e) {
-      showAlert("error", "Error", "Failed to pick image");
+      showAlert("error", t("common.error"), t("editProfile.pickImageError"));
     }
   };
 
@@ -89,12 +91,19 @@ export default function EditProfileScreen() {
         avatar_url: avatarUrl,
       });
 
-      showAlert("success", "Success", "Profile updated successfully", () =>
-        router.back(),
+      showAlert(
+        "success",
+        t("common.success"),
+        t("editProfile.updateSuccess"),
+        () => router.back(),
       );
     } catch (e: any) {
       console.error(e);
-      showAlert("error", "Error", e.message || "Failed to update profile");
+      showAlert(
+        "error",
+        t("common.error"),
+        e.message || t("editProfile.updateError"),
+      );
     } finally {
       setLoading(false);
     }
@@ -249,7 +258,7 @@ export default function EditProfileScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <Text style={styles.headerTitle}>{t("editProfile.title")}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -278,21 +287,21 @@ export default function EditProfileScreen() {
           </View>
 
           <View style={styles.formSection}>
-            <Text style={styles.label}>Email Address</Text>
+            <Text style={styles.label}>{t("editProfile.emailLabel")}</Text>
             <TextInput
               style={[styles.input, styles.inputDisabled]}
               value={session?.user?.email}
               editable={false}
-              placeholder="Email"
+              placeholder={t("editProfile.emailPlaceholder")}
               placeholderTextColor={colors.textSecondary}
             />
 
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.label}>{t("editProfile.fullNameLabel")}</Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="Enter your name"
+              placeholder={t("editProfile.namePlaceholder")}
               placeholderTextColor={colors.textSecondary}
               autoCapitalize="words"
             />
@@ -302,7 +311,9 @@ export default function EditProfileScreen() {
                 style={styles.actionButtonOutline}
                 onPress={() => router.back()}
               >
-                <Text style={styles.actionButtonOutlineText}>Cancel</Text>
+                <Text style={styles.actionButtonOutlineText}>
+                  {t("common.cancel")}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionButtonFilled}
@@ -313,7 +324,7 @@ export default function EditProfileScreen() {
                   <ActivityIndicator color="white" />
                 ) : (
                   <Text style={styles.actionButtonFilledText}>
-                    Save Changes
+                    {t("editProfile.saveChanges")}
                   </Text>
                 )}
               </TouchableOpacity>

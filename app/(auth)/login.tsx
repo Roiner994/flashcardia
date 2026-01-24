@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +21,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -30,7 +32,7 @@ export default function LoginScreen() {
 
   async function handleAuth() {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+      Alert.alert(t("common.error"), t("auth.fillAll"));
       return;
     }
 
@@ -48,10 +50,10 @@ export default function LoginScreen() {
           password,
         });
         if (error) throw error;
-        Alert.alert("Success", "Check your email for the confirmation link!");
+        Alert.alert(t("common.success"), t("auth.checkEmail"));
       }
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      Alert.alert(t("common.error"), error.message);
     } finally {
       setLoading(false);
     }
@@ -78,12 +80,10 @@ export default function LoginScreen() {
               <Ionicons name="sparkles" size={32} color={colors.primary} />
             </View>
             <Text style={styles.authTitle}>
-              {isLogin ? "Welcome Back" : "Join MagicDeck"}
+              {isLogin ? t("auth.welcomeBack") : t("auth.join")}
             </Text>
             <Text style={styles.authSubtitle}>
-              {isLogin
-                ? "Sign in to sync your decks across devices."
-                : "Create an account to start your learning journey."}
+              {isLogin ? t("auth.signInSubtitle") : t("auth.signUpSubtitle")}
             </Text>
           </View>
 
@@ -94,17 +94,19 @@ export default function LoginScreen() {
                 style={styles.googleIcon}
                 contentFit="contain"
               />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
+              <Text style={styles.googleButtonText}>
+                {t("auth.continueGoogle")}
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.dividerRow}>
               <View style={styles.smallDivider} />
-              <Text style={styles.dividerText}>or continue with email</Text>
+              <Text style={styles.dividerText}>{t("auth.orEmail")}</Text>
               <View style={styles.smallDivider} />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email Address</Text>
+              <Text style={styles.inputLabel}>{t("auth.email")}</Text>
               <View style={styles.inputWrapper}>
                 <Ionicons
                   name="mail-outline"
@@ -125,7 +127,7 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Password</Text>
+              <Text style={styles.inputLabel}>{t("auth.password")}</Text>
               <View style={styles.inputWrapper}>
                 <Ionicons
                   name="lock-closed-outline"
@@ -153,7 +155,7 @@ export default function LoginScreen() {
                 <ActivityIndicator color="white" />
               ) : (
                 <Text style={styles.authButtonText}>
-                  {isLogin ? "Sign In" : "Create Account"}
+                  {isLogin ? t("auth.signIn") : t("auth.createAccount")}
                 </Text>
               )}
             </TouchableOpacity>
@@ -163,11 +165,9 @@ export default function LoginScreen() {
               onPress={() => setIsLogin(!isLogin)}
             >
               <Text style={styles.toggleText}>
-                {isLogin
-                  ? "Small steps today, big results tomorrow. "
-                  : "Join thousands of successful learners. "}
+                {isLogin ? t("auth.signUpPrompt") : t("auth.signInPrompt")}
                 <Text style={styles.toggleHighlight}>
-                  {isLogin ? "Sign Up" : "Log In"}
+                  {isLogin ? t("auth.signUpLink") : t("auth.logInLink")}
                 </Text>
               </Text>
             </TouchableOpacity>
@@ -176,7 +176,9 @@ export default function LoginScreen() {
               style={styles.guestButton}
               onPress={() => router.replace("/(tabs)")}
             >
-              <Text style={styles.guestButtonText}>Continue as Guest</Text>
+              <Text style={styles.guestButtonText}>
+                {t("auth.continueGuest")}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

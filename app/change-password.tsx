@@ -5,6 +5,7 @@ import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -19,6 +20,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ChangePasswordScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const colors = useTheme();
   const { session, updatePassword } = useStore();
@@ -59,10 +61,10 @@ export default function ChangePasswordScreen() {
   const validate = () => {
     const newErrors: typeof errors = {};
     if (newPassword.length > 0 && newPassword.length < 6) {
-      newErrors.newPassword = "Password must be at least 6 characters";
+      newErrors.newPassword = t("changePassword.passwordLength");
     }
     if (confirmPassword.length > 0 && newPassword !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = t("changePassword.passwordsDoNotMatch");
     }
     setErrors(newErrors);
   };
@@ -96,18 +98,25 @@ export default function ChangePasswordScreen() {
       });
 
       if (signInError) {
-        throw new Error("Incorrect current password");
+        throw new Error(t("changePassword.incorrectCurrent"));
       }
 
       // 2. Update to new password
       await updatePassword(newPassword);
 
-      showAlert("success", "Success", "Password updated successfully", () =>
-        router.back(),
+      showAlert(
+        "success",
+        t("common.success"),
+        t("changePassword.successMessage"),
+        () => router.back(),
       );
     } catch (e: any) {
       console.error(e);
-      showAlert("error", "Error", e.message || "Failed to update password");
+      showAlert(
+        "error",
+        t("common.error"),
+        e.message || t("changePassword.errorMessage"),
+      );
     } finally {
       setLoading(false);
     }
@@ -200,8 +209,8 @@ export default function ChangePasswordScreen() {
       opacity: 1,
     },
     actionButtonDisabled: {
-      opacity: 0.3, // Softer opacity
-      backgroundColor: colors.primary, // Keep primary color but faded
+      opacity: 0.3,
+      backgroundColor: colors.primary,
     },
     actionButtonFilledText: {
       fontSize: 16,
@@ -226,7 +235,7 @@ export default function ChangePasswordScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Change Password</Text>
+        <Text style={styles.headerTitle}>{t("changePassword.title")}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -236,18 +245,20 @@ export default function ChangePasswordScreen() {
       >
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.formSection}>
-            <Text style={styles.label}>Current Password</Text>
+            <Text style={styles.label}>
+              {t("changePassword.currentPassword")}
+            </Text>
             <TextInput
               style={[styles.input, { marginBottom: 16 }]}
               value={currentPassword}
               onChangeText={setCurrentPassword}
-              placeholder="Enter current password"
+              placeholder={t("changePassword.currentPlaceholder")}
               placeholderTextColor={colors.textSecondary}
               secureTextEntry
               autoCapitalize="none"
             />
 
-            <Text style={styles.label}>New Password</Text>
+            <Text style={styles.label}>{t("changePassword.newPassword")}</Text>
             <TextInput
               style={[
                 styles.input,
@@ -255,7 +266,7 @@ export default function ChangePasswordScreen() {
               ]}
               value={newPassword}
               onChangeText={setNewPassword}
-              placeholder="Enter new password"
+              placeholder={t("changePassword.newPlaceholder")}
               placeholderTextColor={colors.textSecondary}
               secureTextEntry
               autoCapitalize="none"
@@ -265,7 +276,9 @@ export default function ChangePasswordScreen() {
             )}
             {!errors.newPassword && <View style={{ marginBottom: 16 }} />}
 
-            <Text style={styles.label}>Confirm New Password</Text>
+            <Text style={styles.label}>
+              {t("changePassword.confirmPassword")}
+            </Text>
             <TextInput
               style={[
                 styles.input,
@@ -273,7 +286,7 @@ export default function ChangePasswordScreen() {
               ]}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder="Re-enter new password"
+              placeholder={t("changePassword.confirmPlaceholder")}
               placeholderTextColor={colors.textSecondary}
               secureTextEntry
               autoCapitalize="none"
@@ -288,7 +301,9 @@ export default function ChangePasswordScreen() {
                 style={styles.actionButtonOutline}
                 onPress={() => router.back()}
               >
-                <Text style={styles.actionButtonOutlineText}>Cancel</Text>
+                <Text style={styles.actionButtonOutlineText}>
+                  {t("common.cancel")}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -302,7 +317,7 @@ export default function ChangePasswordScreen() {
                   <ActivityIndicator color="white" />
                 ) : (
                   <Text style={styles.actionButtonFilledText}>
-                    Update Password
+                    {t("changePassword.updateButton")}
                   </Text>
                 )}
               </TouchableOpacity>

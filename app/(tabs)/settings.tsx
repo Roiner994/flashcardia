@@ -1,10 +1,13 @@
+import { LanguageModal } from "@/components/LanguageModal";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
+import { changeLanguage } from "@/i18n";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Link, useRouter } from "expo-router";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ScrollView,
   StyleSheet,
@@ -15,6 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -27,6 +31,9 @@ export default function SettingsScreen() {
     themeMode,
     setThemeMode,
   } = useStore();
+
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+
   useEffect(() => {
     checkSession();
   }, [checkSession]);
@@ -73,7 +80,7 @@ export default function SettingsScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Settings</Text>
+          <Text style={styles.headerTitle}>{t("settings.title")}</Text>
         </View>
 
         <ScrollView
@@ -90,32 +97,34 @@ export default function SettingsScreen() {
               />
             </View>
             <View style={styles.guestInfo}>
-              <Text style={styles.guestTitle}>Guest Mode</Text>
+              <Text style={styles.guestTitle}>{t("settings.guestMode")}</Text>
               <Text style={styles.guestSubtitle}>
-                Sign in to sync your progress across devices.
+                {t("settings.guestSubtitle")}
               </Text>
             </View>
             <TouchableOpacity
               style={styles.signInButton}
               onPress={() => router.push("/(auth)/login")}
             >
-              <Text style={styles.signInButtonText}>Sign In</Text>
+              <Text style={styles.signInButtonText}>
+                {t("settings.signIn")}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Common Settings for Guests */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Preferences</Text>
+            <Text style={styles.sectionTitle}>{t("settings.preferences")}</Text>
             <View style={styles.card}>
               <SettingItem
                 icon="notifications-outline"
-                label="Notifications"
+                label={t("settings.notifications")}
                 color={colors.info}
               />
               <View style={styles.divider} />
               <SettingItem
                 icon="moon-outline"
-                label="Dark Mode"
+                label={t("settings.darkMode")}
                 value={themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}
                 color="#6366f1"
                 onPress={() => {
@@ -132,35 +141,44 @@ export default function SettingsScreen() {
               <View style={styles.divider} />
               <SettingItem
                 icon="language-outline"
-                label="Language"
-                value="English"
+                label={t("settings.language")}
+                value={i18n.language.startsWith("es") ? "Español" : "English"}
                 color={colors.warning}
+                onPress={() => setLanguageModalVisible(true)}
               />
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Support</Text>
+            <Text style={styles.sectionTitle}>{t("settings.support")}</Text>
             <View style={styles.card}>
               <SettingItem
                 icon="help-circle-outline"
-                label="Help Center"
+                label={t("settings.helpCenter")}
                 color={colors.textSecondary}
               />
               <View style={styles.divider} />
               <SettingItem
                 icon="star-outline"
-                label="Rate MagicDeck"
+                label={t("settings.rateApp")}
                 color={colors.warning}
               />
             </View>
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.versionText}>version 1.2.4 (Build 42)</Text>
-            <Text style={styles.madeWith}>Made with ✨ by MagicDeck AI</Text>
+            <Text style={styles.versionText}>
+              {t("settings.version")} 1.2.4 (Build 42)
+            </Text>
+            <Text style={styles.madeWith}>{t("settings.madeWith")}</Text>
           </View>
         </ScrollView>
+        <LanguageModal
+          visible={languageModalVisible}
+          onClose={() => setLanguageModalVisible(false)}
+          onSelectLanguage={changeLanguage}
+          currentLanguage={i18n.language}
+        />
       </SafeAreaView>
     );
   }
@@ -168,7 +186,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={styles.headerTitle}>{t("settings.title")}</Text>
       </View>
 
       <ScrollView
@@ -200,7 +218,7 @@ export default function SettingsScreen() {
 
         {/* Settings Groups */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Learning Rules</Text>
+          <Text style={styles.sectionTitle}>{t("settings.learningRules")}</Text>
           <View style={styles.card}>
             <View style={styles.settingItem}>
               <View
@@ -215,7 +233,9 @@ export default function SettingsScreen() {
                   color={colors.info}
                 />
               </View>
-              <Text style={styles.settingLabel}>Daily New Limit</Text>
+              <Text style={styles.settingLabel}>
+                {t("settings.dailyNewLimit")}
+              </Text>
               <View style={styles.limitControls}>
                 <TouchableOpacity
                   onPress={() => setDailyLimit(Math.max(1, dailyNewLimit - 1))}
@@ -240,17 +260,17 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          <Text style={styles.sectionTitle}>{t("settings.preferences")}</Text>
           <View style={styles.card}>
             <SettingItem
               icon="notifications-outline"
-              label="Notifications"
+              label={t("settings.notifications")}
               color={colors.info}
             />
             <View style={styles.divider} />
             <SettingItem
               icon="moon-outline"
-              label="Dark Mode"
+              label={t("settings.darkMode")}
               value={
                 useStore.getState().themeMode.charAt(0).toUpperCase() +
                 useStore.getState().themeMode.slice(1)
@@ -270,26 +290,27 @@ export default function SettingsScreen() {
             <View style={styles.divider} />
             <SettingItem
               icon="language-outline"
-              label="Language"
-              value="English"
+              label={t("settings.language")}
+              value={i18n.language.startsWith("es") ? "Español" : "English"}
               color={colors.warning}
+              onPress={() => setLanguageModalVisible(true)}
             />
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sync & Security</Text>
+          <Text style={styles.sectionTitle}>{t("settings.syncSecurity")}</Text>
           <View style={styles.card}>
             <SettingItem
               icon="cloud-upload-outline"
-              label="Automatic Sync"
+              label={t("settings.automaticSync")}
               value="ON"
               color={colors.success}
             />
             <View style={styles.divider} />
             <SettingItem
               icon="lock-closed-outline"
-              label="Change Password"
+              label={t("settings.changePassword")}
               color={colors.textSecondary}
               onPress={() => router.push("/change-password")}
             />
@@ -297,17 +318,17 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Support</Text>
+          <Text style={styles.sectionTitle}>{t("settings.support")}</Text>
           <View style={styles.card}>
             <SettingItem
               icon="help-circle-outline"
-              label="Help Center"
+              label={t("settings.helpCenter")}
               color={colors.textSecondary}
             />
             <View style={styles.divider} />
             <SettingItem
               icon="star-outline"
-              label="Rate MagicDeck"
+              label={t("settings.rateApp")}
               color={colors.warning}
             />
           </View>
@@ -318,7 +339,7 @@ export default function SettingsScreen() {
           <View style={styles.card}>
             <SettingItem
               icon="log-out-outline"
-              label="Sign Out"
+              label={t("settings.signOut")}
               onPress={() => signOut()}
               isDestructive={true}
             />
@@ -326,10 +347,18 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.versionText}>version 1.2.4 (Build 42)</Text>
-          <Text style={styles.madeWith}>Made with ✨ by MagicDeck AI</Text>
+          <Text style={styles.versionText}>
+            {t("settings.version")} 1.2.4 (Build 42)
+          </Text>
+          <Text style={styles.madeWith}>{t("settings.madeWith")}</Text>
         </View>
       </ScrollView>
+      <LanguageModal
+        visible={languageModalVisible}
+        onClose={() => setLanguageModalVisible(false)}
+        onSelectLanguage={changeLanguage}
+        currentLanguage={i18n.language}
+      />
     </SafeAreaView>
   );
 }
