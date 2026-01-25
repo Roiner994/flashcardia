@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import React, { useMemo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Deck } from "../types";
+import { Deck } from "../../types";
 
 interface DeckCardProps {
   deck: Deck;

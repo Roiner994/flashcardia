@@ -3,7 +3,7 @@ import { useTheme } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Card } from "../types";
+import { Card } from "../../types";
 
 interface FlashcardItemProps {
   card: Card;

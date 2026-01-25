@@ -2,10 +2,12 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function StatsScreen() {
+  const { t } = useTranslation();
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -13,7 +15,7 @@ export default function StatsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Statistics</Text>
+          <Text style={styles.title}>{t("stats.title")}</Text>
         </View>
 
         <View style={styles.placeholder}>
@@ -22,9 +24,9 @@ export default function StatsScreen() {
             size={64}
             color={colors.textSecondary}
           />
-          <Text style={styles.placeholderTitle}>Coming Soon</Text>
+          <Text style={styles.placeholderTitle}>{t("stats.comingSoon")}</Text>
           <Text style={styles.placeholderText}>
-            Track your learning progress, streaks, and achievements here.
+            {t("stats.placeholderText")}
           </Text>
         </View>
       </View>

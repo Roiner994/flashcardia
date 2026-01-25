@@ -1,3 +1,4 @@
+import "@/i18n";
 import {
   DarkTheme,
   DefaultTheme,
@@ -6,6 +7,7 @@ import {
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import "../global.css";
 
@@ -40,18 +42,36 @@ export default function RootLayout() {
   }, [session, segments]);
 
   return (
-    <ThemeProvider value={effectiveTheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
-        <Stack.Screen name="deck/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="review/[id]" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", title: "Modal" }}
-        />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider
+        value={effectiveTheme === "dark" ? DarkTheme : DefaultTheme}
+      >
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+          <Stack.Screen name="deck/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="review/[id]" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="modal"
+            options={{ presentation: "modal", title: "Modal" }}
+          />
+          <Stack.Screen
+            name="edit-profile"
+            options={{
+              title: "Edit Profile",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="change-password"
+            options={{
+              title: "Change Password",
+              headerShown: false,
+            }}
+          />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
