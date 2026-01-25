@@ -13,8 +13,6 @@ export const MagicGenerator = {
     if (!word) throw new Error('Word is required');
 
     try {
-      console.log(`Generating card for "${word}" using custom API...`);
-
       const response = await fetch(CUSTOM_API_URL, {
         method: 'POST',
         headers: {
@@ -29,8 +27,6 @@ export const MagicGenerator = {
       }
 
       const data = await response.json();
-      
-      console.log('Custom API Response:', JSON.stringify(data, null, 2));
 
       // Map the custom API response to our app's MagicCardResult interface
       return {

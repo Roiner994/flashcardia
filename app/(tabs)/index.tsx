@@ -1,3 +1,5 @@
+import { AnimatedBottomSheet } from "@/components/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@/components/BottomSheetHeader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { useStore } from "@/store/useStore";
@@ -8,23 +10,26 @@ import { useTranslation } from "react-i18next";
 import {
   FlatList,
   Image,
-  Modal,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import "../../global.css";
 
 export default function HomeScreen() {
   const router = useRouter();
   const colors = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const insets = useSafeAreaInsets();
+  const styles = useMemo(() => createStyles(colors, insets), [colors, insets]);
 
   const { t } = useTranslation();
-  const [isModalVisible, setModalVisible] = React.useState(false);
+  const [isBottomSheetVisible, setBottomSheetVisible] = React.useState(false);
   const [newDeckTitle, setNewDeckTitle] = React.useState("");
   const {
     decks,
@@ -41,7 +46,7 @@ export default function HomeScreen() {
     if (!newDeckTitle.trim()) return;
     await createDeck(newDeckTitle);
     setNewDeckTitle("");
-    setModalVisible(false);
+    setBottomSheetVisible(false);
   };
 
   useEffect(() => {
@@ -237,7 +242,7 @@ export default function HomeScreen() {
         <View style={styles.fabContainer}>
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => setModalVisible(true)}
+            onPress={() => setBottomSheetVisible(true)}
             style={styles.fab}
           >
             <Ionicons name="add" size={32} color="white" />
@@ -245,20 +250,18 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* Create Deck Modal */}
-      <Modal visible={isModalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t("home.newCollection")}</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons
-                  name="close-circle"
-                  size={28}
-                  color={colors.textSecondary}
-                />
-              </TouchableOpacity>
-            </View>
+      {/* Create Deck Bottom Sheet */}
+      <AnimatedBottomSheet
+        visible={isBottomSheetVisible}
+        onClose={() => setBottomSheetVisible(false)}
+        snapPoint={30}
+      >
+        {(handleClose) => (
+          <>
+            <BottomSheetHeader
+              title={t("home.newCollection")}
+              onClose={handleClose}
+            />
 
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>{t("home.deckTitle")}</Text>
@@ -268,7 +271,6 @@ export default function HomeScreen() {
                 placeholderTextColor={colors.textSecondary}
                 value={newDeckTitle}
                 onChangeText={setNewDeckTitle}
-                autoFocus
               />
             </View>
 
@@ -280,14 +282,17 @@ export default function HomeScreen() {
                 {t("home.createDeck")}
               </Text>
             </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+          </>
+        )}
+      </AnimatedBottomSheet>
     </SafeAreaView>
   );
 }
 
-const createStyles = (colors: typeof Colors.light) =>
+const createStyles = (
+  colors: typeof Colors.light,
+  insets: { bottom: number },
+) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -472,11 +477,12 @@ const createStyles = (colors: typeof Colors.light) =>
     modalOverlay: {
       flex: 1,
       justifyContent: "flex-end",
-      backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: "rgba(0,0,0,0.3)",
     },
     modalContent: {
       backgroundColor: colors.surface,
       padding: 32,
+      paddingBottom: Math.max(insets.bottom + 20, 32),
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
     },
@@ -496,6 +502,7 @@ const createStyles = (colors: typeof Colors.light) =>
       padding: 16,
       borderRadius: 12,
       marginBottom: 24,
+      marginTop: 8,
     },
     inputLabel: {
       color: colors.textSecondary,
