@@ -1,3 +1,5 @@
+import { AnimatedBottomSheet } from "@/components/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@/components/BottomSheetHeader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { MagicCardResult, MagicGenerator } from "@/services/MagicGenerator";
@@ -19,7 +21,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function DeckDetailScreen() {
   const { t } = useTranslation();
@@ -29,7 +34,8 @@ export default function DeckDetailScreen() {
   }>();
   const router = useRouter();
   const colors = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const insets = useSafeAreaInsets();
+  const styles = useMemo(() => createStyles(colors, insets), [colors, insets]);
   const { decks, currentCards, loadCards, addCard, updateDeck, isLoading } =
     useStore();
 
@@ -355,182 +361,173 @@ export default function DeckDetailScreen() {
         </View>
       </Modal>
 
-      {/* Magic Creation Modal */}
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={creationStep === "input"}
-      >
-        <View
-          style={
-            creationStep === "input"
-              ? styles.modalOverlay
-              : styles.previewContainer
-          }
+      {/* Magic Creation Input - Bottom Sheet */}
+      {creationStep === "input" && (
+        <AnimatedBottomSheet
+          visible={isModalVisible}
+          onClose={() => setModalVisible(false)}
+          snapPoint={40}
         >
-          {creationStep === "input" ? (
-            <View style={styles.inputModalContent}>
-              <View style={styles.modalGrabber} />
-              <TouchableOpacity
-                style={styles.closeModalButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Ionicons name="close" size={20} color={colors.icon} />
-              </TouchableOpacity>
+          {(handleClose) => (
+            <>
+              <BottomSheetHeader
+                title={t("magic.title")}
+                subtitle={t("magic.subtitle")}
+                onClose={handleClose}
+              />
 
-              <View style={styles.inputModalHeader}>
-                <Text style={styles.inputModalTitle}>{t("magic.title")}</Text>
-                <Text style={styles.inputModalSub}>{t("magic.subtitle")}</Text>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>{t("magic.inputLabel")}</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput
-                    style={styles.magicInputMain}
-                    placeholder={t("magic.placeholder")}
-                    placeholderTextColor={colors.textSecondary}
-                    value={magicWord}
-                    onChangeText={setMagicWord}
-                    autoFocus
-                  />
-                  <TouchableOpacity style={styles.micButton}>
-                    <Ionicons
-                      name="mic-outline"
-                      size={24}
-                      color={colors.icon}
+              <View style={styles.bottomSheetContent}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>{t("magic.inputLabel")}</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.magicInputMain}
+                      placeholder={t("magic.placeholder")}
+                      placeholderTextColor={colors.textSecondary}
+                      value={magicWord}
+                      onChangeText={setMagicWord}
                     />
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.inputNote}>{t("magic.note")}</Text>
-              </View>
-
-              <TouchableOpacity
-                style={[
-                  styles.mainGenerateButton,
-                  (!magicWord.trim() || isGenerating) && styles.buttonDisabled,
-                ]}
-                onPress={handleMagicGenerate}
-                disabled={!magicWord.trim() || isGenerating}
-              >
-                {isGenerating ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <>
-                    <Ionicons name="sparkles" size={20} color="white" />
-                    <Text style={styles.mainGenerateButtonText}>
-                      {t("magic.generate")}
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <SafeAreaView style={styles.previewSafeArea}>
-              <View style={styles.previewHeader}>
-                <TouchableOpacity
-                  onPress={() => setCreationStep("input")}
-                  style={styles.previewBack}
-                >
-                  <Ionicons
-                    name="arrow-back"
-                    size={24}
-                    color={colors.primary}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.previewHeaderTitle}>
-                  {t("magic.previewTitle")}
-                </Text>
-                <View style={{ width: 40 }} />
-              </View>
-
-              <ScrollView
-                style={styles.previewScroll}
-                showsVerticalScrollIndicator={false}
-              >
-                <View style={styles.previewCardBody}>
-                  <View style={styles.wordHeroContainer}>
-                    <Text style={styles.previewWordMain}>{magicWord}</Text>
-
-                    <TouchableOpacity
-                      onPress={() => speak(magicWord)}
-                      style={styles.phoneticRow}
-                    >
-                      <View style={styles.audioButtonPreview}>
-                        <Ionicons
-                          name="volume-medium"
-                          size={18}
-                          color={colors.primary}
-                        />
-                      </View>
-                      <Text style={styles.phoneticTextPreview}>
-                        {generatedResult?.phonetic}
-                      </Text>
+                    <TouchableOpacity style={styles.micButton}>
+                      <Ionicons
+                        name="mic-outline"
+                        size={24}
+                        color={colors.icon}
+                      />
                     </TouchableOpacity>
                   </View>
-
-                  <View style={styles.divider} />
-
-                  <View style={styles.contentBlock}>
-                    <Text style={styles.contentLabel}>
-                      {t("magic.concept")}
-                    </Text>
-                    <Text style={styles.contentText}>
-                      {generatedResult?.definition}
-                    </Text>
-                  </View>
-
-                  <View style={styles.contentBlock}>
-                    <Text style={styles.contentLabel}>
-                      {t("magic.meaning")}
-                    </Text>
-                    <View style={styles.meaningBox}>
-                      <Text style={styles.contentText}>
-                        {generatedResult?.spanish_meaning}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.contentBlock}>
-                    <Text style={styles.contentLabel}>
-                      {t("magic.examples")}
-                    </Text>
-                    {generatedResult?.examples.map((ex, idx) => (
-                      <View key={idx} style={styles.exampleListItem}>
-                        <View style={styles.bullet} />
-                        <Text style={styles.exampleItemText}>{ex}</Text>
-                      </View>
-                    ))}
-                  </View>
+                  <Text style={styles.inputNote}>{t("magic.note")}</Text>
                 </View>
-              </ScrollView>
 
-              <View style={styles.previewFooter}>
                 <TouchableOpacity
-                  style={styles.saveToDeckButton}
-                  onPress={handleSaveCard}
+                  style={[
+                    styles.mainGenerateButton,
+                    (!magicWord.trim() || isGenerating) &&
+                      styles.buttonDisabled,
+                  ]}
+                  onPress={handleMagicGenerate}
+                  disabled={!magicWord.trim() || isGenerating}
                 >
-                  <Ionicons name="checkmark" size={24} color="white" />
-                  <Text style={styles.saveToDeckText}>{t("magic.save")}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.deleteTryAgain}
-                  onPress={resetCreation}
-                >
-                  <Text style={styles.deleteTryAgainText}>
-                    {t("magic.tryAgain")}
-                  </Text>
+                  {isGenerating ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <>
+                      <Ionicons name="sparkles" size={20} color="white" />
+                      <Text style={styles.mainGenerateButtonText}>
+                        {t("magic.generate")}
+                      </Text>
+                    </>
+                  )}
                 </TouchableOpacity>
               </View>
-            </SafeAreaView>
+            </>
           )}
-        </View>
-      </Modal>
+        </AnimatedBottomSheet>
+      )}
+
+      {/* Magic Creation Preview - Full Screen */}
+      {creationStep === "preview" && (
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={false}
+        >
+          <SafeAreaView style={styles.previewSafeArea}>
+            <View style={styles.previewHeader}>
+              <TouchableOpacity
+                onPress={() => setCreationStep("input")}
+                style={styles.previewBack}
+              >
+                <Ionicons name="arrow-back" size={24} color={colors.primary} />
+              </TouchableOpacity>
+              <Text style={styles.previewHeaderTitle}>
+                {t("magic.previewTitle")}
+              </Text>
+              <View style={{ width: 40 }} />
+            </View>
+
+            <ScrollView
+              style={styles.previewScroll}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.previewCardBody}>
+                <View style={styles.wordHeroContainer}>
+                  <Text style={styles.previewWordMain}>{magicWord}</Text>
+
+                  <TouchableOpacity
+                    onPress={() => speak(magicWord)}
+                    style={styles.phoneticRow}
+                  >
+                    <View style={styles.audioButtonPreview}>
+                      <Ionicons
+                        name="volume-medium"
+                        size={18}
+                        color={colors.primary}
+                      />
+                    </View>
+                    <Text style={styles.phoneticTextPreview}>
+                      {generatedResult?.phonetic}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.divider} />
+
+                <View style={styles.contentBlock}>
+                  <Text style={styles.contentLabel}>{t("magic.concept")}</Text>
+                  <Text style={styles.contentText}>
+                    {generatedResult?.definition}
+                  </Text>
+                </View>
+
+                <View style={styles.contentBlock}>
+                  <Text style={styles.contentLabel}>{t("magic.meaning")}</Text>
+                  <View style={styles.meaningBox}>
+                    <Text style={styles.contentText}>
+                      {generatedResult?.spanish_meaning}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.contentBlock}>
+                  <Text style={styles.contentLabel}>{t("magic.examples")}</Text>
+                  {generatedResult?.examples.map((ex, idx) => (
+                    <View key={idx} style={styles.exampleListItem}>
+                      <View style={styles.bullet} />
+                      <Text style={styles.exampleItemText}>{ex}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.previewFooter}>
+              <TouchableOpacity
+                style={styles.saveToDeckButton}
+                onPress={handleSaveCard}
+              >
+                <Ionicons name="checkmark" size={24} color="white" />
+                <Text style={styles.saveToDeckText}>{t("magic.save")}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteTryAgain}
+                onPress={resetCreation}
+              >
+                <Text style={styles.deleteTryAgainText}>
+                  {t("magic.tryAgain")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
 
-const createStyles = (colors: typeof Colors.light) =>
+const createStyles = (
+  colors: typeof Colors.light,
+  insets: { bottom: number },
+) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -751,14 +748,14 @@ const createStyles = (colors: typeof Colors.light) =>
     modalOverlay: {
       flex: 1,
       justifyContent: "flex-end",
-      backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: "rgba(0,0,0,0.3)",
     },
     inputModalContent: {
       backgroundColor: colors.surface,
       borderTopLeftRadius: 32,
       borderTopRightRadius: 32,
       padding: 24,
-      paddingBottom: 40,
+      paddingBottom: Math.max(insets.bottom, 20),
     },
     modalGrabber: {
       width: 40,
@@ -768,16 +765,21 @@ const createStyles = (colors: typeof Colors.light) =>
       alignSelf: "center",
       marginBottom: 16,
     },
+    bottomSheetContent: {
+      paddingTop: 16,
+      paddingBottom: 8,
+    },
     closeModalButton: {
       position: "absolute",
-      top: 24,
-      right: 24,
+      top: 8,
+      right: 16,
       width: 32,
       height: 32,
       borderRadius: 16,
       backgroundColor: colors.background,
       alignItems: "center",
       justifyContent: "center",
+      zIndex: 10,
     },
     inputModalHeader: {
       alignItems: "center",
