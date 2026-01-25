@@ -1,4 +1,4 @@
-import { CustomAlert } from "@/components/CustomAlert";
+import { CustomAlert } from "@/components/modals/CustomAlert";
 import { useTheme } from "@/hooks/useThemeColor";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";

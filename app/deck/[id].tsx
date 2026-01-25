@@ -1,5 +1,5 @@
-import { AnimatedBottomSheet } from "@/components/AnimatedBottomSheet";
-import { BottomSheetHeader } from "@/components/BottomSheetHeader";
+import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { MagicCardResult, MagicGenerator } from "@/services/MagicGenerator";

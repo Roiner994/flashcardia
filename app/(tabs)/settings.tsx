@@ -1,4 +1,4 @@
-import { LanguageModal } from "@/components/LanguageModal";
+import { LanguageModal } from "@/components/modals/LanguageModal";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { changeLanguage } from "@/i18n";

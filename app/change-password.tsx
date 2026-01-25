@@ -1,4 +1,4 @@
-import { CustomAlert } from "@/components/CustomAlert";
+import { CustomAlert } from "@/components/modals/CustomAlert";
 import { useTheme } from "@/hooks/useThemeColor";
 import { supabase } from "@/lib/supabase";
 import { useStore } from "@/store/useStore";
