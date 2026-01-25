@@ -29,7 +29,7 @@ const initI18n = async () => {
         interpolation: {
             escapeValue: false,
         },
-        compatibilityJSON: 'v3' // Required for Android
+        compatibilityJSON: 'v4'
     });
 };
 

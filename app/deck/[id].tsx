@@ -1,8 +1,8 @@
-import { AnimatedBottomSheet } from "@/components/AnimatedBottomSheet";
-import { BottomSheetHeader } from "@/components/BottomSheetHeader";
+import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
 import { Colors } from "@/constants/Colors";
+import { useMagicCard } from "@/hooks/useMagicCard";
 import { useTheme } from "@/hooks/useThemeColor";
-import { MagicCardResult, MagicGenerator } from "@/services/MagicGenerator";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -33,22 +33,26 @@ export default function DeckDetailScreen() {
     initialMagicWord?: string;
   }>();
   const router = useRouter();
+  // Custom Hook for Magic Logic
+  const {
+    magicWord,
+    setMagicWord,
+    creationStep,
+    setCreationStep,
+    isGenerating,
+    generatedResult,
+    generateCard,
+    saveCard,
+    resetCreation,
+  } = useMagicCard(id);
+
   const colors = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors, insets), [colors, insets]);
-  const { decks, currentCards, loadCards, addCard, updateDeck, isLoading } =
-    useStore();
+  const { decks, currentCards, loadCards, updateDeck } = useStore();
 
-  // Settings/Menu State
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [creationStep, setCreationStep] = useState<"input" | "preview">(
-    "input",
-  );
-  const [magicWord, setMagicWord] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedResult, setGeneratedResult] =
-    useState<MagicCardResult | null>(null);
 
   const deck = decks.find((d) => d.id === id);
 
@@ -83,45 +87,17 @@ export default function DeckDetailScreen() {
     (c) => c.status === "review" || c.status === "mastered",
   ).length;
 
-  // Magic Logic
+  // Handlers
   async function handleMagicGenerate() {
-    if (!magicWord.trim()) return;
-    setIsGenerating(true);
-    try {
-      const result = await MagicGenerator.generateCard(magicWord);
-      setGeneratedResult(result);
-      setCreationStep("preview");
-    } catch (error) {
-      Alert.alert(t("magic.errorTitle"), t("magic.errorBody"));
-    } finally {
-      setIsGenerating(false);
-    }
+    await generateCard();
   }
 
   async function handleSaveCard() {
-    if (!generatedResult) return;
-    await addCard({
-      deck_id: id,
-      front_word: magicWord,
-      definition: generatedResult.definition,
-      spanish_meaning: generatedResult.spanish_meaning,
-      phonetic: generatedResult.phonetic || null,
-      examples: generatedResult.examples,
-      status: "new",
-      next_review_at: null,
-      interval: 0,
-      ease_factor: 2.5,
-    });
-    setModalVisible(false);
-    resetCreation();
-    loadCards(id);
+    const success = await saveCard();
+    if (success) {
+      setModalVisible(false);
+    }
   }
-
-  const resetCreation = () => {
-    setMagicWord("");
-    setGeneratedResult(null);
-    setCreationStep("input");
-  };
 
   const handleStartSession = () => {
     if (currentCards.length === 0) {
@@ -133,7 +109,6 @@ export default function DeckDetailScreen() {
 
   const speak = (text: string) => {
     if (!text) return;
-    console.log("Speaking:", text);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     Speech.stop();
     Speech.speak(text, {
@@ -490,7 +465,7 @@ export default function DeckDetailScreen() {
 
                 <View style={styles.contentBlock}>
                   <Text style={styles.contentLabel}>{t("magic.examples")}</Text>
-                  {generatedResult?.examples.map((ex, idx) => (
+                  {generatedResult?.examples.map((ex: string, idx: number) => (
                     <View key={idx} style={styles.exampleListItem}>
                       <View style={styles.bullet} />
                       <Text style={styles.exampleItemText}>{ex}</Text>
