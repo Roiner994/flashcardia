@@ -1,6 +1,8 @@
 import { Session } from '@supabase/supabase-js';
 import { Card, Deck } from '../types';
 
+export { Card, Deck };
+
 export interface AuthSlice {
     session: Session | null;
     checkSession: () => Promise<void>;

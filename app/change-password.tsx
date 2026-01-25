@@ -1,10 +1,11 @@
 import { CustomAlert } from "@/components/modals/CustomAlert";
+import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { supabase } from "@/lib/supabase";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -122,102 +123,7 @@ export default function ChangePasswordScreen() {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    header: {
-      paddingHorizontal: 24,
-      paddingVertical: 16,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-    headerTitle: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: colors.text,
-    },
-    backButton: {
-      width: 40,
-      height: 40,
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: 20,
-      marginLeft: -12,
-    },
-    content: {
-      flex: 1,
-    },
-    formSection: {
-      paddingHorizontal: 24,
-      paddingTop: 24,
-      marginBottom: 24,
-    },
-    label: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: colors.textSecondary,
-      marginBottom: 8,
-      textTransform: "uppercase",
-    },
-    input: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      fontSize: 16,
-      color: colors.text,
-      marginBottom: 8,
-    },
-    errorText: {
-      fontSize: 12,
-      color: colors.error,
-      marginBottom: 16,
-      marginLeft: 4,
-    },
-    actions: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginTop: 24,
-    },
-    actionButtonOutline: {
-      flex: 1,
-      paddingVertical: 14,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      alignItems: "center",
-      marginRight: 12,
-      justifyContent: "center",
-    },
-    actionButtonOutlineText: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: colors.text,
-    },
-    actionButtonFilled: {
-      flex: 2,
-      paddingVertical: 14,
-      borderRadius: 12,
-      backgroundColor: colors.primary,
-      alignItems: "center",
-      justifyContent: "center",
-      opacity: 1,
-    },
-    actionButtonDisabled: {
-      opacity: 0.3,
-      backgroundColor: colors.primary,
-    },
-    actionButtonFilledText: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: "white",
-    },
-  });
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -328,3 +234,101 @@ export default function ChangePasswordScreen() {
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: typeof Colors.light) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: 24,
+      paddingVertical: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 20,
+      marginLeft: -12,
+    },
+    content: {
+      flex: 1,
+    },
+    formSection: {
+      paddingHorizontal: 24,
+      paddingTop: 24,
+      marginBottom: 24,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      marginBottom: 8,
+      textTransform: "uppercase",
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      fontSize: 16,
+      color: colors.text,
+      marginBottom: 8,
+    },
+    errorText: {
+      fontSize: 12,
+      color: colors.error,
+      marginBottom: 16,
+      marginLeft: 4,
+    },
+    actions: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 24,
+    },
+    actionButtonOutline: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+      marginRight: 12,
+      justifyContent: "center",
+    },
+    actionButtonOutlineText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    actionButtonFilled: {
+      flex: 2,
+      paddingVertical: 14,
+      borderRadius: 12,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      opacity: 1,
+    },
+    actionButtonDisabled: {
+      opacity: 0.3,
+      backgroundColor: colors.primary,
+    },
+    actionButtonFilledText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "white",
+    },
+  });
