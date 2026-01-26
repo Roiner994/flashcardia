@@ -6,7 +6,10 @@
     "error": "Error",
     "success": "Éxito",
     "loading": "Cargando...",
-    "back": "Atrás"
+    "back": "Atrás",
+    "search": "Buscar...",
+    "noResults": "No hay resultados",
+    "all": "Todas"
   },
   "settings": {
     "title": "Ajustes",

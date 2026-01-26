@@ -204,7 +204,7 @@ export default function DeckDetailScreen() {
         {/* Recent Cards */}
         <View style={styles.recentHeader}>
           <Text style={styles.sectionTitle}>{t("deck.recentCards")}</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push(`/deck/${id}/cards`)}>
             <Text style={styles.seeAll}>{t("deck.seeAll")}</Text>
           </TouchableOpacity>
         </View>

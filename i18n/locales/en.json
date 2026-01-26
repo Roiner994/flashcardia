@@ -6,7 +6,10 @@
     "error": "Error",
     "success": "Success",
     "loading": "Loading...",
-    "back": "Back"
+    "back": "Back",
+    "search": "Search...",
+    "noResults": "No results found",
+    "all": "All"
   },
   "settings": {
     "title": "Settings",
