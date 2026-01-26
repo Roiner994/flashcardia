@@ -1,6 +1,9 @@
+import { CustomAlert } from "@/components/modals/CustomAlert";
 import { ReviewCard } from "@/components/review/ReviewCard";
 import { ReviewControls } from "@/components/review/ReviewControls";
 import { ReviewHeader } from "@/components/review/ReviewHeader";
+import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
 import { useReviewSession } from "@/hooks/useReviewSession";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -10,7 +13,6 @@ import React, { useRef, useState } from "react";
 import {
   Alert,
   Animated,
-  Modal,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -35,6 +37,7 @@ export default function ReviewScreen() {
   // Local UI State
   const [isFlipped, setIsFlipped] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   // Animation
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -79,6 +82,8 @@ export default function ReviewScreen() {
     const result = await sessionHandleRating(rating);
     if (result && !result.isComplete) {
       resetFlip();
+    } else if (result && result.isComplete) {
+      setSuccessModalVisible(true);
     }
   };
 
@@ -146,6 +151,16 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <CustomAlert
+        visible={successModalVisible}
+        type="success"
+        title="Session Complete!"
+        message="You've reviewed all cards for now. Great job!"
+        onClose={() => {
+          setSuccessModalVisible(false);
+          router.back();
+        }}
+      />
       <ReviewHeader
         onBack={() => router.back()}
         onShowOptions={() => setMenuVisible(true)}
@@ -169,28 +184,36 @@ export default function ReviewScreen() {
 
       <ReviewControls isFlipped={isFlipped} onRate={onRate} />
 
-      {/* Options Modal */}
-      <Modal
+      {/* Options Sheet */}
+      <AnimatedBottomSheet
         visible={menuVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setMenuVisible(false)}
+        onClose={() => setMenuVisible(false)}
+        snapPoint={25}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setMenuVisible(false)}
-        >
-          <View style={styles.menuContainer}>
-            <TouchableOpacity style={styles.menuItem} onPress={onDelete}>
-              <Ionicons name="trash-outline" size={18} color="#ef4444" />
-              <Text style={[styles.menuText, { color: "#ef4444" }]}>
-                Delete Card
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+        {(handleClose) => (
+          <>
+            <BottomSheetHeader title="Options" onClose={handleClose} />
+            <View style={{ paddingTop: 8 }}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  handleClose();
+                  setTimeout(() => onDelete(), 300);
+                }}
+              >
+                <View
+                  style={[styles.iconContainer, { backgroundColor: "#fee2e2" }]}
+                >
+                  <Ionicons name="trash-outline" size={24} color="#ef4444" />
+                </View>
+                <Text style={[styles.menuText, { color: "#ef4444" }]}>
+                  Delete Card
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </AnimatedBottomSheet>
     </SafeAreaView>
   );
 }
@@ -221,36 +244,22 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
-  // Menu Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.1)", // Lighter overlay
-  },
-  menuContainer: {
-    position: "absolute",
-    top: 60, // Position below header
-    right: 20,
-    backgroundColor: "white",
-    borderRadius: 12,
-    width: 180,
-    paddingVertical: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: "#f3f4f6",
-  },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderRadius: 12,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
   },
   menuText: {
-    fontSize: 14,
-    marginLeft: 12,
-    fontWeight: "500",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
