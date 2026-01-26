@@ -46,12 +46,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="stats"
+        name="challenge"
         options={{
-          title: t("tabs.stats"),
+          title: t("tabs.challenge"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "stats-chart" : "stats-chart-outline"}
+              name={focused ? "trophy" : "trophy-outline"}
               size={26}
               color={color}
             />

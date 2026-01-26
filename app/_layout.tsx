@@ -60,6 +60,14 @@ export default function RootLayout() {
             options={{ presentation: "modal", title: "Modal" }}
           />
           <Stack.Screen
+            name="challenge/setup"
+            options={{
+              presentation: "modal",
+              headerShown: false,
+              sheetAllowedDetents: [1.0], // Full screen modal feel
+            }}
+          />
+          <Stack.Screen
             name="edit-profile"
             options={{
               title: "Edit Profile",
