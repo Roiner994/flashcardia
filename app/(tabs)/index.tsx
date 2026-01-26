@@ -1,5 +1,6 @@
 import { CreateDeckSheet } from "@/components/home/CreateDeckSheet";
 import { DeckListItem } from "@/components/home/DeckListItem";
+import { DeckListSkeleton } from "@/components/home/DeckListSkeleton";
 import { StatsDashboard } from "@/components/home/StatsDashboard";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
@@ -153,9 +154,13 @@ export default function HomeScreen() {
             );
           }}
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>{t("home.noDecks")}</Text>
-            </View>
+            isLoading ? (
+              <DeckListSkeleton />
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>{t("home.noDecks")}</Text>
+              </View>
+            )
           }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}

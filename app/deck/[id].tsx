@@ -1,3 +1,4 @@
+import { DeckDetailSkeleton } from "@/components/deck/DeckDetailSkeleton";
 import { DeckSettingsSheet } from "@/components/deck/DeckSettingsSheet";
 import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
 import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
@@ -50,7 +51,7 @@ export default function DeckDetailScreen() {
   const colors = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors, insets), [colors, insets]);
-  const { decks, currentCards, loadCards, updateDeck } = useStore();
+  const { decks, currentCards, loadCards, updateDeck, isLoading } = useStore();
 
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -70,6 +71,10 @@ export default function DeckDetailScreen() {
       setCreationStep("input");
     }
   }, [initialMagicWord]);
+
+  if (isLoading) {
+    return <DeckDetailSkeleton />;
+  }
 
   if (!deck) {
     return (
