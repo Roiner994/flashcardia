@@ -82,9 +82,6 @@ export function useReviewSession(deckId: string | undefined) {
             return { isComplete: false };
         } else {
             setCards(updatedCards);
-            Alert.alert('Session Complete', "You've reviewed all cards!", [
-                { text: 'Back to Deck', onPress: () => router.back() },
-            ]);
             return { isComplete: true };
         }
     };
