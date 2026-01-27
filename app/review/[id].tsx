@@ -4,12 +4,16 @@ import { ReviewControls } from "@/components/review/ReviewControls";
 import { ReviewHeader } from "@/components/review/ReviewHeader";
 import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
 import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
+import { SRSRating } from "@/constants/AppConstants";
+import { Colors } from "@/constants/Colors";
 import { useReviewSession } from "@/hooks/useReviewSession";
+import { useTheme } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Animated,
@@ -21,8 +25,11 @@ import {
 } from "react-native";
 
 export default function ReviewScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const colors = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   // Custom Hook for Session Logic
   const {
@@ -78,7 +85,7 @@ export default function ReviewScreen() {
   });
 
   // Action Handlers
-  const onRate = async (rating: "again" | "hard" | "good" | "easy") => {
+  const onRate = async (rating: SRSRating) => {
     const result = await sessionHandleRating(rating);
     if (result && !result.isComplete) {
       resetFlip();
@@ -101,10 +108,10 @@ export default function ReviewScreen() {
 
   const onDelete = async () => {
     setMenuVisible(false);
-    Alert.alert("Delete Card", "Are you sure you want to delete this card?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("review.deleteConfirmTitle"), t("review.deleteConfirmBody"), [
+      { text: t("review.cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("review.delete"),
         style: "destructive",
         onPress: async () => {
           const result = await handleDeleteCurrentCard();
@@ -122,7 +129,7 @@ export default function ReviewScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={styles.loadingText}>{t("review.loading")}</Text>
       </View>
     );
   }
@@ -130,12 +137,12 @@ export default function ReviewScreen() {
   if (cards.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>No cards to review.</Text>
+        <Text style={styles.loadingText}>{t("review.noCards")}</Text>
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.goBackButton}
         >
-          <Text style={styles.goBackButtonText}>Go Back</Text>
+          <Text style={styles.goBackButtonText}>{t("review.goBack")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -144,7 +151,7 @@ export default function ReviewScreen() {
   if (!currentCard) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading card...</Text>
+        <Text style={styles.loadingText}>{t("review.loading")}</Text>
       </View>
     );
   }
@@ -154,8 +161,8 @@ export default function ReviewScreen() {
       <CustomAlert
         visible={successModalVisible}
         type="success"
-        title="Session Complete!"
-        message="You've reviewed all cards for now. Great job!"
+        title={t("review.sessionComplete")}
+        message={t("review.sessionCompleteMsg")}
         onClose={() => {
           setSuccessModalVisible(false);
           router.back();
@@ -192,7 +199,10 @@ export default function ReviewScreen() {
       >
         {(handleClose) => (
           <>
-            <BottomSheetHeader title="Options" onClose={handleClose} />
+            <BottomSheetHeader
+              title={t("review.options")}
+              onClose={handleClose}
+            />
             <View style={{ paddingTop: 8 }}>
               <TouchableOpacity
                 style={styles.menuItem}
@@ -202,12 +212,19 @@ export default function ReviewScreen() {
                 }}
               >
                 <View
-                  style={[styles.iconContainer, { backgroundColor: "#fee2e2" }]}
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: colors.error + "15" },
+                  ]}
                 >
-                  <Ionicons name="trash-outline" size={24} color="#ef4444" />
+                  <Ionicons
+                    name="trash-outline"
+                    size={24}
+                    color={colors.error}
+                  />
                 </View>
-                <Text style={[styles.menuText, { color: "#ef4444" }]}>
-                  Delete Card
+                <Text style={[styles.menuText, { color: colors.error }]}>
+                  {t("review.deleteCard")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -218,48 +235,49 @@ export default function ReviewScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9fafb", // LIGHT MODE: gray-50
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: "#f9fafb",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loadingText: {
-    color: "#6b7280",
-    fontSize: 16,
-  },
-  goBackButton: {
-    backgroundColor: "#10b981", // green-500
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 16,
-  },
-  goBackButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 16,
-  },
-  menuText: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
+const createStyles = (colors: typeof Colors.light) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    loadingText: {
+      color: colors.textSecondary,
+      fontSize: 16,
+    },
+    goBackButton: {
+      backgroundColor: colors.success,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 12,
+      marginTop: 16,
+    },
+    goBackButtonText: {
+      color: "white",
+      fontWeight: "bold",
+    },
+    menuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 16,
+      borderRadius: 12,
+    },
+    iconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 16,
+    },
+    menuText: {
+      fontSize: 16,
+      fontWeight: "600",
+    },
+  });

@@ -1,6 +1,9 @@
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/hooks/useThemeColor";
 import { Card } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Animated,
   Dimensions,
@@ -30,6 +33,10 @@ export const ReviewCard = ({
   frontStyle,
   backStyle,
 }: ReviewCardProps) => {
+  const { t } = useTranslation();
+  const colors = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.cardContainer}>
       <TouchableOpacity activeOpacity={1} onPress={onFlip}>
@@ -40,7 +47,7 @@ export const ReviewCard = ({
             style={[styles.card, styles.cardFront, frontStyle]}
           >
             <View style={styles.pillLabelContainer}>
-              <Text style={styles.pillLabelText}>CONCEPT</Text>
+              <Text style={styles.pillLabelText}>{t("review.concept")}</Text>
             </View>
             <Text style={styles.frontWord}>{card.front_word}</Text>
 
@@ -48,10 +55,10 @@ export const ReviewCard = ({
               <Ionicons
                 name="finger-print"
                 size={20}
-                color="#9ca3af"
+                color={colors.textSecondary}
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.tapToFlipText}>TAP TO FLIP</Text>
+              <Text style={styles.tapToFlipText}>{t("review.tapToFlip")}</Text>
             </View>
           </Animated.View>
 
@@ -67,7 +74,9 @@ export const ReviewCard = ({
           >
             <View style={styles.cardBackContent}>
               <View style={styles.pillLabelContainerBack}>
-                <Text style={styles.pillLabelTextBack}>DEFINITION</Text>
+                <Text style={styles.pillLabelTextBack}>
+                  {t("review.definition")}
+                </Text>
               </View>
               <ScrollView contentContainerStyle={styles.cardBackScroll}>
                 <Text style={styles.definitionText}>{card.definition}</Text>
@@ -87,8 +96,10 @@ export const ReviewCard = ({
               }}
               style={styles.audioButton}
             >
-              <Ionicons name="volume-high" size={24} color="#10b981" />
-              <Text style={styles.audioButtonText}>Play Audio</Text>
+              <Ionicons name="volume-high" size={24} color={colors.primary} />
+              <Text style={styles.audioButtonText}>
+                {t("review.playAudio")}
+              </Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -97,138 +108,139 @@ export const ReviewCard = ({
   );
 };
 
-const styles = StyleSheet.create({
-  cardContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  card: {
-    width: width * 0.85,
-    height: 480,
-    borderRadius: 40,
-    backfaceVisibility: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1, // Softer shadow for light mode
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  cardFront: {
-    backgroundColor: "white", // LIGHT CARD
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 32,
-    borderWidth: 1,
-    borderColor: "#e5e7eb", // gray-200
-  },
-  cardBack: {
-    backgroundColor: "white", // LIGHT CARD
-    padding: 32,
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#e5e7eb", // gray-200
-  },
-  pillLabelContainer: {
-    backgroundColor: "#f3f4f6", // gray-100
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 100,
-    marginBottom: 32,
-  },
-  pillLabelText: {
-    color: "#6b7280", // gray-500
-    fontSize: 12,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  frontWord: {
-    fontSize: 42,
-    fontWeight: "800",
-    color: "#111827", // gray-900
-    textAlign: "center",
-    marginBottom: 40,
-    lineHeight: 50,
-  },
-  tapToFlipContainer: {
-    position: "absolute",
-    bottom: 40,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  tapToFlipText: {
-    color: "#9ca3af", // gray-400
-    fontSize: 14,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 2,
-  },
-  cardBackContent: {
-    alignItems: "center",
-    flex: 1,
-  },
-  pillLabelContainerBack: {
-    backgroundColor: "#ecfdf5", // green-50
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 100,
-    marginBottom: 24,
-  },
-  pillLabelTextBack: {
-    color: "#059669", // green-600
-    fontSize: 12,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  cardBackScroll: {
-    flexGrow: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  definitionText: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#1f2937", // gray-800
-    textAlign: "center",
-    lineHeight: 32,
-    marginBottom: 24,
-  },
-  divider: {
-    width: 40,
-    height: 2,
-    backgroundColor: "#f3f4f6", // gray-100
-    marginBottom: 24,
-  },
-  exampleContainer: {
-    backgroundColor: "#f9fafb", // gray-50
-    padding: 16,
-    borderRadius: 16,
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#f3f4f6",
-  },
-  exampleText: {
-    color: "#4b5563", // gray-600
-    textAlign: "center",
-    fontStyle: "italic",
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  audioButton: {
-    backgroundColor: "#f3f4f6", // gray-100
-    padding: 16,
-    borderRadius: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-  },
-  audioButtonText: {
-    color: "#374151", // gray-700
-    fontWeight: "bold",
-    marginLeft: 8,
-    fontSize: 16,
-  },
-});
+const createStyles = (colors: typeof Colors.light) =>
+  StyleSheet.create({
+    cardContainer: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    card: {
+      width: width * 0.85,
+      height: 480,
+      borderRadius: 40,
+      backfaceVisibility: "hidden",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.1,
+      shadowRadius: 20,
+      elevation: 10,
+    },
+    cardFront: {
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 32,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cardBack: {
+      backgroundColor: colors.surface,
+      padding: 32,
+      justifyContent: "space-between",
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    pillLabelContainer: {
+      backgroundColor: colors.background,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 100,
+      marginBottom: 32,
+    },
+    pillLabelText: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: "600",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+    },
+    frontWord: {
+      fontSize: 42,
+      fontWeight: "700",
+      color: colors.text,
+      textAlign: "center",
+      marginBottom: 40,
+      lineHeight: 50,
+    },
+    tapToFlipContainer: {
+      position: "absolute",
+      bottom: 40,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    tapToFlipText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      fontWeight: "500",
+      textTransform: "uppercase",
+      letterSpacing: 2,
+    },
+    cardBackContent: {
+      alignItems: "center",
+      flex: 1,
+    },
+    pillLabelContainerBack: {
+      backgroundColor: colors.success + "20",
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 100,
+      marginBottom: 24,
+    },
+    pillLabelTextBack: {
+      color: colors.success,
+      fontSize: 12,
+      fontWeight: "600",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+    },
+    cardBackScroll: {
+      flexGrow: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    definitionText: {
+      fontSize: 24,
+      fontWeight: "500",
+      color: colors.text,
+      textAlign: "center",
+      lineHeight: 32,
+      marginBottom: 24,
+    },
+    divider: {
+      width: 40,
+      height: 2,
+      backgroundColor: colors.border,
+      marginVertical: 24,
+    },
+    exampleContainer: {
+      backgroundColor: colors.background,
+      padding: 16,
+      borderRadius: 16,
+      width: "100%",
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    exampleText: {
+      color: colors.textSecondary,
+      textAlign: "center",
+      fontStyle: "italic",
+      fontSize: 16,
+      lineHeight: 24,
+    },
+    audioButton: {
+      backgroundColor: colors.background,
+      padding: 16,
+      borderRadius: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 16,
+    },
+    audioButtonText: {
+      color: colors.text,
+      fontWeight: "bold",
+      marginLeft: 8,
+      fontSize: 16,
+    },
+  });

@@ -739,6 +739,7 @@ const createStyles = (
     },
     previewSafeArea: {
       flex: 1,
+      backgroundColor: colors.background,
     },
     previewHeader: {
       flexDirection: "row",
@@ -748,6 +749,7 @@ const createStyles = (
       paddingVertical: 12,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
+      backgroundColor: colors.surface,
     },
     previewBack: {
       width: 40,
@@ -762,6 +764,7 @@ const createStyles = (
     },
     previewScroll: {
       flex: 1,
+      backgroundColor: colors.background,
     },
     previewCardBody: {
       padding: 24,
