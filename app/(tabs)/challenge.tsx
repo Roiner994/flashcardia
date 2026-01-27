@@ -10,6 +10,7 @@ import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -58,7 +59,11 @@ export default function ChallengeScreen() {
         </SafeAreaView>
       </LinearGradient>
 
-      <View style={styles.contentContainer}>
+      <ScrollView
+        style={styles.contentContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.sectionTitle}>{t("challenge.pickDeck")}</Text>
 
         {decks.length === 0 ? (
@@ -103,7 +108,7 @@ export default function ChallengeScreen() {
             </TouchableOpacity>
           ))
         )}
-      </View>
+      </ScrollView>
 
       {selectedDeck && (
         <ChallengeSetupSheet
@@ -184,7 +189,10 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     contentContainer: {
       flex: 1,
+    },
+    scrollContent: {
       padding: 24,
+      paddingBottom: 100,
     },
     sectionTitle: {
       fontSize: 18,
