@@ -1,3 +1,5 @@
+import { DeckDetailSkeleton } from "@/components/deck/DeckDetailSkeleton";
+import { DeckSettingsSheet } from "@/components/deck/DeckSettingsSheet";
 import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
 import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
 import { Colors } from "@/constants/Colors";
@@ -49,7 +51,7 @@ export default function DeckDetailScreen() {
   const colors = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors, insets), [colors, insets]);
-  const { decks, currentCards, loadCards, updateDeck } = useStore();
+  const { decks, currentCards, loadCards, updateDeck, isLoading } = useStore();
 
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -69,6 +71,10 @@ export default function DeckDetailScreen() {
       setCreationStep("input");
     }
   }, [initialMagicWord]);
+
+  if (isLoading) {
+    return <DeckDetailSkeleton />;
+  }
 
   if (!deck) {
     return (
@@ -198,7 +204,7 @@ export default function DeckDetailScreen() {
         {/* Recent Cards */}
         <View style={styles.recentHeader}>
           <Text style={styles.sectionTitle}>{t("deck.recentCards")}</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push(`/deck/${id}/cards`)}>
             <Text style={styles.seeAll}>{t("deck.seeAll")}</Text>
           </TouchableOpacity>
         </View>
@@ -232,109 +238,11 @@ export default function DeckDetailScreen() {
         )}
       </ScrollView>
 
-      {/* Settings Modal */}
-      <Modal visible={isSettingsVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.inputModalContent}>
-            <View style={styles.modalGrabber} />
-            <TouchableOpacity
-              style={styles.closeModalButton}
-              onPress={() => setSettingsVisible(false)}
-            >
-              <Ionicons name="close" size={20} color={colors.icon} />
-            </TouchableOpacity>
-
-            <View style={styles.inputModalHeader}>
-              <Text style={styles.inputModalTitle}>
-                {t("deckSettings.title")}
-              </Text>
-              <Text style={styles.inputModalSub}>
-                {t("deckSettings.subtitle")}
-              </Text>
-            </View>
-
-            <View style={styles.settingItemRow}>
-              <View style={styles.settingIconCol}>
-                <Ionicons
-                  name="calendar-outline"
-                  size={20}
-                  color={colors.info}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.settingLabel}>
-                  {t("deckSettings.dailyLimit")}
-                </Text>
-                <Text style={styles.settingHint}>
-                  {t("deckSettings.dailyLimitHint")}
-                </Text>
-              </View>
-              <View style={styles.limitControls}>
-                <TouchableOpacity
-                  onPress={() =>
-                    updateDeck(deck.id, {
-                      daily_new_limit: Math.max(
-                        1,
-                        (deck.daily_new_limit ?? 10) - 1,
-                      ),
-                    })
-                  }
-                  style={styles.controlButton}
-                >
-                  <Ionicons
-                    name="remove"
-                    size={20}
-                    color={colors.textSecondary}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.limitValue}>
-                  {deck.daily_new_limit ?? 10}
-                </Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    updateDeck(deck.id, {
-                      daily_new_limit: Math.min(
-                        100,
-                        (deck.daily_new_limit ?? 10) + 1,
-                      ),
-                    })
-                  }
-                  style={styles.controlButton}
-                >
-                  <Ionicons name="add" size={20} color={colors.textSecondary} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={styles.deleteDeckButton}
-              onPress={() => {
-                Alert.alert(
-                  t("deckSettings.deleteConfirmTitle"),
-                  t("deckSettings.deleteConfirmBody"),
-                  [
-                    { text: t("common.cancel"), style: "cancel" },
-                    {
-                      text: t("deckSettings.delete"),
-                      style: "destructive",
-                      onPress: async () => {
-                        await useStore.getState().deleteDeck(deck.id);
-                        setSettingsVisible(false);
-                        router.back();
-                      },
-                    },
-                  ],
-                );
-              }}
-            >
-              <Ionicons name="trash-outline" size={20} color={colors.error} />
-              <Text style={styles.deleteDeckText}>
-                {t("deckSettings.deleteDeck")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <DeckSettingsSheet
+        visible={isSettingsVisible}
+        onClose={() => setSettingsVisible(false)}
+        deck={deck}
+      />
 
       {/* Magic Creation Input - Bottom Sheet */}
       {creationStep === "input" && (
@@ -831,6 +739,7 @@ const createStyles = (
     },
     previewSafeArea: {
       flex: 1,
+      backgroundColor: colors.background,
     },
     previewHeader: {
       flexDirection: "row",
@@ -840,6 +749,7 @@ const createStyles = (
       paddingVertical: 12,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
+      backgroundColor: colors.surface,
     },
     previewBack: {
       width: 40,
@@ -854,6 +764,7 @@ const createStyles = (
     },
     previewScroll: {
       flex: 1,
+      backgroundColor: colors.background,
     },
     previewCardBody: {
       padding: 24,

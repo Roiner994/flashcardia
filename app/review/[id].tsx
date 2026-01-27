@@ -1,16 +1,22 @@
+import { CustomAlert } from "@/components/modals/CustomAlert";
 import { ReviewCard } from "@/components/review/ReviewCard";
 import { ReviewControls } from "@/components/review/ReviewControls";
 import { ReviewHeader } from "@/components/review/ReviewHeader";
+import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
+import { SRSRating } from "@/constants/AppConstants";
+import { Colors } from "@/constants/Colors";
 import { useReviewSession } from "@/hooks/useReviewSession";
+import { useTheme } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Animated,
-  Modal,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -19,8 +25,11 @@ import {
 } from "react-native";
 
 export default function ReviewScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const colors = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   // Custom Hook for Session Logic
   const {
@@ -35,6 +44,7 @@ export default function ReviewScreen() {
   // Local UI State
   const [isFlipped, setIsFlipped] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   // Animation
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -75,10 +85,12 @@ export default function ReviewScreen() {
   });
 
   // Action Handlers
-  const onRate = async (rating: "again" | "hard" | "good" | "easy") => {
+  const onRate = async (rating: SRSRating) => {
     const result = await sessionHandleRating(rating);
     if (result && !result.isComplete) {
       resetFlip();
+    } else if (result && result.isComplete) {
+      setSuccessModalVisible(true);
     }
   };
 
@@ -96,10 +108,10 @@ export default function ReviewScreen() {
 
   const onDelete = async () => {
     setMenuVisible(false);
-    Alert.alert("Delete Card", "Are you sure you want to delete this card?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("review.deleteConfirmTitle"), t("review.deleteConfirmBody"), [
+      { text: t("review.cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("review.delete"),
         style: "destructive",
         onPress: async () => {
           const result = await handleDeleteCurrentCard();
@@ -117,7 +129,7 @@ export default function ReviewScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={styles.loadingText}>{t("review.loading")}</Text>
       </View>
     );
   }
@@ -125,12 +137,12 @@ export default function ReviewScreen() {
   if (cards.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>No cards to review.</Text>
+        <Text style={styles.loadingText}>{t("review.noCards")}</Text>
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.goBackButton}
         >
-          <Text style={styles.goBackButtonText}>Go Back</Text>
+          <Text style={styles.goBackButtonText}>{t("review.goBack")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -139,13 +151,23 @@ export default function ReviewScreen() {
   if (!currentCard) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading card...</Text>
+        <Text style={styles.loadingText}>{t("review.loading")}</Text>
       </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
+      <CustomAlert
+        visible={successModalVisible}
+        type="success"
+        title={t("review.sessionComplete")}
+        message={t("review.sessionCompleteMsg")}
+        onClose={() => {
+          setSuccessModalVisible(false);
+          router.back();
+        }}
+      />
       <ReviewHeader
         onBack={() => router.back()}
         onShowOptions={() => setMenuVisible(true)}
@@ -169,88 +191,93 @@ export default function ReviewScreen() {
 
       <ReviewControls isFlipped={isFlipped} onRate={onRate} />
 
-      {/* Options Modal */}
-      <Modal
+      {/* Options Sheet */}
+      <AnimatedBottomSheet
         visible={menuVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setMenuVisible(false)}
+        onClose={() => setMenuVisible(false)}
+        snapPoint={25}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setMenuVisible(false)}
-        >
-          <View style={styles.menuContainer}>
-            <TouchableOpacity style={styles.menuItem} onPress={onDelete}>
-              <Ionicons name="trash-outline" size={18} color="#ef4444" />
-              <Text style={[styles.menuText, { color: "#ef4444" }]}>
-                Delete Card
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+        {(handleClose) => (
+          <>
+            <BottomSheetHeader
+              title={t("review.options")}
+              onClose={handleClose}
+            />
+            <View style={{ paddingTop: 8 }}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  handleClose();
+                  setTimeout(() => onDelete(), 300);
+                }}
+              >
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: colors.error + "15" },
+                  ]}
+                >
+                  <Ionicons
+                    name="trash-outline"
+                    size={24}
+                    color={colors.error}
+                  />
+                </View>
+                <Text style={[styles.menuText, { color: colors.error }]}>
+                  {t("review.deleteCard")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </AnimatedBottomSheet>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9fafb", // LIGHT MODE: gray-50
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: "#f9fafb",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loadingText: {
-    color: "#6b7280",
-    fontSize: 16,
-  },
-  goBackButton: {
-    backgroundColor: "#10b981", // green-500
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 16,
-  },
-  goBackButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  // Menu Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.1)", // Lighter overlay
-  },
-  menuContainer: {
-    position: "absolute",
-    top: 60, // Position below header
-    right: 20,
-    backgroundColor: "white",
-    borderRadius: 12,
-    width: 180,
-    paddingVertical: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: "#f3f4f6",
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  menuText: {
-    fontSize: 14,
-    marginLeft: 12,
-    fontWeight: "500",
-  },
-});
+const createStyles = (colors: typeof Colors.light) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    loadingText: {
+      color: colors.textSecondary,
+      fontSize: 16,
+    },
+    goBackButton: {
+      backgroundColor: colors.success,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 12,
+      marginTop: 16,
+    },
+    goBackButtonText: {
+      color: "white",
+      fontWeight: "bold",
+    },
+    menuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 16,
+      borderRadius: 12,
+    },
+    iconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 16,
+    },
+    menuText: {
+      fontSize: 16,
+      fontWeight: "600",
+    },
+  });

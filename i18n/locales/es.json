@@ -6,7 +6,10 @@
     "error": "Error",
     "success": "Éxito",
     "loading": "Cargando...",
-    "back": "Atrás"
+    "back": "Atrás",
+    "search": "Buscar...",
+    "noResults": "No hay resultados",
+    "all": "Todas"
   },
   "settings": {
     "title": "Ajustes",
@@ -134,9 +137,44 @@
     "fillAll": "Por favor completa todos los campos",
     "checkEmail": "¡Revisa tu correo para confirmar!"
   },
+  "challenge": {
+    "setupTitle": "Configuración del Reto",
+    "heroTitle": "Modo Reto",
+    "heroSubtitle": "Pon a prueba tus conocimientos escribiendo frases con tus tarjetas. ¡La IA calificará tu creatividad y gramática!",
+    "pickDeck": "Elige un Mazo para Empezar",
+    "noDecks": "No se encontraron mazos. ¡Crea uno primero!",
+    "cardsAvailable": "{{count}} tarjetas disponibles",
+    "filters": "Filtros",
+    "modeTitle": "Modo de Dificultad",
+    "easyTitle": "Fácil",
+    "hardTitle": "Difícil",
+    "easyDesc": "Simplemente termina todas las tarjetas. Sin requisitos de puntuación. Ideal para practicar.",
+    "hardDesc": "Debes lograr una puntuación > 5.5 en cada tarjeta. ¡La IA juzga estrictamente!",
+    "start": "Iniciar Reto",
+    "tapToConfigure": "Toca para configurar el reto",
+    "limit": "Número de Tarjetas",
+    "all": "Todas",
+    "custom": "Personalizado",
+    "filterNew": "Nuevas",
+    "filterActive": "Activas",
+    "filterReview": "Repaso",
+    "active": {
+      "preparing": "Preparando Reto...",
+      "completeTitle": "¡Reto Completado!",
+      "finalScore": "Puntuación Final: {{score}}",
+      "makeSentence": "Haz una frase con:",
+      "inputPlaceholder": "Escribe tu frase...",
+      "scoreLabel": "Puntuación: {{score}}",
+      "submit": "Enviar",
+      "tryAgain": "Intentar de Nuevo",
+      "nextCard": "Siguiente Tarjeta",
+      "feedbackExcellent": "¡Buen trabajo!",
+      "feedbackImprove": "Intenta ser más descriptivo."
+    }
+  },
   "tabs": {
     "decks": "Mazos",
-    "stats": "Estadísticas",
+    "challenge": "Reto",
     "settings": "Ajustes"
   }
 }

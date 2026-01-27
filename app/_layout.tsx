@@ -50,6 +50,10 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
           <Stack.Screen name="deck/[id]" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="deck/[id]/cards"
+            options={{ headerShown: false }}
+          />
           <Stack.Screen name="review/[id]" options={{ headerShown: false }} />
           <Stack.Screen
             name="modal"

@@ -1,6 +1,8 @@
 import { CreateDeckSheet } from "@/components/home/CreateDeckSheet";
 import { DeckListItem } from "@/components/home/DeckListItem";
+import { DeckListSkeleton } from "@/components/home/DeckListSkeleton";
 import { StatsDashboard } from "@/components/home/StatsDashboard";
+import { CARD_STATUS, ROUTES } from "@/constants/AppConstants";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { useStore } from "@/store/useStore";
@@ -61,7 +63,7 @@ export default function HomeScreen() {
 
     // 1. Due reviews
     const reviewsDue = deckCards.filter((c) => {
-      if (c.status === "new") return false;
+      if (c.status === CARD_STATUS.NEW) return false;
       if (!c.next_review_at) return true;
       return new Date(c.next_review_at) <= now;
     }).length;
@@ -69,13 +71,15 @@ export default function HomeScreen() {
     // 2. New cards allowed
     const limit = deck.daily_new_limit ?? dailyNewLimit;
     const newAllowed = deckCards
-      .filter((c) => c.status === "new")
+      .filter((c) => c.status === CARD_STATUS.NEW)
       .slice(0, limit).length;
 
     dueToday += reviewsDue + newAllowed;
   });
 
-  const learnedWords = allCards.filter((c) => c.status !== "new").length;
+  const learnedWords = allCards.filter(
+    (c) => c.status !== CARD_STATUS.NEW,
+  ).length;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -89,7 +93,7 @@ export default function HomeScreen() {
           <View style={styles.headerRight}>
             <TouchableOpacity
               onPress={() => {
-                if (!session) router.push("/(auth)/login");
+                if (!session) router.push(ROUTES.AUTH_LOGIN as any);
               }}
               style={[
                 styles.authButton,
@@ -131,12 +135,14 @@ export default function HomeScreen() {
           }
           renderItem={({ item, index }) => {
             const deckCards = allCards.filter((c) => c.deck_id === item.id);
-            const newCards = deckCards.filter((c) => c.status === "new").length;
+            const newCards = deckCards.filter(
+              (c) => c.status === CARD_STATUS.NEW,
+            ).length;
             const learningCards = deckCards.filter(
-              (c) => c.status === "learning",
+              (c) => c.status === CARD_STATUS.LEARNING,
             ).length;
             const masteredCards = deckCards.filter(
-              (c) => c.status === "mastered",
+              (c) => c.status === CARD_STATUS.MASTERED,
             ).length;
             const totalCards = deckCards.length;
 
@@ -148,14 +154,18 @@ export default function HomeScreen() {
                 newCards={newCards}
                 learningCards={learningCards}
                 masteredCards={masteredCards}
-                onPress={(id) => router.push(`/deck/${id}`)}
+                onPress={(id) => router.push(ROUTES.DECK_DETAILS(id) as any)}
               />
             );
           }}
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>{t("home.noDecks")}</Text>
-            </View>
+            isLoading ? (
+              <DeckListSkeleton />
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>{t("home.noDecks")}</Text>
+              </View>
+            )
           }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
