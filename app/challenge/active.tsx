@@ -1,12 +1,13 @@
+import { CustomAlert } from "@/components/modals/CustomAlert";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/hooks/useThemeColor";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -19,20 +20,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 // Mock AI Service until Phase 4
 const mockGradeSentence = async (sentence: string, word: string) => {
-  return new Promise<{ score: number; feedback: string }>((resolve) => {
+  return new Promise<{ score: number; feedbackKey: string }>((resolve) => {
     setTimeout(() => {
       const length = sentence.length;
       const score =
         length > 20 ? Math.min(10, 5 + Math.random() * 5) : Math.random() * 5;
       resolve({
         score: Number(score.toFixed(1)),
-        feedback: score > 7 ? "Great job!" : "Try to be more descriptive.",
+        feedbackKey:
+          score > 7
+            ? "challenge.active.feedbackExcellent"
+            : "challenge.active.feedbackImprove",
       });
     }, 1500);
   });
 };
 
-type CardStatus = "new" | "learning" | "review";
+const PASSING_SCORE = 5.5;
 
 export default function ActiveChallengeScreen() {
   const { deckId, difficulty, statuses, limit } = useLocalSearchParams<{
@@ -43,6 +47,7 @@ export default function ActiveChallengeScreen() {
   }>();
   const router = useRouter();
   const colors = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const { allCards } = useStore();
@@ -54,9 +59,11 @@ export default function ActiveChallengeScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{
     score: number;
-    feedback: string;
+    feedbackKey: string;
   } | null>(null);
   const [sessionScore, setSessionScore] = useState(0);
+  const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
+  const [finalScore, setFinalScore] = useState(0);
 
   // Initialize Game
   useEffect(() => {
@@ -79,7 +86,7 @@ export default function ActiveChallengeScreen() {
         .slice(0, limitCount);
       setQueue(shuffled);
     }
-  }, [allCards, deckId, statuses, limit]);
+  }, [allCards, deckId, statuses, limit, queue.length]);
 
   const currentCard = queue[currentIndex];
 
@@ -90,22 +97,19 @@ export default function ActiveChallengeScreen() {
     const grading = await mockGradeSentence(userInput, currentCard.front_word);
     setResult(grading);
     setIsSubmitting(false);
-
-    // Accumulate score
-    setSessionScore((prev) => prev + grading.score);
   };
 
   const handleNext = () => {
-    if (difficulty === "hard" && result && result.score < 5.5) {
+    if (difficulty === "hard" && result && result.score < PASSING_SCORE) {
       // Retry in hard mode
       setResult(null);
       setUserInput("");
-      Alert.alert(
-        "Try Again",
-        "In Hard Mode, you need a score of at least 5.5 to advance!",
-      );
       return;
     }
+
+    const scoreToAdd = result?.score || 0;
+    const newTotal = sessionScore + scoreToAdd;
+    setSessionScore(newTotal);
 
     if (currentIndex < queue.length - 1) {
       setCurrentIndex((prev) => prev + 1);
@@ -113,12 +117,8 @@ export default function ActiveChallengeScreen() {
       setResult(null);
     } else {
       // Finish Session
-      Alert.alert(
-        "Challenge Complete!",
-        `Final Score: ${sessionScore.toFixed(1)}`,
-      );
-      router.back();
-      router.back(); // Back to hub
+      setFinalScore(newTotal / queue.length);
+      setIsCompleteModalVisible(true);
     }
   };
 
@@ -128,7 +128,7 @@ export default function ActiveChallengeScreen() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={{ color: colors.text, marginTop: 10 }}>
-            Preparing Challenge...
+            {t("challenge.active.preparing")}
           </Text>
         </View>
       </SafeAreaView>
@@ -138,6 +138,19 @@ export default function ActiveChallengeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
+
+      <CustomAlert
+        visible={isCompleteModalVisible}
+        type="success"
+        title={t("challenge.active.completeTitle")}
+        message={t("challenge.active.finalScore", {
+          score: finalScore.toFixed(1),
+        })}
+        onClose={() => {
+          setIsCompleteModalVisible(false);
+          router.dismissAll();
+        }}
+      />
 
       {/* Top Bar */}
       <View style={styles.topBar}>
@@ -168,14 +181,16 @@ export default function ActiveChallengeScreen() {
         style={styles.content}
       >
         <View style={styles.cardContainer}>
-          <Text style={styles.instruction}>Make a sentence with:</Text>
+          <Text style={styles.instruction}>
+            {t("challenge.active.makeSentence")}
+          </Text>
           <Text style={styles.targetWord}>{currentCard?.front_word}</Text>
           <Text style={styles.definitionHint}>{currentCard?.definition}</Text>
         </View>
 
         <TextInput
           style={styles.input}
-          placeholder="Type your sentence..."
+          placeholder={t("challenge.active.inputPlaceholder")}
           placeholderTextColor={colors.textSecondary}
           multiline
           value={userInput}
@@ -187,7 +202,7 @@ export default function ActiveChallengeScreen() {
           <View
             style={[
               styles.resultCard,
-              result.score >= 5.5
+              result.score >= PASSING_SCORE
                 ? { borderColor: colors.success }
                 : { borderColor: colors.error },
             ]}
@@ -197,19 +212,26 @@ export default function ActiveChallengeScreen() {
                 style={[
                   styles.scoreLabel,
                   {
-                    color: result.score >= 5.5 ? colors.success : colors.error,
+                    color:
+                      result.score >= PASSING_SCORE
+                        ? colors.success
+                        : colors.error,
                   },
                 ]}
               >
-                Score: {result.score}
+                {t("challenge.active.scoreLabel", { score: result.score })}
               </Text>
               <Ionicons
-                name={result.score >= 5.5 ? "checkmark-circle" : "warning"}
+                name={
+                  result.score >= PASSING_SCORE ? "checkmark-circle" : "warning"
+                }
                 size={24}
-                color={result.score >= 5.5 ? colors.success : colors.error}
+                color={
+                  result.score >= PASSING_SCORE ? colors.success : colors.error
+                }
               />
             </View>
-            <Text style={styles.feedbackText}>{result.feedback}</Text>
+            <Text style={styles.feedbackText}>{t(result.feedbackKey)}</Text>
           </View>
         )}
       </KeyboardAvoidingView>
@@ -228,7 +250,9 @@ export default function ActiveChallengeScreen() {
             {isSubmitting ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text style={styles.buttonText}>Submit</Text>
+              <Text style={styles.buttonText}>
+                {t("challenge.active.submit")}
+              </Text>
             )}
           </TouchableOpacity>
         ) : (
@@ -237,7 +261,7 @@ export default function ActiveChallengeScreen() {
               styles.actionButton,
               {
                 backgroundColor:
-                  result.score < 5.5 && difficulty === "hard"
+                  result.score < PASSING_SCORE && difficulty === "hard"
                     ? colors.warning
                     : colors.success,
               },
@@ -245,9 +269,9 @@ export default function ActiveChallengeScreen() {
             onPress={handleNext}
           >
             <Text style={styles.buttonText}>
-              {result.score < 5.5 && difficulty === "hard"
-                ? "Try Again"
-                : "Next Card"}
+              {result.score < PASSING_SCORE && difficulty === "hard"
+                ? t("challenge.active.tryAgain")
+                : t("challenge.active.nextCard")}
             </Text>
             <Ionicons name="arrow-forward" size={20} color="white" />
           </TouchableOpacity>
@@ -357,9 +381,6 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     footer: {
       padding: 20,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
-      backgroundColor: colors.surface,
     },
     actionButton: {
       flexDirection: "row",
