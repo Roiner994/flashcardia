@@ -82,7 +82,7 @@ export default function HomeScreen() {
   ).length;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={["top"]} style={styles.container}>
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>

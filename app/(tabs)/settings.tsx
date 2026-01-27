@@ -78,7 +78,7 @@ export default function SettingsScreen() {
 
   if (!session) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView edges={["top"]} style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{t("settings.title")}</Text>
         </View>
@@ -184,7 +184,7 @@ export default function SettingsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={["top"]} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t("settings.title")}</Text>
       </View>
