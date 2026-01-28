@@ -13,27 +13,36 @@ const resources = {
 
 const LANGUAGE_KEY = "user-language";
 
-const initI18n = async () => {
-    let savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+// Initialize i18next synchronously with device locale
+const deviceLanguage = getLocales()[0]?.languageCode ?? 'en';
+const initialLanguage = deviceLanguage === 'es' ? 'es' : 'en';
 
-    if (!savedLanguage) {
-        const deviceLanguage = getLocales()[0]?.languageCode;
-        savedLanguage = deviceLanguage === "es" ? "es" : "en";
+i18n.use(initReactI18next).init({
+    resources,
+    lng: initialLanguage,
+    fallbackLng: "en",
+    debug: false,
+    interpolation: {
+        escapeValue: false,
+    },
+    compatibilityJSON: 'v4'
+});
+
+// Load saved user preference asynchronously
+const loadUserLanguage = async () => {
+    try {
+        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+        if (savedLanguage) {
+            await i18n.changeLanguage(savedLanguage);
+        }
+    } catch (error) {
+        // Ignore errors during SSR/static generation where window might be missing
+        // or AsyncStorage unavailable
+        console.debug('Failed to load user language preference', error);
     }
-
-    i18n.use(initReactI18next).init({
-        resources,
-        lng: savedLanguage,
-        fallbackLng: "en",
-        debug: true, // Enable debug
-        interpolation: {
-            escapeValue: false,
-        },
-        compatibilityJSON: 'v4'
-    });
 };
 
-initI18n();
+loadUserLanguage();
 
 export default i18n;
 

@@ -1,5 +1,6 @@
 import { DeckDetailSkeleton } from "@/components/deck/DeckDetailSkeleton";
 import { DeckSettingsSheet } from "@/components/deck/DeckSettingsSheet";
+import { CustomAlert } from "@/components/modals/CustomAlert";
 import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
 import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
 import { Colors } from "@/constants/Colors";
@@ -14,7 +15,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -55,6 +55,8 @@ export default function DeckDetailScreen() {
 
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ title: "", message: "" });
 
   const deck = decks.find((d) => d.id === id);
 
@@ -107,7 +109,11 @@ export default function DeckDetailScreen() {
 
   const handleStartSession = () => {
     if (currentCards.length === 0) {
-      Alert.alert(t("deck.noCardsAlertTitle"), t("deck.noCardsAlertBody"));
+      setAlertConfig({
+        title: t("deck.noCardsAlertTitle"),
+        message: t("deck.noCardsAlertBody"),
+      });
+      setAlertVisible(true);
       return;
     }
     router.push(`/review/${id}`);
@@ -403,6 +409,13 @@ export default function DeckDetailScreen() {
           </SafeAreaView>
         </Modal>
       )}
+
+      <CustomAlert
+        visible={alertVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertVisible(false)}
+      />
     </SafeAreaView>
   );
 }

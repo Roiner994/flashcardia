@@ -1,3 +1,4 @@
+import { CustomAlert } from "@/components/modals/CustomAlert";
 import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
 import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
 import { Colors } from "@/constants/Colors";
@@ -8,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface DeckSettingsSheetProps {
   visible: boolean;
@@ -27,32 +28,42 @@ export function DeckSettingsSheet({
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { updateDeck, deleteDeck } = useStore();
 
+  const [deleteAlertVisible, setDeleteAlertVisible] = React.useState(false);
+
   const handleDelete = () => {
-    Alert.alert(
-      t("deckSettings.deleteConfirmTitle"),
-      t("deckSettings.deleteConfirmBody"),
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("deckSettings.delete"),
-          style: "destructive",
-          onPress: async () => {
-            onClose();
-            // Small delay to allow sheet to close
-            setTimeout(async () => {
-              await deleteDeck(deck.id);
-              router.back();
-            }, 300);
-          },
-        },
-      ],
-    );
+    setDeleteAlertVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    setDeleteAlertVisible(false);
+    onClose();
+    // Small delay to allow sheet to close
+    setTimeout(async () => {
+      await deleteDeck(deck.id);
+      router.back();
+    }, 300);
   };
 
   const currentLimit = deck.daily_new_limit ?? 10;
 
   return (
-    <AnimatedBottomSheet visible={visible} onClose={onClose} snapPoint={32}>
+    <AnimatedBottomSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoint={32}
+      renderOverlays={() => (
+        <CustomAlert
+          visible={deleteAlertVisible}
+          type="danger"
+          title={t("deckSettings.deleteConfirmTitle")}
+          message={t("deckSettings.deleteConfirmBody")}
+          onClose={() => setDeleteAlertVisible(false)}
+          onConfirm={confirmDelete}
+          confirmText={t("deckSettings.delete")}
+          cancelText={t("common.cancel")}
+        />
+      )}
+    >
       {(handleClose) => (
         <>
           <BottomSheetHeader
