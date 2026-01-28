@@ -74,7 +74,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style={effectiveTheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>
     </GestureHandlerRootView>
   );

@@ -175,17 +175,15 @@ export default function HomeScreen() {
       </View>
 
       {/* Floating Add Button */}
-      {session && (
-        <View style={styles.fabContainer}>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => setBottomSheetVisible(true)}
-            style={styles.fab}
-          >
-            <Ionicons name="add" size={32} color="white" />
-          </TouchableOpacity>
-        </View>
-      )}
+      <View style={styles.fabContainer}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => setBottomSheetVisible(true)}
+          style={styles.fab}
+        >
+          <Ionicons name="add" size={32} color="white" />
+        </TouchableOpacity>
+      </View>
 
       {/* Create Deck Bottom Sheet */}
       <CreateDeckSheet

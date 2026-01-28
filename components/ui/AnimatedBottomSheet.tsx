@@ -17,6 +17,7 @@ interface AnimatedBottomSheetProps {
   children: (handleClose: () => void) => React.ReactNode;
   snapPoint?: number; // percentage of screen height (0-100)
   withoutPadding?: boolean;
+  renderOverlays?: () => React.ReactNode;
 }
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -27,6 +28,7 @@ export function AnimatedBottomSheet({
   children,
   snapPoint = 45,
   withoutPadding = false,
+  renderOverlays,
 }: AnimatedBottomSheetProps) {
   const colors = useTheme();
   const insets = useSafeAreaInsets();
@@ -158,6 +160,9 @@ export function AnimatedBottomSheet({
             {children(handleClose)}
           </View>
         </Animated.View>
+
+        {/* Portals/Overlays rendered at the root of the Modal context */}
+        {renderOverlays?.()}
       </View>
     </Modal>
   );
