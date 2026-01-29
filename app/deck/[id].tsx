@@ -11,11 +11,17 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from "expo-speech-recognition";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -50,13 +56,14 @@ export default function DeckDetailScreen() {
 
   const colors = useTheme();
   const insets = useSafeAreaInsets();
-  const styles = useMemo(() => createStyles(colors, insets), [colors, insets]);
-  const { decks, currentCards, loadCards, updateDeck, isLoading } = useStore();
+  const styles = useMemo(() => getStyles(colors, insets), [colors, insets]);
+  const { decks, currentCards, loadCards, isLoading } = useStore();
 
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertConfig, setAlertConfig] = useState({ title: "", message: "" });
+  const [isListening, setIsListening] = useState(false);
 
   const deck = decks.find((d) => d.id === id);
 
@@ -64,7 +71,7 @@ export default function DeckDetailScreen() {
     if (id) {
       loadCards(id);
     }
-  }, [id]);
+  }, [id, loadCards]);
 
   useEffect(() => {
     if (initialMagicWord) {
@@ -72,7 +79,40 @@ export default function DeckDetailScreen() {
       setModalVisible(true);
       setCreationStep("input");
     }
-  }, [initialMagicWord]);
+  }, [initialMagicWord, setMagicWord, setCreationStep]);
+
+  // Speech Recognition Events - Must be before any early returns
+  useSpeechRecognitionEvent("start", () => setIsListening(true));
+  useSpeechRecognitionEvent("end", () => setIsListening(false));
+  useSpeechRecognitionEvent("result", (event) => {
+    console.log("Speech result received:", JSON.stringify(event.results));
+    if (event.results && event.results[0]?.transcript) {
+      const transcript = event.results[0].transcript;
+      console.log("Setting magic word:", transcript);
+      setMagicWord(transcript);
+    } else {
+      console.log("No transcript found in results");
+    }
+  });
+  useSpeechRecognitionEvent("error", (event) => {
+    // Ignore "no-speech" errors as they are just timeouts
+    if (event.error === "no-speech") {
+      setIsListening(false);
+      return;
+    }
+
+    console.error("Speech recognition error:", event.error, event.message);
+    setIsListening(false);
+
+    if (
+      event.error === "not-allowed" ||
+      event.error === "service-not-allowed"
+    ) {
+      alert(t("magic.permissionDenied") || "Microphone access denied.");
+    } else {
+      alert(`Error: ${event.message}`);
+    }
+  });
 
   if (isLoading) {
     return <DeckDetailSkeleton />;
@@ -128,6 +168,46 @@ export default function DeckDetailScreen() {
       pitch: 1.0,
       rate: 0.9,
     });
+  };
+
+  const startListening = async () => {
+    try {
+      const permission =
+        await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!permission.granted) {
+        alert(
+          t("magic.permissionDenied") || "Microphone permission is required.",
+        );
+        return;
+      }
+
+      ExpoSpeechRecognitionModule.start({
+        lang: "en-US",
+        interimResults: true,
+        maxAlternatives: 1,
+        continuous: true,
+      });
+      console.log("Started listening...");
+    } catch (e: any) {
+      console.error("Start listening error:", e);
+      alert("Failed to start microphone: " + e.message);
+    }
+  };
+
+  const stopListening = async () => {
+    try {
+      ExpoSpeechRecognitionModule.stop();
+    } catch (e) {
+      console.error("Stop listening error:", e);
+    }
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
   };
 
   return (
@@ -265,49 +345,64 @@ export default function DeckDetailScreen() {
                 onClose={handleClose}
               />
 
-              <View style={styles.bottomSheetContent}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>{t("magic.inputLabel")}</Text>
-                  <View style={styles.inputWrapper}>
-                    <TextInput
-                      style={styles.magicInputMain}
-                      placeholder={t("magic.placeholder")}
-                      placeholderTextColor={colors.textSecondary}
-                      value={magicWord}
-                      onChangeText={setMagicWord}
-                    />
-                    <TouchableOpacity style={styles.micButton}>
-                      <Ionicons
-                        name="mic-outline"
-                        size={24}
-                        color={colors.icon}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.inputNote}>{t("magic.note")}</Text>
-                </View>
-
-                <TouchableOpacity
-                  style={[
-                    styles.mainGenerateButton,
-                    (!magicWord.trim() || isGenerating) &&
-                      styles.buttonDisabled,
-                  ]}
-                  onPress={handleMagicGenerate}
-                  disabled={!magicWord.trim() || isGenerating}
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "android" ? 100 : 0}
+              >
+                <ScrollView
+                  contentContainerStyle={styles.bottomSheetContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
                 >
-                  {isGenerating ? (
-                    <ActivityIndicator color="white" />
-                  ) : (
-                    <>
-                      <Ionicons name="sparkles" size={20} color="white" />
-                      <Text style={styles.mainGenerateButtonText}>
-                        {t("magic.generate")}
-                      </Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </View>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>
+                      {t("magic.inputLabel")}
+                    </Text>
+                    <View style={styles.inputWrapper}>
+                      <TextInput
+                        style={styles.magicInputMain}
+                        placeholder={t("magic.placeholder")}
+                        placeholderTextColor={colors.textSecondary}
+                        value={magicWord}
+                        onChangeText={setMagicWord}
+                      />
+                      <TouchableOpacity
+                        style={styles.micButton}
+                        onPress={toggleListening}
+                      >
+                        <Ionicons
+                          name={isListening ? "mic" : "mic-outline"}
+                          size={24}
+                          color={isListening ? colors.error : colors.icon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.inputNote}>{t("magic.note")}</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.mainGenerateButton,
+                      (!magicWord.trim() || isGenerating) &&
+                        styles.buttonDisabled,
+                    ]}
+                    onPress={handleMagicGenerate}
+                    disabled={!magicWord.trim() || isGenerating}
+                  >
+                    {isGenerating ? (
+                      <ActivityIndicator color="white" />
+                    ) : (
+                      <>
+                        <Ionicons name="sparkles" size={20} color="white" />
+                        <Text style={styles.mainGenerateButtonText}>
+                          {t("magic.generate")}
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </ScrollView>
+              </KeyboardAvoidingView>
             </>
           )}
         </AnimatedBottomSheet>
@@ -420,11 +515,8 @@ export default function DeckDetailScreen() {
   );
 }
 
-const createStyles = (
-  colors: typeof Colors.light,
-  insets: { bottom: number },
-) =>
-  StyleSheet.create({
+function getStyles(colors: typeof Colors.light, insets: { bottom: number }) {
+  return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -663,7 +755,7 @@ const createStyles = (
     },
     bottomSheetContent: {
       paddingTop: 16,
-      paddingBottom: 8,
+      paddingBottom: 24,
     },
     closeModalButton: {
       position: "absolute",
@@ -971,3 +1063,4 @@ const createStyles = (
       marginLeft: 8,
     },
   });
+}
