@@ -121,10 +121,10 @@ const createStyles = (colors: typeof Colors.light) =>
       borderRadius: 40,
       backfaceVisibility: "hidden",
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 10 },
+      shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
-      shadowRadius: 20,
-      elevation: 10,
+      shadowRadius: 12,
+      elevation: 5,
     },
     cardFront: {
       backgroundColor: colors.surface,

@@ -52,7 +52,7 @@ export function ChallengeSetupSheet({
   } = useChallengeSetup(deck, onClose);
 
   return (
-    <AnimatedBottomSheet visible={visible} onClose={onClose} snapPoint={71}>
+    <AnimatedBottomSheet visible={visible} onClose={onClose} snapPoint={80}>
       {(handleClose) => (
         <>
           <BottomSheetHeader
@@ -442,7 +442,7 @@ export function ChallengeSetupSheet({
 const createStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
     content: {
-      paddingBottom: 40,
+      paddingBottom: 60,
     },
     deckHeader: {
       marginBottom: 24,

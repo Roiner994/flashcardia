@@ -63,6 +63,7 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "android" ? 10 : 0}
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -196,7 +197,7 @@ const createStyles = (colors: typeof Colors.light) =>
     scrollContent: {
       flexGrow: 1,
       padding: 24,
-      justifyContent: "center",
+      paddingBottom: 150,
     },
     header: {
       alignItems: "flex-end",
