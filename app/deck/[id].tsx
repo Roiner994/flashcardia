@@ -125,6 +125,10 @@ export default function DeckDetailScreen() {
     const success = await saveCard();
     if (success) {
       setModalVisible(false);
+      // Wait for modal to close before resetting state to avoid iOS Modal race conditions
+      setTimeout(() => {
+        resetCreation();
+      }, 500);
     }
   }
 

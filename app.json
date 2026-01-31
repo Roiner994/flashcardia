@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "magic-deck-ai",
-    "slug": "magic-deck-ai",
+    "name": "Flashcardia",
+    "slug": "flashcardia",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "magicdeckai",
+    "scheme": "flashcardia",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourname.magicdeckai"
+      "bundleIdentifier": "com.roinerucropit.flashcardia"
     },
     "android": {
-      "package": "com.roinerucropit.magicdeckai",
+      "package": "com.roinerucropit.flashcardia",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

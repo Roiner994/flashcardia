@@ -87,8 +87,21 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Ionicons name="sparkles" size={24} color={colors.primary} />
-            <Text style={styles.headerTitle}>{t("home.title")}</Text>
+            <Image
+              source={require("../../assets/images/icon.png")}
+              style={{ width: 40, height: 40, borderRadius: 10 }}
+              resizeMode="contain"
+            />
+            <Text
+              style={[styles.headerTitle, { marginLeft: 12, fontSize: 28 }]}
+            >
+              <Text style={{ color: (colors as any).brandPurple }}>
+                {t("home.brandPart1")}
+              </Text>
+              <Text style={{ color: (colors as any).brandCyan }}>
+                {t("home.brandPart2")}
+              </Text>
+            </Text>
           </View>
           <View style={styles.headerRight}>
             <TouchableOpacity
@@ -112,14 +125,27 @@ export default function HomeScreen() {
             </TouchableOpacity>
 
             <View style={styles.avatar}>
-              <Image
-                source={{
-                  uri:
-                    session?.user?.user_metadata?.avatar_url ||
-                    "https://i.pravatar.cc/150?u=a042581f4e29026704d",
-                }}
-                style={styles.avatarImage}
-              />
+              {session?.user?.user_metadata?.avatar_url ? (
+                <Image
+                  source={{ uri: session.user.user_metadata.avatar_url }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: colors.surface,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons
+                    name="person"
+                    size={24}
+                    color={colors.textSecondary}
+                  />
+                </View>
+              )}
             </View>
           </View>
         </View>
