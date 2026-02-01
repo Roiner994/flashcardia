@@ -10,19 +10,22 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.roinerucropit.flashcardia"
+      "bundleIdentifier": "com.roinerucropit.flashcardia",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition.",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to use the microphone."
+      }
     },
     "android": {
       "package": "com.roinerucropit.flashcardia",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#290F58",
+        "foregroundImage": "./assets/images/android-icon-foreground-padded.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "softwareKeyboardLayoutMode": "resize"
+      "softwareKeyboardLayoutMode": "resize",
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "output": "static",
@@ -51,9 +54,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "ab7432f5-3338-4582-ab5e-a7a2dad7ff8d"
+        "projectId": "8687758c-68bd-4841-8a0f-6b14f03c4df1"
       }
     },
-    "owner": "magic-deck-ai"
+    "owner": "flashcardia"
   }
 }
