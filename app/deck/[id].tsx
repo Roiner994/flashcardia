@@ -3,19 +3,24 @@ import { DeckSettingsSheet } from "@/components/deck/DeckSettingsSheet";
 import { CustomAlert } from "@/components/modals/CustomAlert";
 import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
 import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
+import { RecordingView } from "@/components/ui/RecordingView";
 import { Colors } from "@/constants/Colors";
 import { useMagicCard } from "@/hooks/useMagicCard";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useTheme } from "@/hooks/useThemeColor";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
+
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -50,13 +55,29 @@ export default function DeckDetailScreen() {
 
   const colors = useTheme();
   const insets = useSafeAreaInsets();
-  const styles = useMemo(() => createStyles(colors, insets), [colors, insets]);
-  const { decks, currentCards, loadCards, updateDeck, isLoading } = useStore();
+  const styles = useMemo(() => getStyles(colors, insets), [colors, insets]);
+  const { decks, currentCards, loadCards, isLoading } = useStore();
 
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertConfig, setAlertConfig] = useState({ title: "", message: "" });
+
+  const { isRecording, transcript, start, stop, cancel } = useSpeechRecognition(
+    {
+      onError: (e) => {
+        setAlertConfig({ title: t("errors.oops"), message: e.message });
+        setAlertVisible(true);
+      },
+    },
+  );
+
+  // Sync transcript to magicWord during recording
+  useEffect(() => {
+    if (isRecording) {
+      setMagicWord(transcript);
+    }
+  }, [transcript, isRecording]);
 
   const deck = decks.find((d) => d.id === id);
 
@@ -64,7 +85,7 @@ export default function DeckDetailScreen() {
     if (id) {
       loadCards(id);
     }
-  }, [id]);
+  }, [id, loadCards]);
 
   useEffect(() => {
     if (initialMagicWord) {
@@ -72,7 +93,7 @@ export default function DeckDetailScreen() {
       setModalVisible(true);
       setCreationStep("input");
     }
-  }, [initialMagicWord]);
+  }, [initialMagicWord, setMagicWord, setCreationStep]);
 
   if (isLoading) {
     return <DeckDetailSkeleton />;
@@ -104,6 +125,10 @@ export default function DeckDetailScreen() {
     const success = await saveCard();
     if (success) {
       setModalVisible(false);
+      // Wait for modal to close before resetting state to avoid iOS Modal race conditions
+      setTimeout(() => {
+        resetCreation();
+      }, 500);
     }
   }
 
@@ -255,7 +280,7 @@ export default function DeckDetailScreen() {
         <AnimatedBottomSheet
           visible={isModalVisible}
           onClose={() => setModalVisible(false)}
-          snapPoint={40}
+          snapPoint={45}
         >
           {(handleClose) => (
             <>
@@ -265,49 +290,85 @@ export default function DeckDetailScreen() {
                 onClose={handleClose}
               />
 
-              <View style={styles.bottomSheetContent}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>{t("magic.inputLabel")}</Text>
-                  <View style={styles.inputWrapper}>
-                    <TextInput
-                      style={styles.magicInputMain}
-                      placeholder={t("magic.placeholder")}
-                      placeholderTextColor={colors.textSecondary}
-                      value={magicWord}
-                      onChangeText={setMagicWord}
-                    />
-                    <TouchableOpacity style={styles.micButton}>
-                      <Ionicons
-                        name="mic-outline"
-                        size={24}
-                        color={colors.icon}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.inputNote}>{t("magic.note")}</Text>
-                </View>
-
-                <TouchableOpacity
-                  style={[
-                    styles.mainGenerateButton,
-                    (!magicWord.trim() || isGenerating) &&
-                      styles.buttonDisabled,
-                  ]}
-                  onPress={handleMagicGenerate}
-                  disabled={!magicWord.trim() || isGenerating}
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "android" ? 100 : 0}
+              >
+                <ScrollView
+                  contentContainerStyle={styles.bottomSheetContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
                 >
-                  {isGenerating ? (
-                    <ActivityIndicator color="white" />
+                  {isRecording ? (
+                    <RecordingView
+                      onStop={stop}
+                      onCancel={cancel}
+                      transcription={magicWord}
+                    />
                   ) : (
-                    <>
-                      <Ionicons name="sparkles" size={20} color="white" />
-                      <Text style={styles.mainGenerateButtonText}>
-                        {t("magic.generate")}
-                      </Text>
-                    </>
+                    <View style={styles.inputGroup}>
+                      <View>
+                        <Text style={styles.inputLabel}>
+                          {t("magic.inputLabel")}
+                        </Text>
+                        <View style={styles.inputWrapper}>
+                          <TextInput
+                            style={styles.magicInputMain}
+                            placeholder={t("magic.placeholder")}
+                            placeholderTextColor={colors.textSecondary}
+                            value={magicWord}
+                            onChangeText={setMagicWord}
+                          />
+                          {magicWord.length > 0 && (
+                            <TouchableOpacity
+                              onPress={() => setMagicWord("")}
+                              style={{ marginRight: 8 }}
+                            >
+                              <Ionicons
+                                name="close-circle"
+                                size={20}
+                                color={colors.textSecondary}
+                              />
+                            </TouchableOpacity>
+                          )}
+                          <TouchableOpacity
+                            style={styles.micButton}
+                            onPress={() => start(magicWord)}
+                          >
+                            <Ionicons
+                              name="mic-outline"
+                              size={24}
+                              color={colors.icon}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                        <Text style={styles.inputNote}>{t("magic.note")}</Text>
+                      </View>
+                      <TouchableOpacity
+                        style={[
+                          styles.mainGenerateButton,
+                          (!magicWord.trim() || isGenerating) &&
+                            styles.buttonDisabled,
+                        ]}
+                        onPress={handleMagicGenerate}
+                        disabled={!magicWord.trim() || isGenerating}
+                      >
+                        {isGenerating ? (
+                          <ActivityIndicator color="white" />
+                        ) : (
+                          <>
+                            <Ionicons name="sparkles" size={20} color="white" />
+                            <Text style={styles.mainGenerateButtonText}>
+                              {t("magic.generate")}
+                            </Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    </View>
                   )}
-                </TouchableOpacity>
-              </View>
+                </ScrollView>
+              </KeyboardAvoidingView>
             </>
           )}
         </AnimatedBottomSheet>
@@ -420,11 +481,8 @@ export default function DeckDetailScreen() {
   );
 }
 
-const createStyles = (
-  colors: typeof Colors.light,
-  insets: { bottom: number },
-) =>
-  StyleSheet.create({
+function getStyles(colors: typeof Colors.light, insets: { bottom: number }) {
+  return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -663,7 +721,7 @@ const createStyles = (
     },
     bottomSheetContent: {
       paddingTop: 16,
-      paddingBottom: 8,
+      paddingBottom: 24,
     },
     closeModalButton: {
       position: "absolute",
@@ -695,7 +753,9 @@ const createStyles = (
       lineHeight: 20,
     },
     inputGroup: {
-      marginBottom: 32,
+      flexDirection: "column",
+      justifyContent: "space-between",
+      height: 240,
     },
     inputLabel: {
       fontSize: 12,
@@ -971,3 +1031,4 @@ const createStyles = (
       marginLeft: 8,
     },
   });
+}

@@ -6,6 +6,9 @@
 const tintColorLight = '#8b5cf6'; // Violet 500
 const tintColorDark = '#a78bfa'; // Violet 400
 
+const brandPurple = '#4C1D95';
+const brandCyan = '#22D3EE';
+
 export const Colors = {
     light: {
         text: '#111827',
@@ -22,6 +25,8 @@ export const Colors = {
         icon: '#6b7280',
         tabIconDefault: '#9ca3af',
         tabIconSelected: tintColorLight,
+        brandPurple,
+        brandCyan,
     },
     dark: {
         text: '#f9fafb',
@@ -37,5 +42,7 @@ export const Colors = {
         icon: '#9ca3af',
         tabIconDefault: '#9ca3af',
         tabIconSelected: tintColorDark,
+        brandPurple,
+        brandCyan,
     },
 };

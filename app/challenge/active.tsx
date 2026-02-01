@@ -1,5 +1,7 @@
 import { CustomAlert } from "@/components/modals/CustomAlert";
+
 import { Colors } from "@/constants/Colors";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useTheme } from "@/hooks/useThemeColor";
 import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,12 +10,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -64,6 +69,30 @@ export default function ActiveChallengeScreen() {
   const [sessionScore, setSessionScore] = useState(0);
   const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
+
+  // Speech Recognition
+  const {
+    isRecording,
+    isPaused,
+    transcript,
+    start,
+    pause,
+    resume,
+    setTranscript,
+  } = useSpeechRecognition({
+    initialTranscript: "", // Will be set on start
+    onError: (e) => {
+      // Handle error
+      console.log("Speech Error", e);
+    },
+  });
+
+  // Sync transcript
+  useEffect(() => {
+    if (isRecording || isPaused) {
+      setUserInput(transcript);
+    }
+  }, [transcript, isRecording, isPaused]);
 
   // Initialize Game
   useEffect(() => {
@@ -178,105 +207,166 @@ export default function ActiveChallengeScreen() {
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.content}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <View style={styles.cardContainer}>
-          <Text style={styles.instruction}>
-            {t("challenge.active.makeSentence")}
-          </Text>
-          <Text style={styles.targetWord}>{currentCard?.front_word}</Text>
-          <Text style={styles.definitionHint}>{currentCard?.definition}</Text>
-        </View>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.content}>
+              <View style={styles.cardContainer}>
+                <Text style={styles.instruction}>
+                  {t("challenge.active.makeSentence")}
+                </Text>
+                <Text style={styles.targetWord}>{currentCard?.front_word}</Text>
+                <Text style={styles.definitionHint}>
+                  {currentCard?.definition}
+                </Text>
+              </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder={t("challenge.active.inputPlaceholder")}
-          placeholderTextColor={colors.textSecondary}
-          multiline
-          value={userInput}
-          onChangeText={setUserInput}
-          editable={!isSubmitting && !result}
-        />
+              <View style={{ marginBottom: 24 }}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    isRecording && !isPaused && styles.inputDisabled,
+                  ]}
+                  placeholder={t("challenge.active.inputPlaceholder")}
+                  placeholderTextColor={colors.textSecondary}
+                  multiline
+                  value={userInput}
+                  onChangeText={setUserInput}
+                  editable={
+                    (!isRecording || isPaused) && !isSubmitting && !result
+                  }
+                />
+              </View>
 
-        {result && (
-          <View
-            style={[
-              styles.resultCard,
-              result.score >= PASSING_SCORE
-                ? { borderColor: colors.success }
-                : { borderColor: colors.error },
-            ]}
-          >
-            <View style={styles.scoreRow}>
-              <Text
+              {result && (
+                <View
+                  style={[
+                    styles.resultCard,
+                    (result?.score ?? 0) >= PASSING_SCORE
+                      ? { borderColor: colors.success }
+                      : { borderColor: colors.error },
+                  ]}
+                >
+                  <View style={styles.scoreRow}>
+                    <Text
+                      style={[
+                        styles.scoreLabel,
+                        {
+                          color:
+                            (result?.score ?? 0) >= PASSING_SCORE
+                              ? colors.success
+                              : colors.error,
+                        },
+                      ]}
+                    >
+                      {t("challenge.active.scoreLabel", {
+                        score: result.score,
+                      })}
+                    </Text>
+                    <Ionicons
+                      name={
+                        (result?.score ?? 0) >= PASSING_SCORE
+                          ? "checkmark-circle"
+                          : "warning"
+                      }
+                      size={24}
+                      color={
+                        (result?.score ?? 0) >= PASSING_SCORE
+                          ? colors.success
+                          : colors.error
+                      }
+                    />
+                  </View>
+                  <Text style={styles.feedbackText}>
+                    {t(result.feedbackKey)}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+
+        <View style={styles.footer}>
+          {!result ? (
+            <View style={styles.footerRow}>
+              <TouchableOpacity
                 style={[
-                  styles.scoreLabel,
+                  styles.actionButton,
+                  { backgroundColor: colors.primary },
+                  (!userInput.trim() || isSubmitting) && { opacity: 0.7 },
+                ]}
+                onPress={handleSubmit}
+                disabled={!userInput.trim() || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.buttonText}>
+                    {t("challenge.active.submit")}
+                  </Text>
+                )}
+              </TouchableOpacity>
+              {!isSubmitting && (
+                <TouchableOpacity
+                  style={styles.micFooterButton}
+                  onPress={() => {
+                    if (isRecording && !isPaused) {
+                      pause();
+                      Keyboard.dismiss();
+                    } else if (isPaused) {
+                      setTranscript(userInput);
+                      resume();
+                    } else {
+                      start(userInput);
+                    }
+                  }}
+                >
+                  <Ionicons
+                    name={
+                      isRecording && !isPaused
+                        ? "pause"
+                        : isPaused
+                          ? "mic"
+                          : "mic-outline"
+                    }
+                    size={24}
+                    color={colors.primary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <View style={styles.footerRow}>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
                   {
-                    color:
-                      result.score >= PASSING_SCORE
-                        ? colors.success
-                        : colors.error,
+                    backgroundColor:
+                      (result?.score ?? 0) < PASSING_SCORE &&
+                      difficulty === "hard"
+                        ? colors.warning
+                        : colors.success,
                   },
                 ]}
+                onPress={handleNext}
               >
-                {t("challenge.active.scoreLabel", { score: result.score })}
-              </Text>
-              <Ionicons
-                name={
-                  result.score >= PASSING_SCORE ? "checkmark-circle" : "warning"
-                }
-                size={24}
-                color={
-                  result.score >= PASSING_SCORE ? colors.success : colors.error
-                }
-              />
+                <Text style={styles.buttonText}>
+                  {(result?.score ?? 0) < PASSING_SCORE && difficulty === "hard"
+                    ? t("challenge.active.tryAgain")
+                    : t("challenge.active.nextCard")}
+                </Text>
+                <Ionicons name="arrow-forward" size={20} color="white" />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.feedbackText}>{t(result.feedbackKey)}</Text>
-          </View>
-        )}
+          )}
+        </View>
       </KeyboardAvoidingView>
-
-      <View style={styles.footer}>
-        {!result ? (
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              { backgroundColor: colors.primary },
-              (!userInput.trim() || isSubmitting) && { opacity: 0.7 },
-            ]}
-            onPress={handleSubmit}
-            disabled={!userInput.trim() || isSubmitting}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text style={styles.buttonText}>
-                {t("challenge.active.submit")}
-              </Text>
-            )}
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              {
-                backgroundColor:
-                  result.score < PASSING_SCORE && difficulty === "hard"
-                    ? colors.warning
-                    : colors.success,
-              },
-            ]}
-            onPress={handleNext}
-          >
-            <Text style={styles.buttonText}>
-              {result.score < PASSING_SCORE && difficulty === "hard"
-                ? t("challenge.active.tryAgain")
-                : t("challenge.active.nextCard")}
-            </Text>
-            <Ionicons name="arrow-forward" size={20} color="white" />
-          </TouchableOpacity>
-        )}
-      </View>
     </SafeAreaView>
   );
 }
@@ -346,6 +436,7 @@ const createStyles = (colors: typeof Colors.light) =>
       textAlign: "center",
       fontStyle: "italic",
     },
+
     input: {
       backgroundColor: colors.surface,
       borderRadius: 16,
@@ -357,6 +448,10 @@ const createStyles = (colors: typeof Colors.light) =>
       marginBottom: 24,
       borderWidth: 1,
       borderColor: colors.border,
+    },
+    inputDisabled: {
+      backgroundColor: colors.background, // Slightly darker/different to indicate disabled?
+      opacity: 0.7,
     },
     resultCard: {
       padding: 16,
@@ -382,7 +477,13 @@ const createStyles = (colors: typeof Colors.light) =>
     footer: {
       padding: 20,
     },
+    footerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
     actionButton: {
+      flex: 1,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
@@ -394,5 +495,15 @@ const createStyles = (colors: typeof Colors.light) =>
       color: "white",
       fontSize: 18,
       fontWeight: "bold",
+    },
+    micFooterButton: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: colors.border,
     },
   });

@@ -1,10 +1,12 @@
 import { useTheme } from "@/hooks/useThemeColor";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
+  Keyboard,
   Modal,
   PanResponder,
+  Platform,
   StyleSheet,
   TouchableWithoutFeedback,
   View,
@@ -34,15 +36,38 @@ export function AnimatedBottomSheet({
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const sheetHeight = (SCREEN_HEIGHT * snapPoint) / 100;
+
+  // Keyboard event listeners
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+      },
+    );
+
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => {
+        setKeyboardHeight(0);
+      },
+    );
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (visible) {
       // Slide up and fade in backdrop
       Animated.parallel([
         Animated.spring(translateY, {
-          toValue: 0,
+          toValue: -keyboardHeight,
           useNativeDriver: true,
           tension: 40,
           friction: 9,
@@ -69,7 +94,7 @@ export function AnimatedBottomSheet({
       ]).start();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+  }, [visible, keyboardHeight]);
 
   const handleClose = () => {
     // Animate out before closing
@@ -97,7 +122,7 @@ export function AnimatedBottomSheet({
       },
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dy > 0) {
-          translateY.setValue(gestureState.dy);
+          translateY.setValue(gestureState.dy - keyboardHeight);
         }
       },
       onPanResponderRelease: (_, gestureState) => {
@@ -105,9 +130,9 @@ export function AnimatedBottomSheet({
           // Close with smooth animation if dragged down more than 30% or fast swipe
           handleClose();
         } else {
-          // Snap back to open position
+          // Snap back to open position (accounting for keyboard)
           Animated.spring(translateY, {
-            toValue: 0,
+            toValue: -keyboardHeight,
             useNativeDriver: true,
             tension: 50,
             friction: 8,

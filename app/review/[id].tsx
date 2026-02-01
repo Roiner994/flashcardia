@@ -55,7 +55,7 @@ export default function ReviewScreen() {
     Animated.spring(animatedValue, {
       toValue: isFlipped ? 0 : 180,
       friction: 8,
-      tension: 10,
+      tension: 20,
       useNativeDriver: true,
     }).start();
     setIsFlipped(!isFlipped);

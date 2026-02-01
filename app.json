@@ -1,25 +1,31 @@
 {
   "expo": {
-    "name": "magic-deck-ai",
-    "slug": "magic-deck-ai",
+    "name": "Flashcardia",
+    "slug": "flashcardia",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "magicdeckai",
+    "scheme": "flashcardia",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.roinerucropit.flashcardia",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition.",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to use the microphone."
+      }
     },
     "android": {
+      "package": "com.roinerucropit.flashcardia",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#290F58",
+        "foregroundImage": "./assets/images/android-icon-foreground-padded.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "softwareKeyboardLayoutMode": "resize",
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "output": "static",
@@ -27,6 +33,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-speech-recognition",
       [
         "expo-splash-screen",
         {
@@ -43,6 +50,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8687758c-68bd-4841-8a0f-6b14f03c4df1"
+      }
+    },
+    "owner": "flashcardia"
   }
 }

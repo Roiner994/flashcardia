@@ -60,7 +60,9 @@
     "errorMessage": "Failed to update password"
   },
   "home": {
-    "title": "MagicDeck",
+    "title": "Flashcardia",
+    "brandPart1": "Flashcard",
+    "brandPart2": "ia",
     "dueToday": "Due Today",
     "learned": "Learned",
     "cards": "Cards",
