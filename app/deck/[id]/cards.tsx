@@ -1,6 +1,6 @@
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
-import { useStore } from "@/store/useStore";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
+import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";

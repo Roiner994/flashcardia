@@ -1,6 +1,6 @@
-import { CARD_STATUS, CardStatus, CHALLENGE_DIFFICULTY, ChallengeDifficulty, ROUTES } from "@/constants/AppConstants";
-import { Deck } from "@/store/types";
-import { useStore } from "@/store/useStore";
+import { CARD_STATUS, CardStatus, CHALLENGE_DIFFICULTY, ChallengeDifficulty, ROUTES } from "@constants/AppConstants";
+import { Deck } from "@store/types";
+import { useStore } from "@store/useStore";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 

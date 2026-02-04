@@ -1,8 +1,8 @@
-import { LanguageModal } from "@/components/modals/LanguageModal";
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
-import { changeLanguage } from "@/i18n";
-import { useStore } from "@/store/useStore";
+import { LanguageModal } from "@components/modals/LanguageModal";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
+import { changeLanguage } from "@i18n";
+import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Link, useRouter } from "expo-router";

@@ -1,6 +1,6 @@
-import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
-import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
-import { useTheme } from "@/hooks/useThemeColor";
+import { AnimatedBottomSheet } from "@components/ui/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@components/ui/BottomSheetHeader";
+import { useTheme } from "@hooks/useThemeColor";
 import React from "react";
 import {
   ScrollView,

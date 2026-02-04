@@ -1,5 +1,5 @@
-import { Colors } from '@/constants/Colors';
-import { useStore } from '@/store/useStore';
+import { Colors } from '@constants/Colors';
+import { useStore } from '@store/useStore';
 import { useColorScheme as useSystemColorScheme } from 'react-native';
 
 export function useThemeColor(

@@ -1,8 +1,8 @@
-import { CustomAlert } from "@/components/modals/CustomAlert";
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
-import { supabase } from "@/lib/supabase";
-import { useStore } from "@/store/useStore";
+import { CustomAlert } from "@components/modals/CustomAlert";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
+import { supabase } from "@lib/supabase";
+import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";

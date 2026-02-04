@@ -1,5 +1,5 @@
-import { DataService } from '@/services/DataService';
-import { Card } from '@/types';
+import { DataService } from '@services/DataService';
+import { Card } from '@types';
 import { StateCreator } from 'zustand';
 import { ReviewSlice, StoreState } from '../types';
 

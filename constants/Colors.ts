@@ -27,6 +27,7 @@ export const Colors = {
         tabIconSelected: tintColorLight,
         brandPurple,
         brandCyan,
+        white: '#ffffff',
     },
     dark: {
         text: '#f9fafb',
@@ -44,5 +45,6 @@ export const Colors = {
         tabIconSelected: tintColorDark,
         brandPurple,
         brandCyan,
+        white: '#ffffff',
     },
 };

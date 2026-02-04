@@ -1,10 +1,10 @@
-import { CustomAlert } from "@/components/modals/CustomAlert";
-import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
-import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
-import { Deck } from "@/store/types";
-import { useStore } from "@/store/useStore";
+import { CustomAlert } from "@components/modals/CustomAlert";
+import { AnimatedBottomSheet } from "@components/ui/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@components/ui/BottomSheetHeader";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
+import { Deck } from "@store/types";
+import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";

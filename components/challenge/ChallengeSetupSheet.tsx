@@ -1,14 +1,14 @@
-import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
-import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
+import { AnimatedBottomSheet } from "@components/ui/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@components/ui/BottomSheetHeader";
 import {
   CARD_STATUS,
   CardStatus,
   CHALLENGE_DIFFICULTY,
-} from "@/constants/AppConstants";
-import { Colors } from "@/constants/Colors";
-import { useChallengeSetup } from "@/hooks/useChallengeSetup";
-import { useTheme } from "@/hooks/useThemeColor";
-import { Deck } from "@/store/types";
+} from "@constants/AppConstants";
+import { Colors } from "@constants/Colors";
+import { useChallengeSetup } from "@hooks/useChallengeSetup";
+import { useTheme } from "@hooks/useThemeColor";
+import { Deck } from "@store/types";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";

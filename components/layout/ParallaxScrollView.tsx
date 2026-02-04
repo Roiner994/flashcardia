@@ -7,8 +7,8 @@ import Animated, {
   useScrollOffset,
 } from "react-native-reanimated";
 
-import { ThemedView } from "@/components/ui/ThemedView";
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedView } from "@components/ui/ThemedView";
+import { useThemeColor } from "@hooks/useThemeColor";
 import { useColorScheme } from "react-native";
 
 const HEADER_HEIGHT = 250;

@@ -1,6 +1,6 @@
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
-import { Card } from "@/types";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
+import { Card } from "@types";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";

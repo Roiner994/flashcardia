@@ -1,7 +1,7 @@
-import { AnimatedBottomSheet } from "@/components/ui/AnimatedBottomSheet";
-import { BottomSheetHeader } from "@/components/ui/BottomSheetHeader";
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
+import { AnimatedBottomSheet } from "@components/ui/AnimatedBottomSheet";
+import { BottomSheetHeader } from "@components/ui/BottomSheetHeader";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {

@@ -1,5 +1,5 @@
-import { supabase } from '@/lib/supabase';
-import { MigrationService } from '@/services/MigrationService';
+import { supabase } from '@lib/supabase';
+import { MigrationService } from '@services/MigrationService';
 import { StateCreator } from 'zustand';
 import { AuthSlice, StoreState } from '../types';
 

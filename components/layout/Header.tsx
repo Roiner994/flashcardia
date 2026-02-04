@@ -1,5 +1,5 @@
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import React, { useMemo } from "react";

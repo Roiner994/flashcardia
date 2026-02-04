@@ -1,5 +1,5 @@
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
 import React, { useEffect, useMemo, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 

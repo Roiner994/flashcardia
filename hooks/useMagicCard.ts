@@ -1,5 +1,5 @@
-import { MagicCardResult, MagicGenerator } from '@/services/MagicGenerator';
-import { useStore } from '@/store/useStore';
+import { MagicCardResult, MagicGenerator } from '@services/MagicGenerator';
+import { useStore } from '@store/useStore';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';

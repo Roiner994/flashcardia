@@ -1,6 +1,6 @@
-import { DataService } from '@/services/DataService';
-import { useStore } from '@/store/useStore';
-import { Card } from '@/types';
+import { DataService } from '@services/DataService';
+import { useStore } from '@store/useStore';
+import { Card } from '@types';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';

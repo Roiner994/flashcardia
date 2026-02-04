@@ -1,9 +1,9 @@
-import { ChallengeSetupSheet } from "@/components/challenge/ChallengeSetupSheet";
+import { ChallengeSetupSheet } from "@components/challenge/ChallengeSetupSheet";
 // Refactored to avoid magic strings and centralized component organization
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
-import { Deck } from "@/store/types";
-import { useStore } from "@/store/useStore";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
+import { Deck } from "@store/types";
+import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useMemo, useState } from "react";
