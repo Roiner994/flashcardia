@@ -1,5 +1,5 @@
-import { DataService } from '@/services/DataService';
-import { Deck } from '@/types';
+import { DataService } from '@services/DataService';
+import { Deck } from '@types';
 import { StateCreator } from 'zustand';
 import { DecksSlice, StoreState } from '../types';
 

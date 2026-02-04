@@ -3,8 +3,22 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "paths": {
-      "@/*": ["./*"]
+      "@app/*": ["./app/*"],
+      "@components/*": ["./components/*"],
+      "@constants/*": ["./constants/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@i18n": ["./i18n/index.ts"],
+      "@i18n/*": ["./i18n/*"],
+      "@lib/*": ["./lib/*"],
+      "@services/*": ["./services/*"],
+      "@store/*": ["./store/*"],
+      "@types": ["./types/index.ts"],
+      "@types/*": ["./types/*"],
+      "@assets/*": ["./assets/*"],
+      "@scripts/*": ["./scripts/*"]
     }
   },
   "include": [

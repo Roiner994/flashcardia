@@ -1,6 +1,6 @@
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
-import { supabase } from "@/lib/supabase";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
+import { supabase } from "@lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";

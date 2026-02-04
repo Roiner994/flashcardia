@@ -1,9 +1,9 @@
-import { CustomAlert } from "@/components/modals/CustomAlert";
+import { CustomAlert } from "@components/modals/CustomAlert";
 
-import { Colors } from "@/constants/Colors";
-import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
-import { useTheme } from "@/hooks/useThemeColor";
-import { useStore } from "@/store/useStore";
+import { Colors } from "@constants/Colors";
+import { useSpeechRecognition } from "@hooks/useSpeechRecognition";
+import { useTheme } from "@hooks/useThemeColor";
+import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";

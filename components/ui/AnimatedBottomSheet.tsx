@@ -1,4 +1,4 @@
-import { useTheme } from "@/hooks/useThemeColor";
+import { useTheme } from "@hooks/useThemeColor";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,

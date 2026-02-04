@@ -1,11 +1,11 @@
-import { CreateDeckSheet } from "@/components/home/CreateDeckSheet";
-import { DeckListItem } from "@/components/home/DeckListItem";
-import { DeckListSkeleton } from "@/components/home/DeckListSkeleton";
-import { StatsDashboard } from "@/components/home/StatsDashboard";
-import { CARD_STATUS, ROUTES } from "@/constants/AppConstants";
-import { Colors } from "@/constants/Colors";
-import { useTheme } from "@/hooks/useThemeColor";
-import { useStore } from "@/store/useStore";
+import { CreateDeckSheet } from "@components/home/CreateDeckSheet";
+import { DeckListItem } from "@components/home/DeckListItem";
+import { DeckListSkeleton } from "@components/home/DeckListSkeleton";
+import { StatsDashboard } from "@components/home/StatsDashboard";
+import { CARD_STATUS, ROUTES } from "@constants/AppConstants";
+import { Colors } from "@constants/Colors";
+import { useTheme } from "@hooks/useThemeColor";
+import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -87,14 +87,7 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Image
-              source={require("../../assets/images/icon.png")}
-              style={{ width: 40, height: 40, borderRadius: 10 }}
-              resizeMode="contain"
-            />
-            <Text
-              style={[styles.headerTitle, { marginLeft: 12, fontSize: 28 }]}
-            >
+            <Text style={[styles.headerTitle, { marginLeft: 8, fontSize: 28 }]}>
               <Text style={{ color: (colors as any).brandPurple }}>
                 {t("home.brandPart1")}
               </Text>
