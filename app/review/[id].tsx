@@ -6,23 +6,23 @@ import { AnimatedBottomSheet } from "@components/ui/AnimatedBottomSheet";
 import { BottomSheetHeader } from "@components/ui/BottomSheetHeader";
 import { SRSRating } from "@constants/AppConstants";
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useReviewSession } from "@hooks/useReviewSession";
 import { useTheme } from "@hooks/useThemeColor";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
 import React, { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Alert,
-  Animated,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Animated,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
