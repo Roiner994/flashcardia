@@ -171,7 +171,8 @@
       "tryAgain": "Try Again",
       "nextCard": "Next Card",
       "feedbackExcellent": "Great job!",
-      "feedbackImprove": "Try to be more descriptive."
+      "feedbackImprove": "Try to be more descriptive.",
+      "improved": "Better way to say it"
     }
   },
   "review": {

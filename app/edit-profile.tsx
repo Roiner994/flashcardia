@@ -1,7 +1,8 @@
 import { CustomAlert } from "@components/modals/CustomAlert";
-import { useTheme } from "@hooks/useThemeColor";
-import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@hooks/useThemeColor";
+import { supabase } from "@lib/supabase";
+import { useStore } from "@store/useStore";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -82,13 +83,39 @@ export default function EditProfileScreen() {
     }
   };
 
+
   const handleSave = async () => {
     setLoading(true);
     try {
+      let finalAvatarUrl = avatarUrl;
+
+      // Check if the avatar is a local file (upload needed)
+      if (avatarUrl && !avatarUrl.startsWith("http")) {
+        const fileExt = avatarUrl.split(".").pop()?.toLowerCase() ?? "jpg";
+        const fileName = `${session?.user?.id}/${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        // Use fetch to get the blob/buffer from the local URI
+        const response = await fetch(avatarUrl);
+        const arrayBuffer = await response.arrayBuffer();
+
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, arrayBuffer, {
+            contentType: `image/${fileExt}`,
+            upsert: true,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        finalAvatarUrl = data.publicUrl;
+      }
+
       // Update profile
       await updateProfile({
         full_name: name,
-        avatar_url: avatarUrl,
+        avatar_url: finalAvatarUrl,
       });
 
       showAlert(

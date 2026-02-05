@@ -1,7 +1,7 @@
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { supabase } from "@lib/supabase";
-import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -78,7 +78,11 @@ export default function LoginScreen() {
 
           <View style={styles.authHeader}>
             <View style={styles.logoPill}>
-              <Ionicons name="sparkles" size={32} color={colors.primary} />
+              <Image
+                source={require("@assets/images/only-icon.png")}
+                style={{ width: 85, height: 85 }}
+                contentFit="contain"
+              />
             </View>
             <Text style={styles.authTitle}>
               {isLogin ? t("auth.welcomeBack") : t("auth.join")}
@@ -216,7 +220,7 @@ const createStyles = (colors: typeof Colors.light) =>
       width: 64,
       height: 64,
       borderRadius: 24,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.brandPurple,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 20,

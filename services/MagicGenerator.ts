@@ -6,7 +6,7 @@ export interface MagicCardResult {
   examples: string[];
 }
 
-const CUSTOM_API_URL = 'https://flashcard-api-three.vercel.app/api/generate';
+const CUSTOM_API_URL = `${process.env.EXPO_PUBLIC_FLASHCARD_API_URL}/api/generate`;
 
 export const MagicGenerator = {
   async generateCard(word: string): Promise<MagicCardResult> {
