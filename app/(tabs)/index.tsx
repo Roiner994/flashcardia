@@ -2,7 +2,6 @@ import { CreateDeckSheet } from "@components/home/CreateDeckSheet";
 import { DeckListItem } from "@components/home/DeckListItem";
 import { DeckListSkeleton } from "@components/home/DeckListSkeleton";
 import { StatsDashboard } from "@components/home/StatsDashboard";
-import { LogoWithBackground } from "@components/LogoWithBackground";
 import { CARD_STATUS, ROUTES } from "@constants/AppConstants";
 import { Colors } from "@constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -88,7 +87,14 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <LogoWithBackground width={35} height={35} />
+            <Image
+              source={require("@assets/images/only-icon.png")}
+              style={{
+                width: 30,
+                height: 30,
+                }}
+                resizeMode="contain"
+            />
             <Text style={[styles.headerTitle]}>
               <Text style={{ color: (colors as any).brandPurple }}>
                 {t("home.brandPart1")}
@@ -249,7 +255,7 @@ const createStyles = (
       fontSize: 28,
       fontWeight: "800",
       color: colors.text,
-      marginLeft: 4,
+      marginLeft: 8,
     },
     authButton: {
       padding: 8,

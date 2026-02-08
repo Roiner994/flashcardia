@@ -23,8 +23,8 @@ export function LogoWithBackground({
       style={[
         styles.logoPill,
         {
-          width,
-          height,
+          width: width*1.33,
+          height: height*1.33,
           borderRadius: width * 0.375, // Maintain the existing ratio (24/64 ≈ 0.375)
         },
         style,
@@ -33,8 +33,8 @@ export function LogoWithBackground({
       <Image
         source={require("@assets/images/only-icon.png")}
         style={{
-          width: width * 1.33,
-          height: height * 1.33,
+          width: width,
+          height: height,
         }}
         contentFit="contain"
       />

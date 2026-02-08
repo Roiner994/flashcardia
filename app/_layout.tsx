@@ -1,8 +1,8 @@
 import "@i18n";
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider,
 } from "@react-navigation/native";
 import { SplashScreen, Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -11,7 +11,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import "../global.css";
 
-import CustomSplashScreen from "@components/SplashScreen";
+
 import { useStore } from "@store/useStore";
 import { useColorScheme } from "react-native";
 
@@ -34,15 +34,11 @@ export default function RootLayout() {
       try {
         await checkSession();
         await loadSettings();
-
-        // Artificial delay: Ensure custom splash is visible for at least 2 seconds
-        await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch (e) {
         console.warn(e);
       } finally {
-        // Hiding the native splash screen here will verify that the custom splash component is rendered
-        await SplashScreen.hideAsync();
         setIsAppReady(true);
+        await SplashScreen.hideAsync();
       }
     }
 
@@ -62,7 +58,7 @@ export default function RootLayout() {
   }, [session, segments, router]);
 
   if (!isAppReady) {
-    return <CustomSplashScreen />;
+    return null;
   }
 
   return (
