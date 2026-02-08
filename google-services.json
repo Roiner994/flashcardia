@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "721182632268",
+    "project_id": "flashcardia-486501",
+    "storage_bucket": "flashcardia-486501.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721182632268:android:3b6d06740951c5e16cc7e9",
+        "android_client_info": {
+          "package_name": "com.roiner.flashcardia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721182632268-6allpkdoj8k5qsacmjo93gjsvnlpcpc8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.roiner.flashcardia",
+            "certificate_hash": "aa75a4de5f8f704dcc7572de08934021eb67354f"
+          }
+        },
+        {
+          "client_id": "721182632268-fd7l1bdijpgnsdr8e916a1fcnllf7dve.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.roiner.flashcardia",
+            "certificate_hash": "3690ca882539cc950e39d370648b502fd608a8c1"
+          }
+        },
+        {
+          "client_id": "721182632268-41uhb3lj14scl6i0de3ickrdp3as7fuh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxIpl_Mh9sOK4CbbYJpl7Lpm5AlH1UFls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "721182632268-41uhb3lj14scl6i0de3ickrdp3as7fuh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "721182632268-5jbumntlanoqemr9ft2qf2undj7c1tor.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.roiner.flashcardia"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

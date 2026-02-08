@@ -1,10 +1,15 @@
+import { LogoWithBackground } from "@components/LogoWithBackground";
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { supabase } from "@lib/supabase";
-import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -22,6 +27,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        "721182632268-41uhb3lj14scl6i0de3ickrdp3as7fuh.apps.googleusercontent.com",
+      iosClientId:
+        "721182632268-5jbumntlanoqemr9ft2qf2undj7c1tor.apps.googleusercontent.com",
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+    });
+  }, []);
+
+
   const router = useRouter();
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -59,6 +77,54 @@ export default function LoginScreen() {
     }
   }
 
+  async function handleGoogleLogin() {
+    setLoading(true);
+    try {
+      await GoogleSignin.hasPlayServices();
+      console.log('hasPlayServices')
+      const userInfo = await GoogleSignin.signIn();
+      console.log('userInfo', userInfo)
+      if (userInfo.data?.idToken) {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: "google",
+          token: userInfo.data.idToken,
+        });
+
+        if (error) throw error;
+      } else {
+        throw new Error("no ID token present!");
+      }
+    } catch (error: any) {
+      console.log('error', error)
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.SIGN_IN_CANCELLED:
+            // user cancelled the login flow
+            break;
+          case statusCodes.IN_PROGRESS:
+            // operation (e.g. sign in) is in progress already
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            // play services not available or outdated
+            Alert.alert(t("common.error"), "Play services not available");
+            break;
+          default:
+            // some other error happened
+            Alert.alert(t("common.error"), error.message);
+        }
+      } else {
+        // an error that's not related to google sign in occurred
+        Alert.alert(t("common.error"), error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const googleLogout = async () => {
+    await GoogleSignin.signOut();
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -77,9 +143,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.authHeader}>
-            <View style={styles.logoPill}>
-              <Ionicons name="sparkles" size={32} color={colors.primary} />
-            </View>
+            <LogoWithBackground style={{ marginBottom: 20 }} />
             <Text style={styles.authTitle}>
               {isLogin ? t("auth.welcomeBack") : t("auth.join")}
             </Text>
@@ -89,11 +153,14 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.authForm}>
-            <TouchableOpacity style={styles.googleButton}>
-              <Image
-                source="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.png/1200px-Google_%22G%22_logo.png"
-                style={styles.googleIcon}
-                contentFit="contain"
+            <TouchableOpacity
+              style={styles.googleButton}
+              onPress={handleGoogleLogin}
+            >
+              <Ionicons
+                name="logo-google"
+                size={20}
+                color={colors.textSecondary}
               />
               <Text style={styles.googleButtonText}>
                 {t("auth.continueGoogle")}
@@ -212,20 +279,7 @@ const createStyles = (colors: typeof Colors.light) =>
       alignItems: "center",
       marginBottom: 40,
     },
-    logoPill: {
-      width: 64,
-      height: 64,
-      borderRadius: 24,
-      backgroundColor: colors.surface,
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: 20,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 12,
-      elevation: 5,
-    },
+
     authTitle: {
       fontSize: 28,
       fontWeight: "800",
@@ -292,6 +346,7 @@ const createStyles = (colors: typeof Colors.light) =>
       fontSize: 16,
       fontWeight: "600",
       color: colors.text,
+      marginLeft: 12,
     },
     dividerRow: {
       flexDirection: "row",

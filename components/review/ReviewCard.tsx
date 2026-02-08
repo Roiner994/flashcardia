@@ -1,17 +1,17 @@
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { Card } from "@types";
-import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Animated,
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -120,11 +120,6 @@ const createStyles = (colors: typeof Colors.light) =>
       height: 480,
       borderRadius: 40,
       backfaceVisibility: "hidden",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 12,
-      elevation: 5,
     },
     cardFront: {
       backgroundColor: colors.surface,

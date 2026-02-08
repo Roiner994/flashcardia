@@ -4,9 +4,9 @@ import { DeckListSkeleton } from "@components/home/DeckListSkeleton";
 import { StatsDashboard } from "@components/home/StatsDashboard";
 import { CARD_STATUS, ROUTES } from "@constants/AppConstants";
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -87,7 +87,15 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Text style={[styles.headerTitle, { marginLeft: 8, fontSize: 28 }]}>
+            {/* <Image
+              source={require("@assets/images/only-icon.png")}
+              style={{
+                width: 30,
+                height: 30,
+                }}
+                resizeMode="contain"
+            /> */}
+            <Text style={[styles.headerTitle]}>
               <Text style={{ color: (colors as any).brandPurple }}>
                 {t("home.brandPart1")}
               </Text>
@@ -244,7 +252,7 @@ const createStyles = (
       gap: 12,
     },
     headerTitle: {
-      fontSize: 24,
+      fontSize: 28,
       fontWeight: "800",
       color: colors.text,
       marginLeft: 8,
@@ -301,4 +309,8 @@ const createStyles = (
       shadowRadius: 8,
       elevation: 8,
     },
+    image: {
+      width: 60,
+      height: 60,
+    }
   });

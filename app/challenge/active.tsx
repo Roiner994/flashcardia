@@ -1,10 +1,10 @@
 import { CustomAlert } from "@components/modals/CustomAlert";
 
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useSpeechRecognition } from "@hooks/useSpeechRecognition";
 import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
-import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,24 +23,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Mock AI Service until Phase 4
-const mockGradeSentence = async (sentence: string, word: string) => {
-  return new Promise<{ score: number; feedbackKey: string }>((resolve) => {
-    setTimeout(() => {
-      const length = sentence.length;
-      const score =
-        length > 20 ? Math.min(10, 5 + Math.random() * 5) : Math.random() * 5;
-      resolve({
-        score: Number(score.toFixed(1)),
-        feedbackKey:
-          score > 7
-            ? "challenge.active.feedbackExcellent"
-            : "challenge.active.feedbackImprove",
-      });
-    }, 1500);
-  });
-};
 
+import { ChallengeResult, ChallengeService } from "@services/ChallengeService";
 const PASSING_SCORE = 5.5;
 
 export default function ActiveChallengeScreen() {
@@ -62,10 +46,8 @@ export default function ActiveChallengeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<{
-    score: number;
-    feedbackKey: string;
-  } | null>(null);
+  const [result, setResult] = useState<ChallengeResult | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [sessionScore, setSessionScore] = useState(0);
   const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
@@ -123,9 +105,19 @@ export default function ActiveChallengeScreen() {
     if (!userInput.trim()) return;
 
     setIsSubmitting(true);
-    const grading = await mockGradeSentence(userInput, currentCard.front_word);
-    setResult(grading);
-    setIsSubmitting(false);
+    try {
+      const grading = await ChallengeService.evaluateSentence(
+        currentCard.front_word,
+        userInput
+      );
+      setResult(grading);
+      setShowFeedback(difficulty === "easy");
+    } catch (error) {
+       // Ideally show an error toast here
+       console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleNext = () => {
@@ -144,6 +136,7 @@ export default function ActiveChallengeScreen() {
       setCurrentIndex((prev) => prev + 1);
       setUserInput("");
       setResult(null);
+      setShowFeedback(false);
     } else {
       // Finish Session
       setFinalScore(newTotal / queue.length);
@@ -254,38 +247,70 @@ export default function ActiveChallengeScreen() {
                   ]}
                 >
                   <View style={styles.scoreRow}>
-                    <Text
-                      style={[
-                        styles.scoreLabel,
-                        {
-                          color:
-                            (result?.score ?? 0) >= PASSING_SCORE
-                              ? colors.success
-                              : colors.error,
-                        },
-                      ]}
+                    <View style={styles.scoreHeaderLeft}>
+                      <Ionicons
+                        name={
+                          (result?.score ?? 0) >= PASSING_SCORE
+                            ? "checkmark-circle"
+                            : "alert-circle"
+                        }
+                        size={28}
+                        color={
+                          (result?.score ?? 0) >= PASSING_SCORE
+                            ? colors.success
+                            : colors.error
+                        }
+                      />
+                      <Text
+                        style={[
+                          styles.scoreLabel,
+                          {
+                            color:
+                              (result?.score ?? 0) >= PASSING_SCORE
+                                ? colors.success
+                                : colors.error,
+                          },
+                        ]}
+                      >
+                       {t("challenge.active.scoreLabel", {
+                          score: result.score,
+                        })}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setShowFeedback(!showFeedback)}
+                      style={styles.clueButton}
+                      activeOpacity={0.7}
                     >
-                      {t("challenge.active.scoreLabel", {
-                        score: result.score,
-                      })}
-                    </Text>
-                    <Ionicons
-                      name={
-                        (result?.score ?? 0) >= PASSING_SCORE
-                          ? "checkmark-circle"
-                          : "warning"
-                      }
-                      size={24}
-                      color={
-                        (result?.score ?? 0) >= PASSING_SCORE
-                          ? colors.success
-                          : colors.error
-                      }
-                    />
+                      <Ionicons
+                        name={showFeedback ? "bulb" : "bulb-outline"}
+                        size={24}
+                        color="#FFC107"
+                      />
+                    </TouchableOpacity>
                   </View>
-                  <Text style={styles.feedbackText}>
-                    {t(result.feedbackKey)}
-                  </Text>
+                  
+                  {showFeedback && (
+                    <View style={styles.feedbackContainer}>
+                      <View style={styles.separator} />
+                      <Text style={styles.feedbackText}>
+                        {result.feedback}
+                      </Text>
+                      {result.improved_phrase && (
+                        <View style={styles.improvedContainer}>
+                          <View style={styles.improvedLabelRow}>
+                             <Ionicons name="sparkles" size={16} color={colors.primary} />
+                             <Text style={styles.improvedLabel}>
+                               {t('challenge.active.improved')}
+                             </Text>
+                          </View>
+                          <Text style={styles.improvedText}>
+                            {result.improved_phrase}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
                 </View>
               )}
             </View>
@@ -454,25 +479,78 @@ const createStyles = (colors: typeof Colors.light) =>
       opacity: 0.7,
     },
     resultCard: {
-      padding: 16,
-      borderRadius: 12,
+      padding: 20,
+      borderRadius: 16,
       backgroundColor: colors.surface,
-      borderWidth: 2,
+      borderWidth: 1, // Reduced border width to look cleaner
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
     },
     scoreRow: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 8,
+      width: "100%",
+    },
+    scoreHeaderLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
     },
     scoreLabel: {
-      fontSize: 20,
-      fontWeight: "bold",
+      fontSize: 24,
+      fontWeight: "800",
+    },
+    clueButton: {
+      padding: 10,
+      borderRadius: 12,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    feedbackContainer: {
+      marginTop: 16,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginBottom: 16,
     },
     feedbackText: {
       fontSize: 16,
       color: colors.text,
-      lineHeight: 22,
+      lineHeight: 24,
+    },
+    improvedContainer: {
+      marginTop: 20,
+      backgroundColor: colors.background,
+      borderRadius: 12,
+      padding: 16,
+    },
+    improvedLabelRow: {
+       flexDirection: 'row',
+       alignItems: 'center',
+       gap: 8,
+       marginBottom: 8,
+    },
+    improvedLabel: {
+      fontSize: 14,
+      fontWeight: "700",
+      color: colors.text,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    improvedText: {
+      fontSize: 16,
+      color: colors.text,
+      lineHeight: 24,
+      fontStyle: "italic",
     },
     footer: {
       padding: 20,
