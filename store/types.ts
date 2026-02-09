@@ -1,7 +1,13 @@
 import { Session } from '@supabase/supabase-js';
-import { Card, Deck } from '../types';
+import { Card, Deck, Profile } from '../types';
 
 export { Card, Deck };
+
+export interface StreakSlice {
+    profile: Profile | null;
+    loadProfile: (userId: string) => Promise<void>;
+    checkStreak: (userId: string) => Promise<{ celebration: boolean; shieldUsed: boolean; current_streak: number } | null>;
+}
 
 export interface AuthSlice {
     session: Session | null;
@@ -40,4 +46,4 @@ export interface ReviewSlice {
     updateCardSRS: (id: string, rating: 'again' | 'hard' | 'good' | 'easy') => Promise<void>;
 }
 
-export type StoreState = AuthSlice & SettingsSlice & DecksSlice & CardsSlice & ReviewSlice;
+export type StoreState = AuthSlice & SettingsSlice & DecksSlice & CardsSlice & ReviewSlice & StreakSlice;

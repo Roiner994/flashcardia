@@ -2,6 +2,8 @@ import { CreateDeckSheet } from "@components/home/CreateDeckSheet";
 import { DeckListItem } from "@components/home/DeckListItem";
 import { DeckListSkeleton } from "@components/home/DeckListSkeleton";
 import { StatsDashboard } from "@components/home/StatsDashboard";
+import { StreakHeader } from "@components/home/StreakHeader";
+import { StreakCelebration } from "@components/modals/StreakCelebration";
 import { CARD_STATUS, ROUTES } from "@constants/AppConstants";
 import { Colors } from "@constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -42,7 +44,17 @@ export default function HomeScreen() {
     dailyNewLimit,
     session,
     createDeck,
+    profile,
+    loadProfile, // Add loadProfile
   } = useStore();
+
+  const [celebration, setCelebration] = useState<{ visible: boolean; streak: number; shieldUsed?: boolean }>({ visible: false, streak: 0 });
+
+  useEffect(() => {
+    if (session?.user?.id) {
+        loadProfile(session.user.id);
+    }
+  }, [session]);
 
   const handleCreateDeck = async (title: string) => {
     await createDeck(title);
@@ -105,26 +117,6 @@ export default function HomeScreen() {
             </Text>
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity
-              onPress={() => {
-                if (!session) router.push(ROUTES.AUTH_LOGIN as any);
-              }}
-              style={[
-                styles.authButton,
-                {
-                  backgroundColor: session
-                    ? colors.success + "20"
-                    : colors.surface,
-                },
-              ]}
-            >
-              <Ionicons
-                name={session ? "cloud-done" : "cloud-offline-outline"}
-                size={20}
-                color={session ? colors.success : colors.icon}
-              />
-            </TouchableOpacity>
-
             <View style={styles.avatar}>
               {session?.user?.user_metadata?.avatar_url ? (
                 <Image
@@ -148,6 +140,14 @@ export default function HomeScreen() {
                 </View>
               )}
             </View>
+
+            {/* Streak Indicator */}
+            {profile && (
+              <StreakHeader 
+                streak={profile.current_streak} 
+                shields={profile.streak_shields_count} 
+              />
+            )}
           </View>
         </View>
 
@@ -217,6 +217,12 @@ export default function HomeScreen() {
         visible={isBottomSheetVisible}
         onClose={() => setBottomSheetVisible(false)}
         onCreate={handleCreateDeck}
+      />
+      <StreakCelebration 
+        visible={celebration.visible} 
+        streak={celebration.streak}
+        shieldUsed={celebration.shieldUsed} 
+        onClose={() => setCelebration({ ...celebration, visible: false })}
       />
     </SafeAreaView>
   );
@@ -312,5 +318,5 @@ const createStyles = (
     image: {
       width: 60,
       height: 60,
-    }
+    },
   });

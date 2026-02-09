@@ -1,4 +1,5 @@
 import { CustomAlert } from "@components/modals/CustomAlert";
+import { StreakCelebration } from "@components/modals/StreakCelebration";
 import { ReviewCard } from "@components/review/ReviewCard";
 import { ReviewControls } from "@components/review/ReviewControls";
 import { ReviewHeader } from "@components/review/ReviewHeader";
@@ -15,12 +16,12 @@ import * as Speech from "expo-speech";
 import React, { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Alert,
-    Animated,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -45,6 +46,7 @@ export default function ReviewScreen() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [celebration, setCelebration] = useState<{ visible: boolean; streak: number; shieldUsed?: boolean }>({ visible: false, streak: 0 });
 
   // Animation
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -90,6 +92,13 @@ export default function ReviewScreen() {
     if (result && !result.isComplete) {
       resetFlip();
     } else if (result && result.isComplete) {
+      if (result.celebration) {
+          setCelebration({ 
+              visible: false, // Don't show yet, wait for success modal close
+              streak: result.celebration.current_streak, 
+              shieldUsed: result.celebration.shieldUsed 
+          });
+      }
       setSuccessModalVisible(true);
     }
   };
@@ -165,7 +174,20 @@ export default function ReviewScreen() {
         message={t("review.sessionCompleteMsg")}
         onClose={() => {
           setSuccessModalVisible(false);
-          router.back();
+          if (celebration.streak > 0) {
+             setCelebration(prev => ({ ...prev, visible: true }));
+          } else {
+             router.back();
+          }
+        }}
+      />
+      <StreakCelebration 
+        visible={celebration.visible} 
+        streak={celebration.streak}
+        shieldUsed={celebration.shieldUsed} 
+        onClose={() => {
+            setCelebration(prev => ({ ...prev, visible: false }));
+            router.back();
         }}
       />
       <ReviewHeader

@@ -4,6 +4,7 @@ import { createCardsSlice } from './slices/createCardsSlice';
 import { createDecksSlice } from './slices/createDecksSlice';
 import { createReviewSlice } from './slices/createReviewSlice';
 import { createSettingsSlice } from './slices/createSettingsSlice';
+import { createStreakSlice } from './slices/createStreakSlice';
 import { StoreState } from './types';
 
 // Export StoreState so types are available to consumers
@@ -15,4 +16,5 @@ export const useStore = create<StoreState>((...a) => ({
   ...createDecksSlice(...a),
   ...createCardsSlice(...a),
   ...createReviewSlice(...a),
+  ...createStreakSlice(...a),
 }));

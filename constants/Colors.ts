@@ -27,6 +27,7 @@ export const Colors = {
         tabIconSelected: tintColorLight,
         brandPurple,
         brandCyan,
+        streak: '#f97316',
         white: '#ffffff',
     },
     dark: {
@@ -45,6 +46,7 @@ export const Colors = {
         tabIconSelected: tintColorDark,
         brandPurple,
         brandCyan,
+        streak: '#f97316',
         white: '#ffffff',
     },
 };

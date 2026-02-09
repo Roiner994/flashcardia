@@ -1,5 +1,6 @@
 import { CustomAlert } from "@components/modals/CustomAlert";
 
+import { StreakCelebration } from "@components/modals/StreakCelebration";
 import { Colors } from "@constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useSpeechRecognition } from "@hooks/useSpeechRecognition";
@@ -9,17 +10,17 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -39,7 +40,7 @@ export default function ActiveChallengeScreen() {
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const { allCards } = useStore();
+  const { allCards, checkStreak, session } = useStore();
 
   // Game State
   const [queue, setQueue] = useState<any[]>([]);
@@ -51,6 +52,7 @@ export default function ActiveChallengeScreen() {
   const [sessionScore, setSessionScore] = useState(0);
   const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
+  const [celebration, setCelebration] = useState<{ visible: boolean; streak: number; shieldUsed?: boolean }>({ visible: false, streak: 0 });
 
   // Speech Recognition
   const {
@@ -140,6 +142,20 @@ export default function ActiveChallengeScreen() {
     } else {
       // Finish Session
       setFinalScore(newTotal / queue.length);
+      
+      // Check Streak
+      if (session?.user?.id) {
+         checkStreak(session.user.id).then(result => {
+             if (result && result.celebration) {
+                 setCelebration({
+                     visible: false,
+                     streak: result.current_streak,
+                     shieldUsed: result.shieldUsed
+                 });
+             }
+         });
+      }
+
       setIsCompleteModalVisible(true);
     }
   };
@@ -170,7 +186,21 @@ export default function ActiveChallengeScreen() {
         })}
         onClose={() => {
           setIsCompleteModalVisible(false);
-          router.dismissAll();
+          if (celebration.streak > 0) {
+              setCelebration(prev => ({ ...prev, visible: true }));
+          } else {
+              router.dismissAll();
+          }
+        }}
+      />
+      
+      <StreakCelebration 
+        visible={celebration.visible} 
+        streak={celebration.streak}
+        shieldUsed={celebration.shieldUsed} 
+        onClose={() => {
+            setCelebration(prev => ({ ...prev, visible: false }));
+            router.dismissAll();
         }}
       />
 

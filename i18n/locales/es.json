@@ -176,5 +176,12 @@
     "decks": "Mazos",
     "challenge": "Reto",
     "settings": "Ajustes"
+  },
+  "streak": {
+    "extendedTitle": "¡Racha Extendida!",
+    "savedTitle": "¡Racha Salvada!",
+    "extendedSubtitle": "¡Buen trabajo! ¡Estás en racha!",
+    "savedSubtitle": "Usaste un escudo para mantener tu progreso.",
+    "continueButton": "Continuar"
   }
 }
