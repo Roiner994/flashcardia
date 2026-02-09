@@ -5,13 +5,13 @@ import { Card } from "@types";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Animated,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -80,6 +80,21 @@ export const ReviewCard = ({
               </View>
               <ScrollView contentContainerStyle={styles.cardBackScroll}>
                 <Text style={styles.definitionText}>{card.definition}</Text>
+                
+                {/* Phonetic & Audio */}
+                <TouchableOpacity 
+                    style={styles.phoneticContainer} 
+                    onPress={(e) => {
+                        e.stopPropagation();
+                        onSpeak();
+                    }}
+                >
+                    <Ionicons name="volume-high" size={24} color={colors.primary} />
+                    {card.phonetic && (
+                        <Text style={styles.phoneticText}>/{card.phonetic}/</Text>
+                    )}
+                </TouchableOpacity>
+
                 <View style={styles.divider} />
                 {card.examples && card.examples.length > 0 && (
                   <View style={styles.exampleContainer}>
@@ -88,19 +103,6 @@ export const ReviewCard = ({
                 )}
               </ScrollView>
             </View>
-
-            <TouchableOpacity
-              onPress={(e) => {
-                e.stopPropagation();
-                onSpeak();
-              }}
-              style={styles.audioButton}
-            >
-              <Ionicons name="volume-high" size={24} color={colors.primary} />
-              <Text style={styles.audioButtonText}>
-                {t("review.playAudio")}
-              </Text>
-            </TouchableOpacity>
           </Animated.View>
         </View>
       </TouchableOpacity>
@@ -237,5 +239,23 @@ const createStyles = (colors: typeof Colors.light) =>
       fontWeight: "bold",
       marginLeft: 8,
       fontSize: 16,
+    },
+    phoneticContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 8,
+        borderRadius: 8,
+        backgroundColor: colors.background,
+        marginBottom: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    phoneticText: {
+        fontSize: 18,
+        color: colors.textSecondary,
+        marginLeft: 8,
+        fontStyle: "italic",
+        fontFamily: "System",
     },
   });
