@@ -1,4 +1,6 @@
 import { CustomAlert } from "@components/modals/CustomAlert";
+import { Button } from "@components/ui/Button";
+import { Input } from "@components/ui/Input";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { supabase } from "@lib/supabase";
@@ -9,15 +11,13 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -161,15 +161,6 @@ export default function EditProfileScreen() {
       borderRadius: 20,
       marginLeft: -12,
     },
-    cancelButton: {
-      fontSize: 16,
-      color: colors.textSecondary,
-    },
-    saveButton: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: colors.primary,
-    },
     content: {
       flex: 1,
     },
@@ -205,67 +196,11 @@ export default function EditProfileScreen() {
       paddingHorizontal: 24,
       marginBottom: 24,
     },
-    label: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: colors.textSecondary,
-      marginBottom: 8,
-      textTransform: "uppercase",
-    },
-    input: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      fontSize: 16,
-      color: colors.text,
-      marginBottom: 16,
-    },
-    inputDisabled: {
-      backgroundColor: colors.background,
-      color: colors.textSecondary,
-    },
-    helperText: {
-      fontSize: 12,
-      color: colors.textSecondary,
-      marginTop: -12,
-      marginBottom: 16,
-      marginLeft: 4,
-    },
     actions: {
       flexDirection: "row",
       justifyContent: "space-between",
       marginTop: 24,
-    },
-    actionButtonOutline: {
-      flex: 1,
-      paddingVertical: 14,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      alignItems: "center",
-      marginRight: 12,
-      justifyContent: "center",
-    },
-    actionButtonOutlineText: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: colors.text,
-    },
-    actionButtonFilled: {
-      flex: 2,
-      paddingVertical: 14,
-      borderRadius: 12,
-      backgroundColor: colors.primary,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    actionButtonFilledText: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: "white",
+      gap: 12,
     },
   });
 
@@ -314,47 +249,35 @@ export default function EditProfileScreen() {
           </View>
 
           <View style={styles.formSection}>
-            <Text style={styles.label}>{t("editProfile.emailLabel")}</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={session?.user?.email}
-              editable={false}
-              placeholder={t("editProfile.emailPlaceholder")}
-              placeholderTextColor={colors.textSecondary}
+            <Input
+                label={t("editProfile.emailLabel")}
+                value={session?.user?.email}
+                editable={false}
+                placeholder={t("editProfile.emailPlaceholder")}
             />
 
-            <Text style={styles.label}>{t("editProfile.fullNameLabel")}</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder={t("editProfile.namePlaceholder")}
-              placeholderTextColor={colors.textSecondary}
-              autoCapitalize="words"
+            <Input
+                label={t("editProfile.fullNameLabel")}
+                value={name}
+                onChangeText={setName}
+                placeholder={t("editProfile.namePlaceholder")}
+                autoCapitalize="words"
             />
 
             <View style={styles.actions}>
-              <TouchableOpacity
-                style={styles.actionButtonOutline}
-                onPress={() => router.back()}
-              >
-                <Text style={styles.actionButtonOutlineText}>
-                  {t("common.cancel")}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.actionButtonFilled}
-                onPress={handleSave}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text style={styles.actionButtonFilledText}>
-                    {t("editProfile.saveChanges")}
-                  </Text>
-                )}
-              </TouchableOpacity>
+              <Button 
+                variant="outline" 
+                title={t("common.cancel")} 
+                onPress={() => router.back()} 
+                style={{ flex: 1 }}
+              />
+              <Button 
+                variant="primary" 
+                title={t("editProfile.saveChanges")} 
+                onPress={handleSave} 
+                loading={loading}
+                style={{ flex: 2 }}
+              />
             </View>
           </View>
         </ScrollView>

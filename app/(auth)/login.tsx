@@ -1,4 +1,6 @@
 import { LogoWithBackground } from "@components/LogoWithBackground";
+import { Button } from "@components/ui/Button";
+import { Input } from "@components/ui/Input";
 import { Colors } from "@constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
@@ -12,14 +14,12 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -153,19 +153,13 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.authForm}>
-            <TouchableOpacity
-              style={styles.googleButton}
+            <Button
+              variant="google"
+              title={t("auth.continueGoogle")}
+              icon="logo-google"
               onPress={handleGoogleLogin}
-            >
-              <Ionicons
-                name="logo-google"
-                size={20}
-                color={colors.textSecondary}
-              />
-              <Text style={styles.googleButtonText}>
-                {t("auth.continueGoogle")}
-              </Text>
-            </TouchableOpacity>
+              style={{ marginBottom: 24 }}
+            />
 
             <View style={styles.dividerRow}>
               <View style={styles.smallDivider} />
@@ -173,60 +167,31 @@ export default function LoginScreen() {
               <View style={styles.smallDivider} />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>{t("auth.email")}</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons
-                  name="mail-outline"
-                  size={20}
-                  color={colors.textSecondary}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="email@example.com"
-                  placeholderTextColor={colors.textSecondary}
-                  value={email}
-                  onChangeText={setEmail}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-              </View>
-            </View>
+            <Input
+              label={t("auth.email")}
+              placeholder="email@example.com"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              leftIcon="mail-outline"
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>{t("auth.password")}</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color={colors.textSecondary}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="••••••••"
-                  placeholderTextColor={colors.textSecondary}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
-              </View>
-            </View>
+            <Input
+              label={t("auth.password")}
+              placeholder="••••••••"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              leftIcon="lock-closed-outline"
+            />
 
-            <TouchableOpacity
-              style={[styles.authButton, loading && styles.buttonDisabled]}
+            <Button
+              title={isLogin ? t("auth.signIn") : t("auth.createAccount")}
               onPress={handleAuth}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text style={styles.authButtonText}>
-                  {isLogin ? t("auth.signIn") : t("auth.createAccount")}
-                </Text>
-              )}
-            </TouchableOpacity>
+              loading={loading}
+              style={{ marginTop: 12 }}
+            />
 
             <TouchableOpacity
               style={styles.toggleButton}
@@ -240,14 +205,13 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.guestButton}
+            <Button
+              variant="ghost"
+              title={t("auth.continueGuest")}
               onPress={() => router.replace("/(tabs)")}
-            >
-              <Text style={styles.guestButtonText}>
-                {t("auth.continueGuest")}
-              </Text>
-            </TouchableOpacity>
+              style={{ marginTop: 32 }}
+              textStyle={styles.guestButtonText}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -279,7 +243,6 @@ const createStyles = (colors: typeof Colors.light) =>
       alignItems: "center",
       marginBottom: 40,
     },
-
     authTitle: {
       fontSize: 28,
       fontWeight: "800",
@@ -296,57 +259,6 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     authForm: {
       width: "100%",
-    },
-    inputGroup: {
-      marginBottom: 20,
-    },
-    inputLabel: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: colors.textSecondary,
-      marginBottom: 8,
-      marginLeft: 4,
-    },
-    inputWrapper: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 16,
-      paddingHorizontal: 16,
-      height: 56,
-    },
-    inputIcon: {
-      marginRight: 12,
-    },
-    input: {
-      flex: 1,
-      fontSize: 16,
-      color: colors.text,
-      fontWeight: "500",
-    },
-    googleButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: colors.surface,
-      height: 56,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginBottom: 24,
-    },
-    googleIcon: {
-      width: 20,
-      height: 20,
-      marginRight: 12,
-    },
-    googleButtonText: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: colors.text,
-      marginLeft: 12,
     },
     dividerRow: {
       flexDirection: "row",
@@ -365,27 +277,6 @@ const createStyles = (colors: typeof Colors.light) =>
       marginHorizontal: 12,
       textTransform: "uppercase",
     },
-    authButton: {
-      backgroundColor: colors.primary,
-      height: 56,
-      borderRadius: 16,
-      alignItems: "center",
-      justifyContent: "center",
-      marginTop: 12,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-      elevation: 4,
-    },
-    authButtonText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "700",
-    },
-    buttonDisabled: {
-      opacity: 0.7,
-    },
     toggleButton: {
       marginTop: 24,
       alignItems: "center",
@@ -398,11 +289,6 @@ const createStyles = (colors: typeof Colors.light) =>
     toggleHighlight: {
       color: colors.primary,
       fontWeight: "700",
-    },
-    guestButton: {
-      marginTop: 32,
-      alignItems: "center",
-      padding: 12,
     },
     guestButtonText: {
       fontSize: 14,

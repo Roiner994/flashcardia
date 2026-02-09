@@ -1,7 +1,7 @@
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { Deck } from "@store/types";
-import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -16,7 +16,7 @@ interface DeckListItemProps {
   onPress: (id: string) => void;
 }
 
-export function DeckListItem({
+export const DeckListItem = React.memo(function DeckListItem({
   deck,
   totalCards,
   newCards,
@@ -50,7 +50,7 @@ export function DeckListItem({
       <View style={styles.deckInfo}>
         <Text style={styles.deckTitle}>{deck.title}</Text>
         <Text style={styles.deckSubtitle}>
-          Total: {totalCards} {t("home.cards").toLowerCase()}
+          {t("home.total")}: {totalCards} {t("home.cards").toLowerCase()}
         </Text>
       </View>
 
@@ -67,7 +67,7 @@ export function DeckListItem({
       </View>
     </TouchableOpacity>
   );
-}
+});
 
 const createStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({

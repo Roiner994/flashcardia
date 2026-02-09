@@ -9,12 +9,12 @@ import { Colors } from "@constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FlatList,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -66,32 +66,45 @@ export default function HomeScreen() {
     loadAllCards();
   }, []);
 
-  // Calculate Stats
-  let dueToday = 0;
-  const now = new Date();
+  // Calculate Stats & Deck Metrics
+  const { dueToday, learnedWords, deckStats } = useMemo(() => {
+    let due = 0;
+    let learned = 0;
+    const stats: Record<string, { new: number; learning: number; mastered: number; total: number }> = {};
+    const now = new Date();
 
-  decks.forEach((deck) => {
-    const deckCards = allCards.filter((c) => c.deck_id === deck.id);
+    // Global Stats
+    learned = allCards.filter((c) => c.status !== CARD_STATUS.NEW).length;
 
-    // 1. Due reviews
-    const reviewsDue = deckCards.filter((c) => {
-      if (c.status === CARD_STATUS.NEW) return false;
-      if (!c.next_review_at) return true;
-      return new Date(c.next_review_at) <= now;
-    }).length;
+    // Per-Deck Stats
+    decks.forEach((deck) => {
+      const deckCards = allCards.filter((c) => c.deck_id === deck.id);
+      
+      // Calculate Due
+      const reviewsDue = deckCards.filter((c) => {
+        if (c.status === CARD_STATUS.NEW) return false;
+        if (!c.next_review_at) return true;
+        return new Date(c.next_review_at) <= now;
+      }).length;
 
-    // 2. New cards allowed
-    const limit = deck.daily_new_limit ?? dailyNewLimit;
-    const newAllowed = deckCards
-      .filter((c) => c.status === CARD_STATUS.NEW)
-      .slice(0, limit).length;
+      const limit = deck.daily_new_limit ?? dailyNewLimit;
+      const newAllowed = deckCards
+        .filter((c) => c.status === CARD_STATUS.NEW)
+        .slice(0, limit).length;
+      
+      due += reviewsDue + newAllowed;
 
-    dueToday += reviewsDue + newAllowed;
-  });
+      // Calculate Deck Metrics
+      stats[deck.id] = {
+        new: deckCards.filter((c) => c.status === CARD_STATUS.NEW).length,
+        learning: deckCards.filter((c) => c.status === CARD_STATUS.LEARNING).length,
+        mastered: deckCards.filter((c) => c.status === CARD_STATUS.MASTERED).length,
+        total: deckCards.length,
+      };
+    });
 
-  const learnedWords = allCards.filter(
-    (c) => c.status !== CARD_STATUS.NEW,
-  ).length;
+    return { dueToday: due, learnedWords: learned, deckStats: stats };
+  }, [decks, allCards, dailyNewLimit]);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
@@ -161,26 +174,15 @@ export default function HomeScreen() {
             </>
           }
           renderItem={({ item, index }) => {
-            const deckCards = allCards.filter((c) => c.deck_id === item.id);
-            const newCards = deckCards.filter(
-              (c) => c.status === CARD_STATUS.NEW,
-            ).length;
-            const learningCards = deckCards.filter(
-              (c) => c.status === CARD_STATUS.LEARNING,
-            ).length;
-            const masteredCards = deckCards.filter(
-              (c) => c.status === CARD_STATUS.MASTERED,
-            ).length;
-            const totalCards = deckCards.length;
-
+            const stats = deckStats[item.id] || { new: 0, learning: 0, mastered: 0, total: 0 };
             return (
               <DeckListItem
                 deck={item}
                 index={index}
-                totalCards={totalCards}
-                newCards={newCards}
-                learningCards={learningCards}
-                masteredCards={masteredCards}
+                totalCards={stats.total}
+                newCards={stats.new}
+                learningCards={stats.learning}
+                masteredCards={stats.mastered}
                 onPress={(id) => router.push(ROUTES.DECK_DETAILS(id) as any)}
               />
             );
@@ -195,7 +197,7 @@ export default function HomeScreen() {
             )
           }
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={styles.listContent}
           refreshing={isLoading}
           onRefresh={loadDecks}
         />
@@ -318,5 +320,8 @@ const createStyles = (
     image: {
       width: 60,
       height: 60,
+    },
+    listContent: {
+      paddingBottom: 100,
     },
   });

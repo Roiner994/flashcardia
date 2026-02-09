@@ -1,3 +1,7 @@
+import { ChallengeFeedback } from "@components/challenge/ChallengeFeedback";
+import { ChallengeHeader } from "@components/challenge/ChallengeHeader";
+import { ChallengeInput } from "@components/challenge/ChallengeInput";
+import { ChallengeQuestion } from "@components/challenge/ChallengeQuestion";
 import { CustomAlert } from "@components/modals/CustomAlert";
 
 import { StreakCelebration } from "@components/modals/StreakCelebration";
@@ -17,10 +21,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -53,7 +56,11 @@ export default function ActiveChallengeScreen() {
   const [sessionScore, setSessionScore] = useState(0);
   const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
-  const [celebration, setCelebration] = useState<{ visible: boolean; streak: number; shieldUsed?: boolean }>({ visible: false, streak: 0 });
+  const [celebration, setCelebration] = useState<{
+    visible: boolean;
+    streak: number;
+    shieldUsed?: boolean;
+  }>({ visible: false, streak: 0 });
 
   // Speech Recognition
   const {
@@ -91,7 +98,7 @@ export default function ActiveChallengeScreen() {
           ((c.status === "new" && parsedStatuses.includes("new")) ||
             (c.status === "mastered" && parsedStatuses.includes("review")) ||
             ((c.status === "learning" || c.status === "review") &&
-              parsedStatuses.includes("learning"))),
+              parsedStatuses.includes("learning")))
       );
 
       // Shuffle logic could go here
@@ -116,8 +123,8 @@ export default function ActiveChallengeScreen() {
       setResult(grading);
       setShowFeedback(difficulty === "easy");
     } catch (error) {
-       // Ideally show an error toast here
-       console.error(error);
+      // Ideally show an error toast here
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -143,23 +150,25 @@ export default function ActiveChallengeScreen() {
     } else {
       // Finish Session
       setFinalScore(newTotal / queue.length);
-      
+
       // Check Streak
       if (session?.user?.id) {
-         checkStreak(session.user.id).then(result => {
-             if (result && result.celebration) {
-                 setCelebration({
-                     visible: false,
-                     streak: result.current_streak,
-                     shieldUsed: result.shieldUsed
-                 });
-             }
-         });
+        checkStreak(session.user.id).then((result) => {
+          if (result && result.celebration) {
+            setCelebration({
+              visible: false,
+              streak: result.current_streak,
+              shieldUsed: result.shieldUsed,
+            });
+          }
+        });
       }
 
       setIsCompleteModalVisible(true);
     }
   };
+
+  const toggleFeedback = () => setShowFeedback(!showFeedback);
 
   if (queue.length === 0) {
     return (
@@ -188,46 +197,24 @@ export default function ActiveChallengeScreen() {
         onClose={() => {
           setIsCompleteModalVisible(false);
           if (celebration.streak > 0) {
-              setCelebration(prev => ({ ...prev, visible: true }));
+            setCelebration((prev) => ({ ...prev, visible: true }));
           } else {
-              router.dismissAll();
+            router.dismissAll();
           }
         }}
       />
-      
-      <StreakCelebration 
-        visible={celebration.visible} 
+
+      <StreakCelebration
+        visible={celebration.visible}
         streak={celebration.streak}
-        shieldUsed={celebration.shieldUsed} 
+        shieldUsed={celebration.shieldUsed}
         onClose={() => {
-            setCelebration(prev => ({ ...prev, visible: false }));
-            router.dismissAll();
+          setCelebration((prev) => ({ ...prev, visible: false }));
+          router.dismissAll();
         }}
       />
 
-      {/* Top Bar */}
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.closeButton}
-        >
-          <Ionicons name="close" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.progressContainer}>
-          <View
-            style={[
-              styles.progressBar,
-              {
-                width: `${((currentIndex + 1) / queue.length) * 100}%`,
-                backgroundColor: colors.primary,
-              },
-            ]}
-          />
-        </View>
-        <Text style={styles.progressText}>
-          {currentIndex + 1}/{queue.length}
-        </Text>
-      </View>
+      <ChallengeHeader currentIndex={currentIndex} total={queue.length} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -241,108 +228,23 @@ export default function ActiveChallengeScreen() {
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.content}>
-              <View style={styles.cardContainer}>
-                <Text style={styles.instruction}>
-                  {t("challenge.active.makeSentence")}
-                </Text>
-                <Text style={styles.targetWord}>{currentCard?.front_word}</Text>
-                <Text style={styles.definitionHint}>
-                  {currentCard?.definition}
-                </Text>
-              </View>
+              <ChallengeQuestion card={currentCard} />
 
-              <View style={{ marginBottom: 24 }}>
-                <TextInput
-                  style={[
-                    styles.input,
-                    isRecording && !isPaused && styles.inputDisabled,
-                  ]}
-                  placeholder={t("challenge.active.inputPlaceholder")}
-                  placeholderTextColor={colors.textSecondary}
-                  multiline
-                  value={userInput}
-                  onChangeText={setUserInput}
-                  editable={
-                    (!isRecording || isPaused) && !isSubmitting && !result
-                  }
-                />
-              </View>
+              <ChallengeInput
+                value={userInput}
+                onChangeText={setUserInput}
+                isRecording={isRecording}
+                isPaused={isPaused}
+                isSubmitting={isSubmitting}
+                result={result}
+              />
 
-              {result && (
-                <View
-                  style={[
-                    styles.resultCard,
-                    (result?.score ?? 0) >= PASSING_SCORE
-                      ? { borderColor: colors.success }
-                      : { borderColor: colors.error },
-                  ]}
-                >
-                  <View style={styles.scoreRow}>
-                    <View style={styles.scoreHeaderLeft}>
-                      <Ionicons
-                        name={
-                          (result?.score ?? 0) >= PASSING_SCORE
-                            ? "checkmark-circle"
-                            : "alert-circle"
-                        }
-                        size={28}
-                        color={
-                          (result?.score ?? 0) >= PASSING_SCORE
-                            ? colors.success
-                            : colors.error
-                        }
-                      />
-                      <Text
-                        style={[
-                          styles.scoreLabel,
-                          {
-                            color:
-                              (result?.score ?? 0) >= PASSING_SCORE
-                                ? colors.success
-                                : colors.error,
-                          },
-                        ]}
-                      >
-                       {t("challenge.active.scoreLabel", {
-                          score: result.score,
-                        })}
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => setShowFeedback(!showFeedback)}
-                      style={styles.clueButton}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons
-                        name={showFeedback ? "bulb" : "bulb-outline"}
-                        size={24}
-                        color="#FFC107"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  
-                  {showFeedback && (
-                    <View style={styles.feedbackContainer}>
-                      <Text style={styles.feedbackText}>
-                        {result.feedback}
-                      </Text>
-                      {result.improved_phrase && (
-                        <View style={styles.improvedContainer}>
-                          <View style={styles.improvedLabelRow}>
-                             <Ionicons name="sparkles" size={16} color={colors.primary} />
-                             <Text style={styles.improvedLabel}>
-                               {t('challenge.active.improved')}
-                             </Text>
-                          </View>
-                          <Text style={styles.improvedText}>
-                            {result.improved_phrase}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  )}
-                </View>
-              )}
+              <ChallengeFeedback
+                result={result}
+                showFeedback={showFeedback}
+                onToggleFeedback={toggleFeedback}
+                passingScore={PASSING_SCORE}
+              />
             </View>
           </TouchableWithoutFeedback>
         </ScrollView>
@@ -391,8 +293,8 @@ export default function ActiveChallengeScreen() {
                     isRecording && !isPaused
                       ? "pause"
                       : isPaused
-                        ? "mic"
-                        : "mic-outline"
+                      ? "mic"
+                      : "mic-outline"
                   }
                   size={24}
                   color={colors.primary}
@@ -440,150 +342,9 @@ const createStyles = (colors: typeof Colors.light) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    topBar: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 20,
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    closeButton: {
-      padding: 4,
-    },
-    progressContainer: {
-      flex: 1,
-      height: 8,
-      backgroundColor: colors.surface,
-      borderRadius: 4,
-      marginHorizontal: 16,
-      overflow: "hidden",
-    },
-    progressBar: {
-      height: "100%",
-      borderRadius: 4,
-    },
-    progressText: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: colors.textSecondary,
-    },
     content: {
       flex: 1,
       padding: 20,
-    },
-    cardContainer: {
-      alignItems: "center",
-      marginVertical: 32,
-    },
-    instruction: {
-      fontSize: 16,
-      color: colors.textSecondary,
-      marginBottom: 8,
-    },
-    targetWord: {
-      fontSize: 36,
-      fontWeight: "bold",
-      color: colors.text,
-      textAlign: "center",
-      marginBottom: 8,
-    },
-    definitionHint: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      textAlign: "center",
-      fontStyle: "italic",
-    },
-
-    input: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 16,
-      fontSize: 18,
-      color: colors.text,
-      minHeight: 120,
-      textAlignVertical: "top",
-      marginBottom: 24,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    inputDisabled: {
-      backgroundColor: colors.background, // Slightly darker/different to indicate disabled?
-      opacity: 0.7,
-    },
-    resultCard: {
-      padding: 20,
-      borderRadius: 16,
-      backgroundColor: colors.surface,
-      borderWidth: 1, // Reduced border width to look cleaner
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.1,
-      shadowRadius: 3.84,
-      elevation: 5,
-    },
-    scoreRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      width: "100%",
-    },
-    scoreHeaderLeft: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
-    },
-    scoreLabel: {
-      fontSize: 24,
-      fontWeight: "800",
-    },
-    clueButton: {
-      padding: 10,
-      borderRadius: 12,
-      backgroundColor: colors.background,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    feedbackContainer: {
-      marginTop: 16,
-    },
-    separator: {
-      height: 1,
-      backgroundColor: colors.border,
-      marginBottom: 16,
-    },
-    feedbackText: {
-      fontSize: 16,
-      color: colors.text,
-      lineHeight: 24,
-    },
-    improvedContainer: {
-      marginTop: 20,
-      backgroundColor: colors.background,
-      borderRadius: 12,
-      padding: 16,
-    },
-    improvedLabelRow: {
-       flexDirection: 'row',
-       alignItems: 'center',
-       gap: 8,
-       marginBottom: 8,
-    },
-    improvedLabel: {
-      fontSize: 14,
-      fontWeight: "700",
-      color: colors.text,
-      textTransform: "uppercase",
-      letterSpacing: 0.5,
-    },
-    improvedText: {
-      fontSize: 16,
-      color: colors.text,
-      lineHeight: 24,
-      fontStyle: "italic",
     },
     footer: {
       paddingHorizontal: 20,

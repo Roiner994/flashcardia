@@ -13,6 +13,7 @@ import { useTheme } from "@hooks/useThemeColor";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
+import LottieView from "lottie-react-native";
 import React, { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -138,7 +139,12 @@ export default function ReviewScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>{t("review.loading")}</Text>
+        <LottieView
+          source={require("@assets/animations/loading.json")}
+          autoPlay
+          loop
+          style={styles.lottie}
+        />
       </View>
     );
   }
@@ -160,7 +166,12 @@ export default function ReviewScreen() {
   if (!currentCard) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>{t("review.loading")}</Text>
+        <LottieView
+          source={require("@assets/animations/loading.json")}
+          autoPlay
+          loop
+          style={styles.lottie}
+        />
       </View>
     );
   }
@@ -268,6 +279,10 @@ const createStyles = (colors: typeof Colors.light) =>
       backgroundColor: colors.background,
       alignItems: "center",
       justifyContent: "center",
+    },
+    lottie: {
+      width: 150,
+      height: 150,
     },
     loadingText: {
       color: colors.textSecondary,
