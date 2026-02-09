@@ -201,5 +201,12 @@
     "decks": "Decks",
     "challenge": "Challenge",
     "settings": "Settings"
+  },
+  "streak": {
+    "extendedTitle": "Streak Extended!",
+    "savedTitle": "Streak Saved!",
+    "extendedSubtitle": "Great job! You're on fire!",
+    "savedSubtitle": "You used a streak shield to keep your progress.",
+    "continueButton": "Keep Going"
   }
 }

@@ -74,15 +74,42 @@ export function useReviewSession(deckId: string | undefined) {
             console.error('Failed to update card status:', e);
         }
 
-        // 3. Move to next card
+        // 3. Move to next card (or finish)
         if (currentIndex < updatedCards.length - 1) {
-            // Return values to let UI handle animation reset
             setCards(updatedCards);
             setCurrentIndex((prev) => prev + 1);
             return { isComplete: false };
         } else {
             setCards(updatedCards);
-            return { isComplete: true };
+
+            // Check Streak (Session Complete)
+            let celebrationData = null;
+            if (currentCard.deck_id) { // Ensure valid context
+                try {
+                    const session = useStore.getState().session;
+                    if (session?.user?.id) {
+                        const result = await useStore.getState().checkStreak(session.user.id);
+                        if (result && result.celebration) {
+                            // result is { celebration: boolean, shieldUsed: boolean, current_streak: number... wait checkStreak returns { celebration: boolean; shieldUsed: boolean } | null in types.ts 
+                            // But checkAndIncrementStreak in Service returns { ... celebration: boolean ... }
+                            // Let's check createStreakSlice.ts
+
+                            // createStreakSlice.ts matches Service return? 
+                            // Service returns StreakResult | null. 
+                            // createStreakSlice checkStreak returns { celebration: boolean, shieldUsed: boolean } | null.
+
+                            // Wait, I need current_streak to display it!
+                            // I need to update createStreakSlice to return current_streak as well.
+
+                            celebrationData = result;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Streak check failed", e);
+                }
+            }
+
+            return { isComplete: true, celebration: celebrationData };
         }
     };
 

@@ -20,3 +20,11 @@ export interface Card {
   ease_factor: number; // default 2.5
   created_at: string;
 }
+
+export interface Profile {
+  id: string;
+  current_streak: number;
+  longest_streak: number;
+  last_completed_date: string | null;
+  streak_shields_count: number;
+}
