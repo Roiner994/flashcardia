@@ -111,6 +111,7 @@
     "placeholder": "e.g. Serendipity",
     "note": "You can also paste a short sentence or expression.",
     "generate": "Generate with AI",
+    "generating": "Generating magic...",
     "previewTitle": "Card Preview",
     "concept": "CONCEPT",
     "meaning": "MEANING",

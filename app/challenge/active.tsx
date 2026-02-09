@@ -10,22 +10,23 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    ActivityIndicator,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
 import { ChallengeResult, ChallengeService } from "@services/ChallengeService";
+import LottieView from "lottie-react-native";
 const PASSING_SCORE = 5.5;
 
 export default function ActiveChallengeScreen() {
@@ -165,7 +166,7 @@ export default function ActiveChallengeScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={{ color: colors.text, marginTop: 10 }}>
+          <Text style={{ color: colors.text }}>
             {t("challenge.active.preparing")}
           </Text>
         </View>
@@ -322,7 +323,6 @@ export default function ActiveChallengeScreen() {
                   
                   {showFeedback && (
                     <View style={styles.feedbackContainer}>
-                      <View style={styles.separator} />
                       <Text style={styles.feedbackText}>
                         {result.feedback}
                       </Text>
@@ -348,53 +348,56 @@ export default function ActiveChallengeScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          {!result ? (
+          {isSubmitting ? (
+            <View style={styles.loadingFooter}>
+              <LottieView
+                source={require("@assets/animations/loading.json")}
+                autoPlay
+                loop
+                style={styles.loadingLottieFooter}
+              />
+            </View>
+          ) : !result ? (
             <View style={styles.footerRow}>
               <TouchableOpacity
                 style={[
                   styles.actionButton,
                   { backgroundColor: colors.primary },
-                  (!userInput.trim() || isSubmitting) && { opacity: 0.7 },
+                  !userInput.trim() && { opacity: 0.7 },
                 ]}
                 onPress={handleSubmit}
-                disabled={!userInput.trim() || isSubmitting}
+                disabled={!userInput.trim()}
               >
-                {isSubmitting ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text style={styles.buttonText}>
-                    {t("challenge.active.submit")}
-                  </Text>
-                )}
+                <Text style={styles.buttonText}>
+                  {t("challenge.active.submit")}
+                </Text>
               </TouchableOpacity>
-              {!isSubmitting && (
-                <TouchableOpacity
-                  style={styles.micFooterButton}
-                  onPress={() => {
-                    if (isRecording && !isPaused) {
-                      pause();
-                      Keyboard.dismiss();
-                    } else if (isPaused) {
-                      setTranscript(userInput);
-                      resume();
-                    } else {
-                      start(userInput);
-                    }
-                  }}
-                >
-                  <Ionicons
-                    name={
-                      isRecording && !isPaused
-                        ? "pause"
-                        : isPaused
-                          ? "mic"
-                          : "mic-outline"
-                    }
-                    size={24}
-                    color={colors.primary}
-                  />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={styles.micFooterButton}
+                onPress={() => {
+                  if (isRecording && !isPaused) {
+                    pause();
+                    Keyboard.dismiss();
+                  } else if (isPaused) {
+                    setTranscript(userInput);
+                    resume();
+                  } else {
+                    start(userInput);
+                  }
+                }}
+              >
+                <Ionicons
+                  name={
+                    isRecording && !isPaused
+                      ? "pause"
+                      : isPaused
+                        ? "mic"
+                        : "mic-outline"
+                  }
+                  size={24}
+                  color={colors.primary}
+                />
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.footerRow}>
@@ -583,7 +586,7 @@ const createStyles = (colors: typeof Colors.light) =>
       fontStyle: "italic",
     },
     footer: {
-      padding: 20,
+      paddingHorizontal: 20,
     },
     footerRow: {
       flexDirection: "row",
@@ -613,5 +616,21 @@ const createStyles = (colors: typeof Colors.light) =>
       justifyContent: "center",
       borderWidth: 1,
       borderColor: colors.border,
+    },
+    loadingFooter: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 12,
+      paddingVertical: 8,
+    },
+    loadingLottieFooter: {
+      width: 60,
+      height: 60,
+    },
+    loadingTextFooter: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.primary,
     },
   });
