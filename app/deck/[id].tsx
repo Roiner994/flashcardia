@@ -5,14 +5,15 @@ import { AnimatedBottomSheet } from "@components/ui/AnimatedBottomSheet";
 import { BottomSheetHeader } from "@components/ui/BottomSheetHeader";
 import { RecordingView } from "@components/ui/RecordingView";
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useMagicCard } from "@hooks/useMagicCard";
 import { useSpeechRecognition } from "@hooks/useSpeechRecognition";
 import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
+import LottieView from "lottie-react-native";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -300,7 +301,19 @@ export default function DeckDetailScreen() {
                   showsVerticalScrollIndicator={false}
                   bounces={false}
                 >
-                  {isRecording ? (
+                  {isGenerating ? (
+                    <View style={styles.magicLoadingContainer}>
+                      <LottieView
+                        source={require('@assets/animations/generating.json')}
+                        autoPlay
+                        loop
+                        style={styles.magicLottie}
+                      />
+                      <Text style={styles.magicLoadingText}>
+                        {t("magic.generating")}
+                      </Text>
+                    </View>
+                  ) : isRecording ? (
                     <RecordingView
                       onStop={stop}
                       onCancel={cancel}
@@ -800,6 +813,21 @@ function getStyles(colors: typeof Colors.light, insets: { bottom: number }) {
       fontSize: 18,
       fontWeight: "bold",
       marginLeft: 12,
+    },
+    magicLoadingContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        height: 240,
+    },
+    magicLottie: {
+        width: 150,
+        height: 150,
+    },
+    magicLoadingText: {
+        marginTop: 16,
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.primary,
     },
     buttonDisabled: {
       opacity: 0.5,
