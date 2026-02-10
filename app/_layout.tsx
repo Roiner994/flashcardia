@@ -1,8 +1,8 @@
 import "@i18n";
 import {
-    DarkTheme,
-    DefaultTheme,
-    ThemeProvider,
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
 } from "@react-navigation/native";
 import { SplashScreen, Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -23,7 +23,7 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const { session, checkSession, loadSettings, themeMode } = useStore();
+  const { session, checkSession, loadSettings, themeMode, hasSeenOnboarding } = useStore();
   const systemColorScheme = useColorScheme();
   const segments = useSegments();
   const router = useRouter();
@@ -48,6 +48,13 @@ export default function RootLayout() {
   const effectiveTheme = themeMode === "system" ? systemColorScheme : themeMode;
 
   useEffect(() => {
+    if (!isAppReady) return;
+
+    if (!hasSeenOnboarding) {
+        router.replace("/onboarding");
+        return;
+    }
+
     if (!session) return;
     const inAuthGroup = (segments[0] as string) === "(auth)";
 
@@ -55,7 +62,7 @@ export default function RootLayout() {
     if (session && inAuthGroup) {
       router.replace("/(tabs)");
     }
-  }, [session, segments, router]);
+  }, [session, segments, router, isAppReady, hasSeenOnboarding]);
 
   if (!isAppReady) {
     return null;
@@ -68,6 +75,7 @@ export default function RootLayout() {
       >
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
           <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
           <Stack.Screen name="deck/[id]" options={{ headerShown: false }} />
           <Stack.Screen

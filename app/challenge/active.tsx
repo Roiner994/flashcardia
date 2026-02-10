@@ -1,8 +1,8 @@
+import { ChallengeCompleteModal } from "@components/challenge/ChallengeCompleteModal";
 import { ChallengeFeedback } from "@components/challenge/ChallengeFeedback";
 import { ChallengeHeader } from "@components/challenge/ChallengeHeader";
 import { ChallengeInput } from "@components/challenge/ChallengeInput";
 import { ChallengeQuestion } from "@components/challenge/ChallengeQuestion";
-import { CustomAlert } from "@components/modals/CustomAlert";
 
 import { StreakCelebration } from "@components/modals/StreakCelebration";
 import { Colors } from "@constants/Colors";
@@ -187,13 +187,9 @@ export default function ActiveChallengeScreen() {
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <CustomAlert
+      <ChallengeCompleteModal
         visible={isCompleteModalVisible}
-        type="success"
-        title={t("challenge.active.completeTitle")}
-        message={t("challenge.active.finalScore", {
-          score: finalScore.toFixed(1),
-        })}
+        score={finalScore}
         onClose={() => {
           setIsCompleteModalVisible(false);
           if (celebration.streak > 0) {
