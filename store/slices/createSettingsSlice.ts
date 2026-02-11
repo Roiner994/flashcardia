@@ -10,7 +10,7 @@ export const createSettingsSlice: StateCreator<
 > = (set, get) => ({
     isLoading: false,
     dailyNewLimit: 10,
-    themeMode: 'system',
+    themeMode: 'light',
 
     hasSeenOnboarding: false,
 
@@ -39,7 +39,7 @@ export const createSettingsSlice: StateCreator<
 
             set({
                 dailyNewLimit: limit ? parseInt(limit, 10) : 10,
-                themeMode: (theme as 'light' | 'dark' | 'system') || 'system',
+                themeMode: (theme as 'light' | 'dark' | 'system') || 'light',
                 hasSeenOnboarding: onboarded === 'true',
             });
         } catch (error) {
