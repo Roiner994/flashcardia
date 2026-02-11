@@ -3,7 +3,8 @@ import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Dimensions,
     FlatList,
@@ -31,32 +32,20 @@ interface Slide {
   color: string;
 }
 
-const slides: Slide[] = [
-  {
-    id: "1",
-    title: "Create a Deck",
-    description: "Organize your learning into custom decks. Add cards with words, definitions, and examples.",
-    animation: require("@assets/animations/cards.json"),
-    color: "#4A90E2",
-  },
-  {
-    id: "2",
-    title: "Review Smartly",
-    description: "Our Spaced Repetition System (SRS) ensures you review cards at the perfect time to maximize retention.",
-    animation: require("@assets/animations/brain.json"),
-    color: "#50E3C2",
-  },
-  {
-    id: "3",
-    title: "Take a Challenge",
-    description: "Test your knowledge with interactive challenges. Fill in the blanks and get instant feedback.",
-    animation: require("@assets/animations/trophy.json"),
-    color: "#F5A623",
-  },
-];
 
-const OnboardingItem = ({ item, index, scrollX }: { item: Slide, index: number, scrollX: SharedValue<number> }) => {
+
+const OnboardingItem = ({ item, index, scrollX, currentIndex }: { item: Slide, index: number, scrollX: SharedValue<number>, currentIndex: number }) => {
     const colors = useTheme();
+    const lottieRef = useRef<LottieView>(null);
+
+    React.useEffect(() => {
+        
+        if (index === currentIndex) {
+            lottieRef.current?.play(0);
+        } else {
+            lottieRef.current?.reset();
+        }
+    }, [currentIndex, index]);
     
     const rnStyle = useAnimatedStyle(() => {
         const inputRange = [
@@ -89,6 +78,7 @@ const OnboardingItem = ({ item, index, scrollX }: { item: Slide, index: number, 
         <View style={[styles.itemContainer, { width }]}>
             <Animated.View style={[styles.iconContainer, { backgroundColor: item.color + '20' }, rnStyle]}>
                  <LottieView
+                    ref={lottieRef}
                     source={item.animation}
                     autoPlay
                     loop
@@ -147,12 +137,37 @@ const Paginator = ({ data, scrollX }: { data: Slide[], scrollX: SharedValue<numb
 };
 
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useSharedValue(0);
   const slidesRef = useRef<FlatList>(null);
   const { completeOnboarding, session } = useStore();
   const router = useRouter();
   const colors = useTheme();
+
+  const slides: Slide[] = useMemo(() => [
+    {
+      id: "1",
+      title: t("onboarding.slide1Title"),
+      description: t("onboarding.slide1Desc"),
+      animation: require("@assets/animations/cards.json"),
+      color: "#4A90E2",
+    },
+    {
+      id: "2",
+      title: t("onboarding.slide2Title"),
+      description: t("onboarding.slide2Desc"),
+      animation: require("@assets/animations/brain.json"),
+      color: "#50E3C2",
+    },
+    {
+      id: "3",
+      title: t("onboarding.slide3Title"),
+      description: t("onboarding.slide3Desc"),
+      animation: require("@assets/animations/trophy.json"),
+      color: "#F5A623",
+    },
+  ], [t]);
 
   const viewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
       if (viewableItems[0] && viewableItems[0].index !== null) {
@@ -184,7 +199,7 @@ export default function OnboardingScreen() {
         <View style={{ flex: 3 }}>
             <FlatList
                 data={slides}
-                renderItem={({ item, index }) => <OnboardingItem item={item} index={index} scrollX={scrollX} />}
+                renderItem={({ item, index }) => <OnboardingItem item={item} index={index} scrollX={scrollX} currentIndex={currentIndex} />}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 pagingEnabled
@@ -202,14 +217,14 @@ export default function OnboardingScreen() {
 
         <View style={styles.footer}>
             <Button
-                title={currentIndex === slides.length - 1 ? "Get Started" : "Next"}
+                title={currentIndex === slides.length - 1 ? t("onboarding.getStarted") : t("onboarding.next")}
                 onPress={scrollToNext}
                 size="lg"
                 style={{ width: '100%' }}
             />
             {currentIndex < slides.length - 1 && (
                  <Button
-                    title="Skip"
+                    title={t("common.skip") || "Skip"}
                     variant="ghost"
                     onPress={finishOnboarding}
                     style={{ marginTop: 10 }}

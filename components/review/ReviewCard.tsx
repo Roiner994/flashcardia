@@ -2,7 +2,7 @@ import { Colors } from "@constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { Card } from "@types";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Animated,
@@ -36,6 +36,11 @@ export const ReviewCard = ({
   const { t } = useTranslation();
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const [showMeaning, setShowMeaning] = useState(false);
+
+  useEffect(() => {
+    setShowMeaning(false);
+  }, [isFlipped]);
 
   return (
     <View style={styles.cardContainer}>
@@ -72,14 +77,45 @@ export const ReviewCard = ({
               { position: "absolute", top: 0 },
             ]}
           >
-            <View style={styles.cardBackContent}>
-              <View style={styles.pillLabelContainerBack}>
+            <View style={styles.cardBackContent}>       
+              <ScrollView contentContainerStyle={styles.cardBackScroll}>
+                <View style={styles.pillLabelContainerBack}>
                 <Text style={styles.pillLabelTextBack}>
                   {t("review.definition")}
                 </Text>
               </View>
-              <ScrollView contentContainerStyle={styles.cardBackScroll}>
                 <Text style={styles.definitionText}>{card.definition}</Text>
+                
+                {card.spanish_meaning && (
+                    <View style={styles.meaningContainer}>
+                        <TouchableOpacity
+                            style={[
+                                styles.meaningChip,
+                                showMeaning && styles.meaningChipActive,
+                            ]}
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                setShowMeaning(!showMeaning);
+                            }}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons
+                                name={showMeaning ? "eye-off-outline" : "eye-outline"}
+                                size={16}
+                                color={showMeaning ? colors.surface : colors.primary}
+                            />
+                            <Text style={[
+                                styles.meaningLabel,
+                                showMeaning && styles.meaningLabelActive,
+                            ]}>
+                                {showMeaning ? t("review.meaning") : t("review.meaning")}
+                            </Text>
+                        </TouchableOpacity>
+                        {showMeaning && (
+                            <Text style={styles.meaningText}>{card.spanish_meaning}</Text>
+                        )}
+                    </View>
+                )}
                 
                 {/* Phonetic & Audio */}
                 <TouchableOpacity 
@@ -98,7 +134,11 @@ export const ReviewCard = ({
                 <View style={styles.divider} />
                 {card.examples && card.examples.length > 0 && (
                   <View style={styles.exampleContainer}>
-                    <Text style={styles.exampleText}>"{card.examples[0]}"</Text>
+                    {card.examples.slice(0, 3).map((example, index) => (
+                        <Text key={index} style={[styles.exampleText, index > 0 && { marginTop: 12 }]}>
+                            "{example}"
+                        </Text>
+                    ))}
                   </View>
                 )}
               </ScrollView>
@@ -119,7 +159,7 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     card: {
       width: width * 0.85,
-      height: 480,
+      height: 520,
       borderRadius: 40,
       backfaceVisibility: "hidden",
     },
@@ -133,7 +173,7 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     cardBack: {
       backgroundColor: colors.surface,
-      padding: 32,
+      padding: 24,
       justifyContent: "space-between",
       borderWidth: 1,
       borderColor: colors.border,
@@ -179,10 +219,10 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     pillLabelContainerBack: {
       backgroundColor: colors.success + "20",
-      paddingHorizontal: 12,
-      paddingVertical: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 3,
       borderRadius: 100,
-      marginBottom: 24,
+      marginBottom: 12,
     },
     pillLabelTextBack: {
       color: colors.success,
@@ -197,23 +237,23 @@ const createStyles = (colors: typeof Colors.light) =>
       justifyContent: "center",
     },
     definitionText: {
-      fontSize: 24,
+      fontSize: 18,
       fontWeight: "500",
       color: colors.text,
       textAlign: "center",
-      lineHeight: 32,
-      marginBottom: 24,
+      lineHeight: 26,
+      marginBottom: 12,
     },
     divider: {
       width: 40,
       height: 2,
       backgroundColor: colors.border,
-      marginVertical: 24,
+      marginVertical: 12,
     },
     exampleContainer: {
       backgroundColor: colors.background,
-      padding: 16,
-      borderRadius: 16,
+      padding: 12,
+      borderRadius: 12,
       width: "100%",
       borderWidth: 1,
       borderColor: colors.border,
@@ -222,8 +262,8 @@ const createStyles = (colors: typeof Colors.light) =>
       color: colors.textSecondary,
       textAlign: "center",
       fontStyle: "italic",
-      fontSize: 16,
-      lineHeight: 24,
+      fontSize: 13,
+      lineHeight: 20,
     },
     audioButton: {
       backgroundColor: colors.background,
@@ -252,10 +292,47 @@ const createStyles = (colors: typeof Colors.light) =>
         borderColor: colors.border,
     },
     phoneticText: {
-        fontSize: 18,
+        fontSize: 15,
         color: colors.textSecondary,
         marginLeft: 8,
         fontStyle: "italic",
         fontFamily: "System",
+    },
+    meaningContainer: {
+        alignItems: "center",
+        marginBottom: 12,
+        width: "100%",
+    },
+    meaningChip: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderWidth: 1.5,
+        borderColor: colors.primary + "60",
+        backgroundColor: colors.primary + "10",
+    },
+    meaningChipActive: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    meaningLabel: {
+        fontSize: 11,
+        fontWeight: "700",
+        color: colors.primary,
+        textTransform: "uppercase",
+        letterSpacing: 1,
+    },
+    meaningLabelActive: {
+        color: colors.surface,
+    },
+    meaningText: {
+        fontSize: 16,
+        color: colors.text,
+        textAlign: "center",
+        fontWeight: "500",
+        marginTop: 8,
     },
   });
