@@ -36,7 +36,7 @@ export function CreateDeckSheet({
   };
 
   return (
-    <AnimatedBottomSheet visible={visible} onClose={onClose} snapPoint={30}>
+    <AnimatedBottomSheet visible={visible} onClose={onClose} snapPoint={35}>
       {(handleClose) => (
         <>
           <BottomSheetHeader

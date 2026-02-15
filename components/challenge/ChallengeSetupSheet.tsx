@@ -6,19 +6,18 @@ import {
   CHALLENGE_DIFFICULTY,
 } from "@constants/AppConstants";
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useChallengeSetup } from "@hooks/useChallengeSetup";
 import { useTheme } from "@hooks/useThemeColor";
 import { Deck } from "@store/types";
-import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 interface ChallengeSetupSheetProps {
@@ -52,17 +51,16 @@ export function ChallengeSetupSheet({
   } = useChallengeSetup(deck, onClose);
 
   return (
-    <AnimatedBottomSheet visible={visible} onClose={onClose} snapPoint={80}>
+    <AnimatedBottomSheet visible={visible} onClose={onClose} snapPoint={90}>
       {(handleClose) => (
         <>
           <BottomSheetHeader
             title={t("challenge.setupTitle")}
             onClose={handleClose}
-          />
+          />  
 
-          <ScrollView
-            contentContainerStyle={[styles.content, { flexGrow: 1 }]}
-            showsVerticalScrollIndicator={false}
+          <View
+            style={styles.content}
           >
             <View style={styles.deckHeader}>
               <Text style={styles.deckTitle}>{deck.title}</Text>
@@ -432,7 +430,7 @@ export function ChallengeSetupSheet({
               <Text style={styles.startButtonText}>{t("challenge.start")}</Text>
               <Ionicons name="arrow-forward" size={20} color="white" />
             </TouchableOpacity>
-          </ScrollView>
+          </View>
         </>
       )}
     </AnimatedBottomSheet>
@@ -443,6 +441,7 @@ const createStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
     content: {
       paddingBottom: 60,
+      
     },
     deckHeader: {
       marginBottom: 24,
@@ -536,7 +535,6 @@ const createStyles = (colors: typeof Colors.light) =>
       position: "relative",
       alignItems: "center",
       justifyContent: "center",
-      gap: 6,
       minHeight: 90,
     },
     modeTitle: {
@@ -571,6 +569,7 @@ const createStyles = (colors: typeof Colors.light) =>
       justifyContent: "center",
       borderWidth: 2,
       borderColor: colors.background,
+      zIndex: 10000000
     },
     startButton: {
       backgroundColor: colors.primary,

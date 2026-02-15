@@ -281,7 +281,7 @@ export default function DeckDetailScreen() {
         <AnimatedBottomSheet
           visible={isModalVisible}
           onClose={() => setModalVisible(false)}
-          snapPoint={45}
+          snapPoint={50}
         >
           {(handleClose) => (
             <>
@@ -617,7 +617,7 @@ function getStyles(colors: typeof Colors.light, insets: { bottom: number }) {
       fontWeight: "800",
     },
     statLabel: {
-      fontSize: 12,
+      fontSize: 10,
       color: colors.textSecondary,
       marginTop: 4,
     },
