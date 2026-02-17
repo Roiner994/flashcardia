@@ -1,18 +1,17 @@
-import { AnimatedBottomSheet } from "@components/ui/AnimatedBottomSheet";
-import { BottomSheetHeader } from "@components/ui/BottomSheetHeader";
 import {
   CARD_STATUS,
   CardStatus,
   CHALLENGE_DIFFICULTY,
 } from "@constants/AppConstants";
 import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useChallengeSetup } from "@hooks/useChallengeSetup";
 import { useTheme } from "@hooks/useThemeColor";
 import { Deck } from "@store/types";
-import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,6 +19,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ChallengeSetupSheetProps {
   visible: boolean;
@@ -52,17 +52,28 @@ export function ChallengeSetupSheet({
   } = useChallengeSetup(deck, onClose);
 
   return (
-    <AnimatedBottomSheet visible={visible} onClose={onClose} snapPoint={80}>
-      {(handleClose) => (
-        <>
-          <BottomSheetHeader
-            title={t("challenge.setupTitle")}
-            onClose={handleClose}
-          />
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent={false}
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color={colors.primary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{t("challenge.setupTitle")}</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-          <ScrollView
-            contentContainerStyle={[styles.content, { flexGrow: 1 }]}
-            showsVerticalScrollIndicator={false}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={styles.content}
           >
             <View style={styles.deckHeader}>
               <Text style={styles.deckTitle}>{deck.title}</Text>
@@ -432,17 +443,45 @@ export function ChallengeSetupSheet({
               <Text style={styles.startButtonText}>{t("challenge.start")}</Text>
               <Ionicons name="arrow-forward" size={20} color="white" />
             </TouchableOpacity>
-          </ScrollView>
-        </>
-      )}
-    </AnimatedBottomSheet>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
   );
 }
 
 const createStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    closeButton: {
+      width: 40,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    scrollContent: {
+      padding: 24,
+      paddingBottom: 40,
+    },
     content: {
-      paddingBottom: 60,
     },
     deckHeader: {
       marginBottom: 24,
@@ -536,7 +575,6 @@ const createStyles = (colors: typeof Colors.light) =>
       position: "relative",
       alignItems: "center",
       justifyContent: "center",
-      gap: 6,
       minHeight: 90,
     },
     modeTitle: {
@@ -571,6 +609,7 @@ const createStyles = (colors: typeof Colors.light) =>
       justifyContent: "center",
       borderWidth: 2,
       borderColor: colors.background,
+      zIndex: 10000000
     },
     startButton: {
       backgroundColor: colors.primary,

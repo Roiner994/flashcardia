@@ -21,8 +21,10 @@ export interface SettingsSlice {
     isLoading: boolean;
     dailyNewLimit: number;
     themeMode: 'light' | 'dark' | 'system';
+    hasSeenOnboarding: boolean;
     setDailyLimit: (limit: number) => void;
     setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
+    completeOnboarding: () => Promise<void>;
     loadSettings: () => Promise<void>;
 }
 

@@ -513,7 +513,7 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     settingLabel: {
       flex: 1,
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: "600",
       color: colors.text,
     },

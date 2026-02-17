@@ -9,7 +9,8 @@
     "back": "Atrás",
     "search": "Buscar...",
     "noResults": "No hay resultados",
-    "all": "Todas"
+    "all": "Todas",
+    "skip": "Saltar"
   },
   "settings": {
     "title": "Ajustes",
@@ -60,7 +61,9 @@
     "errorMessage": "Error al actualizar contraseña"
   },
   "home": {
-    "title": "MagicDeck",
+    "title": "Flashcardia",
+    "brandPart1": "Flashcard",
+    "brandPart2": "ia",
     "dueToday": "Para Hoy",
     "learned": "Aprendidas",
     "cards": "Tarjetas",
@@ -108,7 +111,7 @@
     "inputLabel": "Palabra o frase",
     "placeholder": "ej. Serendipia",
     "note": "También puedes pegar una frase corta.",
-    "generate": "Generar con IA",
+    "generate": "Generar",
     "generating": "Generando magia...",
     "previewTitle": "Vista Previa",
     "concept": "CONCEPTO",
@@ -170,8 +173,32 @@
       "tryAgain": "Intentar de Nuevo",
       "nextCard": "Siguiente Tarjeta",
       "feedbackExcellent": "¡Buen trabajo!",
-      "feedbackImprove": "Intenta ser más descriptivo."
+      "feedbackImprove": "Intenta ser más descriptivo.",
+      "improved": "Mejor forma de decirlo"
     }
+  },
+  "review": {
+    "loading": "Cargando...",
+    "noCards": "No hay tarjetas para repasar.",
+    "goBack": "Volver",
+    "sessionComplete": "¡Sesión Completada!",
+    "sessionCompleteMsg": "Has repasado todas las tarjetas por ahora. ¡Buen trabajo!",
+    "options": "Opciones",
+    "deleteCard": "Eliminar Tarjeta",
+    "deleteConfirmTitle": "Eliminar Tarjeta",
+    "deleteConfirmBody": "¿Estás seguro de que quieres eliminar esta tarjeta?",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "tapToFlip": "TOCA PARA VOLTEAR",
+    "playAudio": "Reproducir Audio",
+    "tapToSeeAnswer": "Toca la tarjeta para ver la respuesta",
+    "concept": "CONCEPTO",
+    "definition": "DEFINICIÓN",
+    "rateAgain": "De nuevo",
+    "rateHard": "Difícil",
+    "rateGood": "Bien",
+    "rateEasy": "Fácil",
+    "meaning": "SIGNIFICADO"
   },
   "tabs": {
     "decks": "Mazos",
@@ -184,5 +211,15 @@
     "extendedSubtitle": "¡Buen trabajo! ¡Estás en racha!",
     "savedSubtitle": "Usaste un escudo para mantener tu progreso.",
     "continueButton": "Continuar"
+  },
+  "onboarding": {
+    "slide1Title": "Crear un Mazo",
+    "slide1Desc": "Organiza tu aprendizaje en mazos personalizados. Agrega tarjetas con palabras, definiciones y ejemplos.",
+    "slide2Title": "Repasa Inteligentemente",
+    "slide2Desc": "Nuestro Sistema de Repetición Espaciada (SRS) asegura que repases las tarjetas en el momento perfecto para maximizar la retención.",
+    "slide3Title": "Acepta un Reto",
+    "slide3Desc": "Pon a prueba tus conocimientos con retos interactivos. Completa los espacios en blanco y obtén retroalimentación instantánea.",
+    "next": "Siguiente",
+    "getStarted": "Empezar"
   }
 }

@@ -10,7 +10,9 @@ export const createSettingsSlice: StateCreator<
 > = (set, get) => ({
     isLoading: false,
     dailyNewLimit: 10,
-    themeMode: 'system',
+    themeMode: 'light',
+
+    hasSeenOnboarding: false,
 
     setDailyLimit: (limit: number) => {
         set({ dailyNewLimit: limit });
@@ -22,16 +24,23 @@ export const createSettingsSlice: StateCreator<
         AsyncStorage.setItem('theme_mode', mode);
     },
 
+    completeOnboarding: async () => {
+        set({ hasSeenOnboarding: true });
+        await AsyncStorage.setItem('has_seen_onboarding', 'true');
+    },
+
     loadSettings: async () => {
         try {
-            const [limit, theme] = await Promise.all([
+            const [limit, theme, onboarded] = await Promise.all([
                 AsyncStorage.getItem('daily_new_limit'),
                 AsyncStorage.getItem('theme_mode'),
+                AsyncStorage.getItem('has_seen_onboarding'),
             ]);
 
             set({
                 dailyNewLimit: limit ? parseInt(limit, 10) : 10,
-                themeMode: (theme as 'light' | 'dark' | 'system') || 'system',
+                themeMode: (theme as 'light' | 'dark' | 'system') || 'light',
+                hasSeenOnboarding: onboarded === 'true',
             });
         } catch (error) {
             console.error('Failed to load settings', error);

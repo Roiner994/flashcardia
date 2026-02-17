@@ -9,7 +9,8 @@
     "back": "Back",
     "search": "Search...",
     "noResults": "No results found",
-    "all": "All"
+    "all": "All",
+    "skip": "Skip"
   },
   "settings": {
     "title": "Settings",
@@ -110,7 +111,7 @@
     "inputLabel": "Word or phrase",
     "placeholder": "e.g. Serendipity",
     "note": "You can also paste a short sentence or expression.",
-    "generate": "Generate with AI",
+    "generate": "Generate",
     "generating": "Generating magic...",
     "previewTitle": "Card Preview",
     "concept": "CONCEPT",
@@ -196,7 +197,8 @@
     "rateAgain": "Again",
     "rateHard": "Hard",
     "rateGood": "Good",
-    "rateEasy": "Easy"
+    "rateEasy": "Easy",
+    "meaning": "MEANING"
   },
   "tabs": {
     "decks": "Decks",
@@ -209,5 +211,15 @@
     "extendedSubtitle": "Great job! You're on fire!",
     "savedSubtitle": "You used a streak shield to keep your progress.",
     "continueButton": "Keep Going"
+  },
+  "onboarding": {
+    "slide1Title": "Create a Deck",
+    "slide1Desc": "Organize your learning into custom decks. Add cards with words, definitions, and examples.",
+    "slide2Title": "Review Smartly",
+    "slide2Desc": "Our Spaced Repetition System (SRS) ensures you review cards at the perfect time to maximize retention.",
+    "slide3Title": "Take a Challenge",
+    "slide3Desc": "Test your knowledge with interactive challenges. Fill in the blanks and get instant feedback.",
+    "next": "Next",
+    "getStarted": "Get Started"
   }
 }
