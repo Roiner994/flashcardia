@@ -53,6 +53,11 @@ export const createCardsSlice: StateCreator<
     addCard: async (card: Omit<Card, 'id' | 'created_at'>) => {
         try {
             await DataService.createCard(card);
+
+            // Forcefully refetch all cards from the database to ensure 100% accurate synchronization
+            await get().loadAllCards();
+
+            // If we are currently viewing this deck's due cards, reload them
             if (get().currentCards.length > 0 && get().currentCards[0].deck_id === card.deck_id) {
                 await get().loadCards(card.deck_id);
             }
