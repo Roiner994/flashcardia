@@ -73,7 +73,8 @@
     "newCollection": "Nueva Colección",
     "deckTitle": "Título del Mazo",
     "deckTitlePlaceholder": "ej. Conceptos Básicos",
-    "createDeck": "Crear Mazo"
+    "createDeck": "Crear Mazo",
+    "total": "Total"
   },
   "stats": {
     "title": "Estadísticas",

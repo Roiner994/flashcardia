@@ -50,7 +50,7 @@ export const DeckListItem = React.memo(function DeckListItem({
       <View style={styles.deckInfo}>
         <Text style={styles.deckTitle}>{deck.title}</Text>
         <Text style={styles.deckSubtitle}>
-          {t("home.total")}: {totalCards} {t("home.cards").toLowerCase()}
+          {t("magic.total")}: {totalCards} {t("home.cards").toLowerCase()}
         </Text>
       </View>
 

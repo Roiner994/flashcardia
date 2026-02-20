@@ -120,7 +120,8 @@
     "save": "Save Card to Deck",
     "tryAgain": "Delete & Try Again",
     "errorTitle": "Error",
-    "errorBody": "Failed to generate card. Please try again."
+    "errorBody": "Failed to generate card. Please try again.",
+    "total": "Total"
   },
   "auth": {
     "welcomeBack": "Welcome Back",
