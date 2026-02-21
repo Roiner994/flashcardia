@@ -9,11 +9,11 @@ import { Link, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -116,12 +116,6 @@ export default function SettingsScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("settings.preferences")}</Text>
             <View style={styles.card}>
-              <SettingItem
-                icon="notifications-outline"
-                label={t("settings.notifications")}
-                color={colors.info}
-              />
-              <View style={styles.divider} />
               <SettingItem
                 icon="moon-outline"
                 label={t("settings.darkMode")}
@@ -262,12 +256,6 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("settings.preferences")}</Text>
           <View style={styles.card}>
-            <SettingItem
-              icon="notifications-outline"
-              label={t("settings.notifications")}
-              color={colors.info}
-            />
-            <View style={styles.divider} />
             <SettingItem
               icon="moon-outline"
               label={t("settings.darkMode")}
