@@ -73,7 +73,8 @@
     "newCollection": "New Collection",
     "deckTitle": "Deck Title",
     "deckTitlePlaceholder": "e.g. Spanish Basics",
-    "createDeck": "Create Deck"
+    "createDeck": "Create Deck",
+    "total": "Total"
   },
   "stats": {
     "title": "Statistics",
