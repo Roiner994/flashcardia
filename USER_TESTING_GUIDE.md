@@ -43,6 +43,8 @@ Magic Deck AI supports multiple languages (English and Spanish).
 2. Tap on **Language**.
 3. Select your preferred language. The app will immediately translate all text to the newly selected language.
 
+> ![Settings Language View](./assets/screenshots/04_settings_language.png)
+
 ### Home Screen Overview
 
 - **Header**: At the top right, you'll see your Avatar and your Current Streak (🔥).
