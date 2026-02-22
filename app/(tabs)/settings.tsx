@@ -9,11 +9,12 @@ import { Link, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -150,6 +151,7 @@ export default function SettingsScreen() {
                 icon="help-circle-outline"
                 label={t("settings.helpCenter")}
                 color={colors.textSecondary}
+                onPress={() => Linking.openURL('mailto:team.flashcardia@gmail.com?subject=MagicDeck%20Support')}
               />
               <View style={styles.divider} />
               <SettingItem
@@ -312,6 +314,7 @@ export default function SettingsScreen() {
               icon="help-circle-outline"
               label={t("settings.helpCenter")}
               color={colors.textSecondary}
+              onPress={() => Linking.openURL('mailto:team.flashcardia@gmail.com?subject=MagicDeck%20Support')}
             />
             <View style={styles.divider} />
             <SettingItem
