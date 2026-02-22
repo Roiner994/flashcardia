@@ -11,9 +11,10 @@ export const createCardsSlice: StateCreator<
 > = (set, get) => ({
     currentCards: [],
     allCards: [],
+    isCardsLoading: false,
 
     loadCards: async (deckId: string) => {
-        set({ isLoading: true });
+        set({ isCardsLoading: true });
         try {
             const allDeckCards = await DataService.getCards(deckId);
             const now = new Date();
@@ -34,19 +35,19 @@ export const createCardsSlice: StateCreator<
         } catch (error) {
             console.error('Failed to load cards', error);
         } finally {
-            set({ isLoading: false });
+            set({ isCardsLoading: false });
         }
     },
 
     loadAllCards: async () => {
-        set({ isLoading: true });
+        set({ isCardsLoading: true });
         try {
             const cards = await DataService.getAllCards();
             set({ allCards: cards });
         } catch (error) {
             console.error('Failed to load all cards', error);
         } finally {
-            set({ isLoading: false });
+            set({ isCardsLoading: false });
         }
     },
 

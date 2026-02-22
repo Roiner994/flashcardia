@@ -10,19 +10,17 @@ export const createDecksSlice: StateCreator<
     DecksSlice
 > = (set, get) => ({
     decks: [],
+    isDecksLoading: false,
 
     loadDecks: async () => {
-        // Note: isLoading is managed in createSettingsSlice, but here we can't easily access
-        // set({ isLoading: true }) without explicitly being part of that slice.
-        // However, Zustand's set merges state, so we can set any property of StoreState.
-        set({ isLoading: true });
+        set({ isDecksLoading: true });
         try {
             const decks = await DataService.getDecks();
             set({ decks });
         } catch (error) {
             console.error('Failed to load decks', error);
         } finally {
-            set({ isLoading: false });
+            set({ isDecksLoading: false });
         }
     },
 

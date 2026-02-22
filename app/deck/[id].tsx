@@ -16,19 +16,19 @@ import LottieView from "lottie-react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator,
-  Dimensions,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Dimensions,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+    SafeAreaView,
+    useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 const width = Dimensions.get("window").width;
@@ -56,7 +56,7 @@ export default function DeckDetailScreen() {
   const colors = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => getStyles(colors, insets), [colors, insets]);
-  const { decks, currentCards, loadCards, isLoading } = useStore();
+  const { decks, currentCards, loadCards, isCardsLoading } = useStore();
 
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -95,7 +95,7 @@ export default function DeckDetailScreen() {
     }
   }, [initialMagicWord, setMagicWord, setCreationStep]);
 
-  if (isLoading) {
+  if (isCardsLoading) {
     return <DeckDetailSkeleton />;
   }
 

@@ -6,10 +6,20 @@ import { Card, Deck } from '../types';
 const LOCAL_DECKS_KEY = 'local_decks';
 const LOCAL_CARDS_KEY = 'local_cards';
 
+// Cache the userId to avoid repeated getSession() calls
+let cachedUserId: string | null | undefined = undefined; // undefined = not yet fetched
+
+// Listen for auth state changes to invalidate cache
+supabase.auth.onAuthStateChange((_event, session) => {
+  cachedUserId = session?.user?.id ?? null;
+});
+
 export const DataService = {
   async getUserId(): Promise<string | null> {
+    if (cachedUserId !== undefined) return cachedUserId;
     const { data: { session } } = await supabase.auth.getSession();
-    return session?.user?.id ?? null;
+    cachedUserId = session?.user?.id ?? null;
+    return cachedUserId;
   },
 
   async getDecks(): Promise<Deck[]> {

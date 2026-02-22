@@ -18,6 +18,48 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+interface SettingItemProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value?: string;
+  color?: string;
+  onPress?: () => void;
+  isDestructive?: boolean;
+  colors: typeof Colors.light;
+  styles: ReturnType<typeof createStyles>;
+}
+
+const SettingItem = React.memo(({ icon, label, value, color, onPress, isDestructive = false, colors, styles }: SettingItemProps) => (
+  <TouchableOpacity style={styles.settingItem} onPress={onPress}>
+    <View
+      style={[
+        styles.settingIconContainer,
+        {
+          backgroundColor: isDestructive
+            ? colors.error + "20"
+            : colors.background,
+        },
+      ]}
+    >
+      <Ionicons
+        name={icon}
+        size={20}
+        color={isDestructive ? colors.error : (color || colors.textSecondary)}
+      />
+    </View>
+    <Text
+      style={[styles.settingLabel, isDestructive && { color: colors.error }]}
+    >
+      {label}
+    </Text>
+    {value ? (
+      <Text style={styles.settingValue}>{value}</Text>
+    ) : (
+      <Ionicons name="chevron-forward" size={18} color={colors.icon} />
+    )}
+  </TouchableOpacity>
+));
+
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -39,44 +81,7 @@ export default function SettingsScreen() {
     checkSession();
   }, [checkSession]);
 
-  const SettingItem = ({
-    icon,
-    label,
-    value,
-    color = colors.textSecondary,
-    onPress,
-    isDestructive = false,
-  }: any) => (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
-      <View
-        style={[
-          styles.settingIconContainer,
-          {
-            backgroundColor: isDestructive
-              ? colors.error + "20"
-              : colors.background,
-          },
-        ]}
-      >
-        <Ionicons
-          name={icon}
-          size={20}
-          color={isDestructive ? colors.error : color}
-        />
-      </View>
-      <Text
-        style={[styles.settingLabel, isDestructive && { color: colors.error }]}
-      >
-        {label}
-      </Text>
-      {value ? (
-        <Text style={styles.settingValue}>{value}</Text>
-      ) : (
-        <Ionicons name="chevron-forward" size={18} color={colors.icon} />
-      )}
-    </TouchableOpacity>
-  );
-  
+
   if (!session) {
     return (
       <SafeAreaView edges={["top"]} style={styles.container}>
@@ -122,6 +127,8 @@ export default function SettingsScreen() {
                 label={t("settings.darkMode")}
                 value={themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}
                 color="#6366f1"
+                colors={colors}
+                styles={styles}
                 onPress={() => {
                   const modes: ("system" | "light" | "dark")[] = [
                     "system",
@@ -139,6 +146,8 @@ export default function SettingsScreen() {
                 label={t("settings.language")}
                 value={i18n.language.startsWith("es") ? "Español" : "English"}
                 color={colors.warning}
+                colors={colors}
+                styles={styles}
                 onPress={() => setLanguageModalVisible(true)}
               />
             </View>
@@ -151,6 +160,8 @@ export default function SettingsScreen() {
                 icon="help-circle-outline"
                 label={t("settings.helpCenter")}
                 color={colors.textSecondary}
+                colors={colors}
+                styles={styles}
                 onPress={() => Linking.openURL('mailto:team.flashcardia@gmail.com?subject=MagicDeck%20Support')}
               />
               <View style={styles.divider} />
@@ -158,6 +169,8 @@ export default function SettingsScreen() {
                 icon="star-outline"
                 label={t("settings.rateApp")}
                 color={colors.warning}
+                colors={colors}
+                styles={styles}
               />
             </View>
           </View>
@@ -262,19 +275,20 @@ export default function SettingsScreen() {
               icon="moon-outline"
               label={t("settings.darkMode")}
               value={
-                useStore.getState().themeMode.charAt(0).toUpperCase() +
-                useStore.getState().themeMode.slice(1)
+                themeMode.charAt(0).toUpperCase() +
+                themeMode.slice(1)
               }
               color="#6366f1"
+              colors={colors}
+              styles={styles}
               onPress={() => {
                 const modes: ("system" | "light" | "dark")[] = [
                   "system",
                   "light",
                   "dark",
                 ];
-                const current = useStore.getState().themeMode;
-                const next = modes[(modes.indexOf(current) + 1) % modes.length];
-                useStore.getState().setThemeMode(next);
+                const next = modes[(modes.indexOf(themeMode) + 1) % modes.length];
+                setThemeMode(next);
               }}
             />
             <View style={styles.divider} />
@@ -283,6 +297,8 @@ export default function SettingsScreen() {
               label={t("settings.language")}
               value={i18n.language.startsWith("es") ? "Español" : "English"}
               color={colors.warning}
+              colors={colors}
+              styles={styles}
               onPress={() => setLanguageModalVisible(true)}
             />
           </View>
@@ -296,12 +312,16 @@ export default function SettingsScreen() {
               label={t("settings.automaticSync")}
               value="ON"
               color={colors.success}
+              colors={colors}
+              styles={styles}
             />
             <View style={styles.divider} />
             <SettingItem
               icon="lock-closed-outline"
               label={t("settings.changePassword")}
               color={colors.textSecondary}
+              colors={colors}
+              styles={styles}
               onPress={() => router.push("/change-password")}
             />
           </View>
@@ -314,6 +334,8 @@ export default function SettingsScreen() {
               icon="help-circle-outline"
               label={t("settings.helpCenter")}
               color={colors.textSecondary}
+              colors={colors}
+              styles={styles}
               onPress={() => Linking.openURL('mailto:team.flashcardia@gmail.com?subject=MagicDeck%20Support')}
             />
             <View style={styles.divider} />
@@ -321,6 +343,8 @@ export default function SettingsScreen() {
               icon="star-outline"
               label={t("settings.rateApp")}
               color={colors.warning}
+              colors={colors}
+              styles={styles}
             />
           </View>
         </View>
@@ -333,6 +357,8 @@ export default function SettingsScreen() {
               label={t("settings.signOut")}
               onPress={() => signOut()}
               isDestructive={true}
+              colors={colors}
+              styles={styles}
             />
           </View>
         </View>
