@@ -69,7 +69,7 @@ export function useReviewSession(deckId: string | undefined) {
 
         // 2. Persist status change via Store (SM-2 Logic)
         try {
-            updateCardSRS(currentCard.id, rating); // No await to prevent UI blocking
+            await updateCardSRS(currentCard.id, rating);
         } catch (e) {
             console.error('Failed to update card status:', e);
         }

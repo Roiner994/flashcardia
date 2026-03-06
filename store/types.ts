@@ -12,13 +12,13 @@ export interface StreakSlice {
 export interface AuthSlice {
     session: Session | null;
     checkSession: () => Promise<void>;
+    initAuthListener: () => () => void;
     signOut: () => Promise<void>;
     updateProfile: (updates: { full_name?: string; avatar_url?: string }) => Promise<void>;
     updatePassword: (password: string) => Promise<void>;
 }
 
 export interface SettingsSlice {
-    isLoading: boolean;
     dailyNewLimit: number;
     themeMode: 'light' | 'dark' | 'system';
     hasSeenOnboarding: boolean;
@@ -30,6 +30,7 @@ export interface SettingsSlice {
 
 export interface DecksSlice {
     decks: Deck[];
+    isDecksLoading: boolean;
     loadDecks: () => Promise<void>;
     createDeck: (title: string) => Promise<void>;
     updateDeck: (id: string, deckData: Partial<Deck>) => Promise<void>;
@@ -39,6 +40,7 @@ export interface DecksSlice {
 export interface CardsSlice {
     currentCards: Card[];
     allCards: Card[];
+    isCardsLoading: boolean;
     loadCards: (deckId: string) => Promise<void>;
     loadAllCards: () => Promise<void>;
     addCard: (card: Omit<Card, 'id' | 'created_at'>) => Promise<void>;

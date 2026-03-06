@@ -14,8 +14,10 @@ export const createAuthSlice: StateCreator<
     checkSession: async () => {
         const { data: { session } } = await supabase.auth.getSession();
         set({ session });
+    },
 
-        supabase.auth.onAuthStateChange(async (_event, session) => {
+    initAuthListener: () => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             const previousSession = get().session;
             set({ session });
 
@@ -27,6 +29,7 @@ export const createAuthSlice: StateCreator<
                 get().loadDecks();
             }
         });
+        return () => subscription.unsubscribe();
     },
 
     signOut: async () => {

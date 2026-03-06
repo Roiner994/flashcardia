@@ -11,7 +11,7 @@ import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     FlatList,
@@ -40,12 +40,13 @@ export default function HomeScreen() {
     allCards,
     loadDecks,
     loadAllCards,
-    isLoading,
+    isDecksLoading,
+    isCardsLoading,
     dailyNewLimit,
     session,
     createDeck,
     profile,
-    loadProfile, // Add loadProfile
+    loadProfile,
   } = useStore();
 
   const [celebration, setCelebration] = useState<{ visible: boolean; streak: number; shieldUsed?: boolean }>({ visible: false, streak: 0 });
@@ -121,10 +122,10 @@ export default function HomeScreen() {
                 resizeMode="contain"
             /> */}
             <Text style={[styles.headerTitle]}>
-              <Text style={{ color: (colors as any).brandPurple }}>
+              <Text style={styles.brandPurple}>
                 {t("home.brandPart1")}
               </Text>
-              <Text style={{ color: (colors as any).brandCyan }}>
+              <Text style={styles.brandCyan}>
                 {t("home.brandPart2")}
               </Text>
             </Text>
@@ -138,12 +139,7 @@ export default function HomeScreen() {
                 />
               ) : (
                 <View
-                  style={{
-                    flex: 1,
-                    backgroundColor: colors.surface,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  style={styles.avatarPlaceholder}
                 >
                   <Ionicons
                     name="person"
@@ -173,7 +169,7 @@ export default function HomeScreen() {
               <Text style={styles.sectionTitle}>{t("home.yourDecks")}</Text>
             </>
           }
-          renderItem={({ item, index }) => {
+          renderItem={useCallback(({ item, index }: { item: typeof decks[0]; index: number }) => {
             const stats = deckStats[item.id] || { new: 0, learning: 0, mastered: 0, total: 0 };
             return (
               <DeckListItem
@@ -186,9 +182,9 @@ export default function HomeScreen() {
                 onPress={(id) => router.push(ROUTES.DECK_DETAILS(id) as any)}
               />
             );
-          }}
+          }, [deckStats, router])}
           ListEmptyComponent={
-            isLoading ? (
+            isDecksLoading || isCardsLoading ? (
               <DeckListSkeleton />
             ) : (
               <View style={styles.emptyState}>
@@ -198,10 +194,9 @@ export default function HomeScreen() {
           }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
-          refreshing={isLoading}
-          onRefresh={async () => {
-            await loadDecks();
-            await loadAllCards();
+          refreshing={isDecksLoading}
+          onRefresh={() => {
+            Promise.all([loadDecks(), loadAllCards()]);
           }}
         />
       </View>
@@ -326,5 +321,17 @@ const createStyles = (
     },
     listContent: {
       paddingBottom: 100,
+    },
+    brandPurple: {
+      color: colors.brandPurple,
+    },
+    brandCyan: {
+      color: colors.brandCyan,
+    },
+    avatarPlaceholder: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
     },
   });

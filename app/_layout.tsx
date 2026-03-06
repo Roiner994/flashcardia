@@ -1,9 +1,9 @@
 import { Outfit_400Regular, Outfit_500Medium, Outfit_700Bold, useFonts } from "@expo-google-fonts/outfit";
 import "@i18n";
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider,
 } from "@react-navigation/native";
 import { SplashScreen, Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -11,6 +11,8 @@ import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import "../global.css";
+
+import { ErrorBoundary } from "@components/ui/ErrorBoundary";
 
 
 import { useStore } from "@store/useStore";
@@ -24,7 +26,7 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const { session, checkSession, loadSettings, themeMode, hasSeenOnboarding } = useStore();
+  const { session, checkSession, initAuthListener, loadSettings, themeMode, hasSeenOnboarding } = useStore();
   const systemColorScheme = useColorScheme();
   const segments = useSegments();
   const router = useRouter();
@@ -48,7 +50,9 @@ export default function RootLayout() {
     }
 
     prepare();
-  }, [checkSession, loadSettings]);
+    const unsubscribe = initAuthListener();
+    return () => unsubscribe();
+  }, []);
 
   const effectiveTheme = themeMode === "system" ? systemColorScheme : themeMode;
 
@@ -84,6 +88,7 @@ export default function RootLayout() {
       <ThemeProvider
         value={effectiveTheme === "dark" ? DarkTheme : DefaultTheme}
       >
+        <ErrorBoundary>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
@@ -113,6 +118,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
+        </ErrorBoundary>
         <StatusBar style={effectiveTheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>
     </GestureHandlerRootView>

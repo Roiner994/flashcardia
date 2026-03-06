@@ -8,7 +8,6 @@ export const createSettingsSlice: StateCreator<
     [],
     SettingsSlice
 > = (set, get) => ({
-    isLoading: false,
     dailyNewLimit: 10,
     themeMode: 'light',
 
