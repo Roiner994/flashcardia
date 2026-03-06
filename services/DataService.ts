@@ -29,6 +29,7 @@ export const DataService = {
       const { data, error } = await supabase
         .from('decks')
         .select('*')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];
@@ -127,9 +128,15 @@ export const DataService = {
     const userId = await this.getUserId();
 
     if (userId) {
+      // Scope to user's decks for tenant isolation
+      const userDecks = await this.getDecks();
+      const deckIds = userDecks.map(d => d.id);
+      if (deckIds.length === 0) return [];
+
       const { data, error } = await supabase
         .from('cards')
-        .select('*');
+        .select('*')
+        .in('deck_id', deckIds);
       if (error) throw error;
       return data || [];
     } else {
