@@ -10,6 +10,17 @@ export interface Deck {
   tags?: string[];
 }
 
+export interface PublicDeckProfile {
+  username?: string | null;
+  full_name?: string | null;
+  avatar_url?: string | null;
+}
+
+export interface PublicDeck extends Deck {
+  profiles?: PublicDeckProfile | null;
+  liked_by_user?: boolean;
+}
+
 export interface Card {
   id: string;
   deck_id: string;
@@ -34,4 +45,25 @@ export interface Profile {
   username?: string;
   full_name?: string;
   avatar_url?: string;
+  public_deck_count?: number;
+}
+
+export interface PublicDeckPreviewCard {
+  id: string;
+  front_word: string;
+  definition: string;
+  spanish_meaning: string;
+  phonetic: string | null;
+  examples: string[];
+  example_sentence?: string | null;
+}
+
+export interface PublicDeckPreviewResponse {
+  deck: PublicDeck;
+  cards: PublicDeckPreviewCard[];
+}
+
+export interface CommunityPersonDecksResponse {
+  person: Profile;
+  decks: PublicDeck[];
 }

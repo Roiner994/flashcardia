@@ -2,9 +2,10 @@ import { Colors } from "@constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { SocialService } from "@services/SocialService";
 import { useStore } from "@store/useStore";
-import { Deck, Profile } from "@types";
+import { Profile, PublicDeck } from "@types";
 import { Image } from "expo-image";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,24 +20,17 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type ExploreDeck = Deck & {
-  profiles?: {
-    username?: string | null;
-    full_name?: string | null;
-    avatar_url?: string | null;
-  } | null;
-};
-
 const PAGE_SIZE = 20;
 
 export default function ExploreScreen() {
+  const router = useRouter();
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
-  const { session, loadDecks, loadAllCards } = useStore();
+  const { session } = useStore();
 
   const [activeTab, setActiveTab] = useState<"decks" | "people">("decks");
-  const [decks, setDecks] = useState<ExploreDeck[]>([]);
+  const [decks, setDecks] = useState<PublicDeck[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -49,9 +43,9 @@ export default function ExploreScreen() {
     setHasMore(true);
     try {
       if (activeTab === "decks") {
-        const data = await SocialService.getExploreDecks(1);
+        const data = await SocialService.getExploreDecks(1, session?.user?.id);
         if (data.length < PAGE_SIZE) setHasMore(false);
-        setDecks(data as ExploreDeck[]);
+        setDecks(data);
       } else {
         const data = await SocialService.searchPeople("", 1);
         if (data.length < PAGE_SIZE) setHasMore(false);
@@ -71,9 +65,9 @@ export default function ExploreScreen() {
     try {
       const nextPage = page + 1;
       if (activeTab === "decks") {
-        const data = await SocialService.getExploreDecks(nextPage);
+        const data = await SocialService.getExploreDecks(nextPage, session?.user?.id);
         if (data.length < PAGE_SIZE) setHasMore(false);
-        setDecks((prev) => [...prev, ...(data as ExploreDeck[])]);
+        setDecks((prev) => [...prev, ...data]);
       } else {
         const data = await SocialService.searchPeople("", nextPage);
         if (data.length < PAGE_SIZE) setHasMore(false);
@@ -89,10 +83,30 @@ export default function ExploreScreen() {
 
   useEffect(() => {
     fetchInitialData();
-  }, [activeTab]);
+  }, [activeTab, session?.user?.id]);
 
   const handleLike = async (deckId: string) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      router.push("/(auth)/login");
+      return;
+    }
+
+    const targetDeck = decks.find((deck) => deck.id === deckId);
+    const wasLiked = !!targetDeck?.liked_by_user;
+    const optimisticDelta = wasLiked ? -1 : 1;
+
+    setDecks((prev) =>
+      prev.map((deck) =>
+        deck.id === deckId
+          ? {
+              ...deck,
+              liked_by_user: !wasLiked,
+              likes_count: Math.max(0, (deck.likes_count || 0) + optimisticDelta),
+            }
+          : deck,
+      ),
+    );
+
     try {
       const liked = await SocialService.toggleLike(deckId, session.user.id);
       setDecks((prev) =>
@@ -100,32 +114,47 @@ export default function ExploreScreen() {
           deck.id === deckId
             ? {
                 ...deck,
-                likes_count: (deck.likes_count || 0) + (liked ? 1 : -1),
+                liked_by_user: liked,
+                likes_count: Math.max(
+                  0,
+                  (deck.likes_count || 0) + (liked === wasLiked ? -optimisticDelta : 0),
+                ),
               }
             : deck,
         ),
       );
     } catch (error) {
       console.error(error);
+      setDecks((prev) =>
+        prev.map((deck) =>
+          deck.id === deckId
+            ? {
+                ...deck,
+                liked_by_user: wasLiked,
+                likes_count: Math.max(0, (deck.likes_count || 0) - optimisticDelta),
+              }
+            : deck,
+        ),
+      );
+      Alert.alert(t("common.error"), t("community.likeError"));
     }
   };
 
   const handleFork = async (deckId: string) => {
-    if (!session?.user?.id) return;
-    try {
-      setLoading(true);
-      await SocialService.forkDeck(deckId, session.user.id);
-      await Promise.all([loadDecks(), loadAllCards()]);
-      Alert.alert(t("common.success"), t("community.forkSuccess"));
-    } catch (error) {
-      console.error(error);
-      Alert.alert(t("common.error"), t("community.forkError"));
-    } finally {
-      setLoading(false);
-    }
+    router.push({
+      pathname: "/community-import/[deckId]",
+      params: { deckId },
+    });
   };
 
-  const renderDeck = ({ item, index }: { item: ExploreDeck; index: number }) => {
+  const handleOpenPerson = (userId: string) => {
+    router.push({
+      pathname: "/community-person/[userId]",
+      params: { userId },
+    });
+  };
+
+  const renderDeck = ({ item, index }: { item: PublicDeck; index: number }) => {
     const ownerName =
       item.profiles?.full_name ||
       item.profiles?.username ||
@@ -157,9 +186,6 @@ export default function ExploreScreen() {
               <Text style={styles.cardSubtitle}>{ownerName}</Text>
             </View>
 
-            <View style={styles.publicBadge}>
-              <Ionicons name="globe-outline" size={14} color={colors.primary} />
-            </View>
           </View>
 
           <View style={styles.metricRow}>
@@ -178,7 +204,11 @@ export default function ExploreScreen() {
               style={styles.secondaryAction}
               onPress={() => handleLike(item.id)}
             >
-              <Ionicons name="heart-outline" size={18} color={colors.primary} />
+              <Ionicons
+                name={item.liked_by_user ? "heart" : "heart-outline"}
+                size={18}
+                color={colors.primary}
+              />
               <Text style={styles.secondaryActionText}>{t("community.like")}</Text>
             </TouchableOpacity>
 
@@ -202,7 +232,11 @@ export default function ExploreScreen() {
 
     return (
       <View style={styles.cardShell}>
-        <View style={styles.personCard}>
+        <TouchableOpacity
+          style={styles.personCard}
+          activeOpacity={0.92}
+          onPress={() => handleOpenPerson(item.id)}
+        >
           <View style={styles.personHeader}>
             <View style={styles.personIdentity}>
               {item.avatar_url ? (
@@ -221,17 +255,27 @@ export default function ExploreScreen() {
               <View style={styles.personInfo}>
                 <Text style={styles.personName}>{displayName}</Text>
                 <Text style={styles.personCaption}>
-                  {t("community.peoplePulse")}
+                  {t("community.publicDeckCreator")}
                 </Text>
               </View>
             </View>
 
-            <View style={[styles.rankBadge, isLeader && styles.rankBadgeHot]}>
-              <Text
-                style={[styles.rankText, isLeader && styles.rankTextHot]}
-              >
-                #{index + 1}
-              </Text>
+            <View style={styles.personMetaColumn}>
+              <View style={[styles.rankBadge, isLeader && styles.rankBadgeHot]}>
+                <Text
+                  style={[styles.rankText, isLeader && styles.rankTextHot]}
+                >
+                  #{index + 1}
+                </Text>
+              </View>
+              <View style={styles.deckCountBadge}>
+                <Ionicons name="albums-outline" size={14} color={colors.primary} />
+                <Text style={styles.deckCountText}>
+                  {t("community.publicDeckCount", {
+                    count: item.public_deck_count || 0,
+                  })}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -244,7 +288,7 @@ export default function ExploreScreen() {
               <Ionicons name="flame" size={20} color="#f97316" />
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -496,14 +540,6 @@ const createStyles = (colors: typeof Colors.light) =>
       marginTop: 4,
       fontWeight: "500",
     },
-    publicBadge: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: colors.background,
-      alignItems: "center",
-      justifyContent: "center",
-    },
     metricRow: {
       flexDirection: "row",
       gap: 10,
@@ -593,6 +629,10 @@ const createStyles = (colors: typeof Colors.light) =>
     personInfo: {
       flex: 1,
     },
+    personMetaColumn: {
+      alignItems: "flex-end",
+      gap: 10,
+    },
     personName: {
       fontSize: 20,
       fontWeight: "800",
@@ -604,6 +644,20 @@ const createStyles = (colors: typeof Colors.light) =>
       color: colors.textSecondary,
       marginTop: 4,
       fontWeight: "500",
+    },
+    deckCountBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: colors.primary + "12",
+      borderRadius: 999,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+    },
+    deckCountText: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.primary,
     },
     rankBadge: {
       paddingHorizontal: 10,

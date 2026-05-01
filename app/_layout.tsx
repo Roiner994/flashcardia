@@ -100,6 +100,14 @@ export default function RootLayout() {
           />
           <Stack.Screen name="review/[id]" options={{ headerShown: false }} />
           <Stack.Screen
+            name="community-import/[deckId]"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="community-person/[userId]"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="modal"
             options={{ presentation: "modal", title: "Modal" }}
           />
