@@ -30,7 +30,8 @@
     "rateApp": "Rate MagicDeck",
     "signOut": "Sign Out",
     "version": "version",
-    "madeWith": "Made with ✨ by MagicDeck AI"
+    "madeWith": "Made with ✨ by MagicDeck AI",
+    "premiumMember": "Premium Member"
   },
   "editProfile": {
     "title": "Edit Profile",
@@ -123,6 +124,28 @@
     "errorBody": "Failed to generate card. Please try again.",
     "total": "Total"
   },
+  "community": {
+    "title": "Explore",
+    "decks": "Decks",
+    "people": "People",
+    "add": "Add",
+    "like": "Like",
+    "subtitle": "Find fresh public decks and people building learning momentum.",
+    "deckSpotlight": "Deck spotlight",
+    "peoplePulse": "Learning rhythm",
+    "shareToCommunity": "Share to Community",
+    "anonymous": "Anonymous",
+    "dayStreak": "Day Streak",
+    "loadDataError": "Failed to load data",
+    "forkSuccess": "Deck added to your library!",
+    "forkError": "Failed to clone deck",
+    "noDecksTitle": "No public decks yet",
+    "noDecksBody": "Shared decks will appear here once someone publishes one to community.",
+    "noPeopleTitle": "No people to highlight yet",
+    "noPeopleBody": "Community profiles will appear here as learners start building streaks.",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Choose a community name"
+  },
   "auth": {
     "welcomeBack": "Welcome Back",
     "join": "Join MagicDeck",
@@ -203,6 +226,7 @@
   },
   "tabs": {
     "decks": "Decks",
+    "explore": "Explore",
     "challenge": "Challenge",
     "settings": "Settings"
   },

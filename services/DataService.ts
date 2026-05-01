@@ -40,19 +40,23 @@ export const DataService = {
     }
   },
 
-  async createDeck(title: string): Promise<Deck> {
+  async createDeck(title: string, isPublic: boolean = false): Promise<Deck> {
     const userId = await this.getUserId();
     const newDeck: Deck = {
       id: Crypto.randomUUID(),
       title,
       user_id: userId,
       created_at: new Date().toISOString(),
+      is_public: isPublic,
+      likes_count: 0,
+      downloads_count: 0,
+      tags: [],
     };
 
     if (userId) {
       const { data, error } = await supabase
         .from('decks')
-        .insert([{ title, user_id: userId }]) // Let Supabase generate ID/timestamp if desired, but we can also send.
+        .insert([{ title, user_id: userId, is_public: isPublic }]) // Let Supabase generate ID/timestamp if desired, but we can also send.
         // Actually, best to let Supabase handle ID for remote, but for hybrid consistency we might want to standardize.
         // For this demo, let's let Supabase return the object.
         .select()

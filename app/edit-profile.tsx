@@ -33,6 +33,9 @@ export default function EditProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState(
     session?.user?.user_metadata?.avatar_url || "",
   );
+  const [username, setUsername] = useState(
+    session?.user?.user_metadata?.username || ""
+  );
   const [loading, setLoading] = useState(false);
 
   // Custom Alert State
@@ -115,6 +118,7 @@ export default function EditProfileScreen() {
       // Update profile
       await updateProfile({
         full_name: name,
+        username: username,
         avatar_url: finalAvatarUrl,
       });
 
@@ -262,6 +266,14 @@ export default function EditProfileScreen() {
                 onChangeText={setName}
                 placeholder={t("editProfile.namePlaceholder")}
                 autoCapitalize="words"
+            />
+
+            <Input
+                label={t("community.usernameLabel")}
+                value={username}
+                onChangeText={setUsername}
+                placeholder={t("community.usernamePlaceholder")}
+                autoCapitalize="none"
             />
 
             <View style={styles.actions}>

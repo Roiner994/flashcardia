@@ -57,8 +57,8 @@ export default function HomeScreen() {
     }
   }, [session]);
 
-  const handleCreateDeck = async (title: string) => {
-    await createDeck(title);
+  const handleCreateDeck = async (title: string, isPublic: boolean) => {
+    await createDeck(title, isPublic);
     setBottomSheetVisible(false);
   };
 

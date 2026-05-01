@@ -4,6 +4,10 @@ export interface Deck {
   user_id: string | null;
   daily_new_limit?: number;
   created_at: string;
+  is_public?: boolean;
+  likes_count?: number;
+  downloads_count?: number;
+  tags?: string[];
 }
 
 export interface Card {
@@ -27,4 +31,7 @@ export interface Profile {
   longest_streak: number;
   last_completed_date: string | null;
   streak_shields_count: number;
+  username?: string;
+  full_name?: string;
+  avatar_url?: string;
 }

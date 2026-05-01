@@ -46,6 +46,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="explore"
+        options={{
+          title: t("tabs.explore") || "Explore",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "earth" : "earth-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="challenge"
         options={{
           title: t("tabs.challenge"),

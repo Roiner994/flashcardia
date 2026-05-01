@@ -214,7 +214,7 @@ export default function SettingsScreen() {
           />
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>
-              {session?.user?.user_metadata?.full_name || "Premium Member"}
+              {session?.user?.user_metadata?.full_name || t("community.premiumMember")}
             </Text>
             <Text style={styles.profileEmail}>{session.user.email}</Text>
           </View>

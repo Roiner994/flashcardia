@@ -30,7 +30,8 @@
     "rateApp": "Valorar MagicDeck",
     "signOut": "Cerrar Sesión",
     "version": "versión",
-    "madeWith": "Hecho con ✨ por MagicDeck AI"
+    "madeWith": "Hecho con ✨ por MagicDeck AI",
+    "premiumMember": "Miembro Premium"
   },
   "editProfile": {
     "title": "Editar Perfil",
@@ -120,7 +121,30 @@
     "save": "Guardar en el Mazo",
     "tryAgain": "Borrar e Intentar de Nuevo",
     "errorTitle": "Error",
-    "errorBody": "Error al generar tarjeta. Intenta de nuevo."
+    "errorBody": "Error al generar tarjeta. Intenta de nuevo.",
+    "total": "Total"
+  },
+  "community": {
+    "title": "Explorar",
+    "decks": "Mazos",
+    "people": "Gente",
+    "add": "Agregar",
+    "like": "Me gusta",
+    "subtitle": "Descubre mazos publicos y personas creando impulso de aprendizaje.",
+    "deckSpotlight": "Mazo destacado",
+    "peoplePulse": "Ritmo de aprendizaje",
+    "shareToCommunity": "Compartir en la Comunidad",
+    "anonymous": "Anónimo",
+    "dayStreak": "Días de racha",
+    "loadDataError": "Error al cargar datos",
+    "forkSuccess": "¡Mazo agregado a tu biblioteca!",
+    "forkError": "Error al clonar el mazo",
+    "noDecksTitle": "Aun no hay mazos publicos",
+    "noDecksBody": "Los mazos compartidos apareceran aqui cuando alguien publique uno en comunidad.",
+    "noPeopleTitle": "Aun no hay personas para destacar",
+    "noPeopleBody": "Los perfiles de comunidad apareceran aqui cuando aprendices empiecen a crear rachas.",
+    "usernameLabel": "Nombre de usuario",
+    "usernamePlaceholder": "Elige un nombre para la comunidad"
   },
   "auth": {
     "welcomeBack": "Bienvenido de Nuevo",
@@ -202,6 +226,7 @@
   },
   "tabs": {
     "decks": "Mazos",
+    "explore": "Explorar",
     "challenge": "Reto",
     "settings": "Ajustes"
   },

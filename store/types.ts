@@ -32,7 +32,7 @@ export interface DecksSlice {
     decks: Deck[];
     isDecksLoading: boolean;
     loadDecks: () => Promise<void>;
-    createDeck: (title: string) => Promise<void>;
+    createDeck: (title: string, isPublic?: boolean) => Promise<void>;
     updateDeck: (id: string, deckData: Partial<Deck>) => Promise<void>;
     deleteDeck: (id: string) => Promise<void>;
 }
