@@ -33,6 +33,9 @@ export default function EditProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState(
     session?.user?.user_metadata?.avatar_url || "",
   );
+  const [username, setUsername] = useState(
+    session?.user?.user_metadata?.username || ""
+  );
   const [loading, setLoading] = useState(false);
 
   // Custom Alert State
@@ -115,6 +118,7 @@ export default function EditProfileScreen() {
       // Update profile
       await updateProfile({
         full_name: name,
+        username: username,
         avatar_url: finalAvatarUrl,
       });
 
@@ -179,6 +183,11 @@ export default function EditProfileScreen() {
       borderWidth: 1,
       borderColor: colors.border,
     },
+    avatarPlaceholder: {
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
     editIconBadge: {
       position: "absolute",
       bottom: 0,
@@ -234,14 +243,16 @@ export default function EditProfileScreen() {
               onPress={pickImage}
               style={styles.avatarContainer}
             >
-              <Image
-                source={{
-                  uri:
-                    avatarUrl ||
-                    "https://i.pravatar.cc/150?u=" + (session?.user?.id || ""),
-                }}
-                style={styles.avatar}
-              />
+              {avatarUrl ? (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                  <Ionicons name="person" size={48} color={colors.white} />
+                </View>
+              )}
               <View style={styles.editIconBadge}>
                 <Ionicons name="camera" size={16} color="white" />
               </View>
@@ -262,6 +273,14 @@ export default function EditProfileScreen() {
                 onChangeText={setName}
                 placeholder={t("editProfile.namePlaceholder")}
                 autoCapitalize="words"
+            />
+
+            <Input
+                label={t("community.usernameLabel")}
+                value={username}
+                onChangeText={setUsername}
+                placeholder={t("community.usernamePlaceholder")}
+                autoCapitalize="none"
             />
 
             <View style={styles.actions}>

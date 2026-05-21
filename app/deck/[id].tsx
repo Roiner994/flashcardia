@@ -1,4 +1,5 @@
 import { DeckDetailSkeleton } from "@components/deck/DeckDetailSkeleton";
+import { CardEditorModal } from "@components/deck/CardEditorModal";
 import { DeckSettingsSheet } from "@components/deck/DeckSettingsSheet";
 import { CustomAlert } from "@components/modals/CustomAlert";
 import { RecordingView } from "@components/ui/RecordingView";
@@ -8,9 +9,7 @@ import { useMagicCard } from "@hooks/useMagicCard";
 import { useSpeechRecognition } from "@hooks/useSpeechRecognition";
 import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
-import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as Speech from "expo-speech";
 import LottieView from "lottie-react-native";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -47,7 +46,12 @@ export default function DeckDetailScreen() {
     creationStep,
     setCreationStep,
     isGenerating,
-    generatedResult,
+    isSaving,
+    draftCard,
+    updateDraftField,
+    updateExample,
+    addExample,
+    removeExample,
     generateCard,
     saveCard,
     resetCreation,
@@ -56,7 +60,7 @@ export default function DeckDetailScreen() {
   const colors = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => getStyles(colors, insets), [colors, insets]);
-  const { decks, currentCards, loadCards, isCardsLoading } = useStore();
+  const { decks, currentCards, allCards, loadCards, loadAllCards, isCardsLoading } = useStore();
 
   const [isSettingsVisible, setSettingsVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -84,8 +88,9 @@ export default function DeckDetailScreen() {
   useEffect(() => {
     if (id) {
       loadCards(id);
+      loadAllCards();
     }
-  }, [id, loadCards]);
+  }, [id, loadCards, loadAllCards]);
 
   useEffect(() => {
     if (initialMagicWord) {
@@ -108,6 +113,7 @@ export default function DeckDetailScreen() {
   }
 
   // Stats
+  const deckTotalCards = allCards.filter((c) => c.deck_id === id).length;
   const getCount = (status: string) =>
     currentCards.filter((c) => (c.status || "new") === status).length;
   const newCount = getCount("new");
@@ -144,17 +150,6 @@ export default function DeckDetailScreen() {
     router.push(`/review/${id}`);
   };
 
-  const speak = (text: string) => {
-    if (!text) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Speech.stop();
-    Speech.speak(text, {
-      language: "en-US",
-      pitch: 1.0,
-      rate: 0.9,
-    });
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
@@ -184,9 +179,10 @@ export default function DeckDetailScreen() {
             <Ionicons name="language" size={32} color={colors.primary} />
           </View>
           <Text style={styles.deckTitle}>{deck.title}</Text>
-          <Text style={styles.cardCount}>
-            {currentCards.length} {t("deck.cardsTotal")}
-          </Text>
+          <View style={styles.cardCountPill}>
+            <Ionicons name="documents-outline" size={14} color={colors.primary} />
+            <Text style={styles.cardCount}>{deckTotalCards} {t("deck.cardsTotal")}</Text>
+          </View>
 
           <TouchableOpacity
             style={styles.startButton}
@@ -386,101 +382,26 @@ export default function DeckDetailScreen() {
         </Modal>
       )}
 
-      {/* Magic Creation Preview - Full Screen */}
       {creationStep === "preview" && (
-        <Modal
+        <CardEditorModal
           visible={isModalVisible}
-          animationType="slide"
-          transparent={false}
-        >
-          <SafeAreaView style={styles.previewSafeArea}>
-            <View style={styles.previewHeader}>
-              <TouchableOpacity
-                onPress={() => setCreationStep("input")}
-                style={styles.previewBack}
-              >
-                <Ionicons name="arrow-back" size={24} color={colors.primary} />
-              </TouchableOpacity>
-              <Text style={styles.previewHeaderTitle}>
-                {t("magic.previewTitle")}
-              </Text>
-              <View style={{ width: 40 }} />
-            </View>
-
-            <ScrollView
-              style={styles.previewScroll}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.previewCardBody}>
-                <View style={styles.wordHeroContainer}>
-                  <Text style={styles.previewWordMain}>{magicWord}</Text>
-
-                  <TouchableOpacity
-                    onPress={() => speak(magicWord)}
-                    style={styles.phoneticRow}
-                  >
-                    <View style={styles.audioButtonPreview}>
-                      <Ionicons
-                        name="volume-medium"
-                        size={18}
-                        color={colors.primary}
-                      />
-                    </View>
-                    <Text style={styles.phoneticTextPreview}>
-                      {generatedResult?.phonetic}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.contentBlock}>
-                  <Text style={styles.contentLabel}>{t("magic.concept")}</Text>
-                  <Text style={styles.contentText}>
-                    {generatedResult?.definition}
-                  </Text>
-                </View>
-
-                <View style={styles.contentBlock}>
-                  <Text style={styles.contentLabel}>{t("magic.meaning")}</Text>
-                  <View style={styles.meaningBox}>
-                    <Text style={styles.contentText}>
-                      {generatedResult?.spanish_meaning}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.contentBlock}>
-                  <Text style={styles.contentLabel}>{t("magic.examples")}</Text>
-                  {generatedResult?.examples.map((ex: string, idx: number) => (
-                    <View key={idx} style={styles.exampleListItem}>
-                      <View style={styles.bullet} />
-                      <Text style={styles.exampleItemText}>{ex}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </ScrollView>
-
-            <View style={styles.previewFooter}>
-              <TouchableOpacity
-                style={styles.saveToDeckButton}
-                onPress={handleSaveCard}
-              >
-                <Ionicons name="checkmark" size={24} color="white" />
-                <Text style={styles.saveToDeckText}>{t("magic.save")}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteTryAgain}
-                onPress={resetCreation}
-              >
-                <Text style={styles.deleteTryAgainText}>
-                  {t("magic.tryAgain")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </SafeAreaView>
-        </Modal>
+          title={t("magic.previewTitle")}
+          saveLabel={t("magic.save")}
+          secondaryLabel={t("magic.tryAgain")}
+          secondaryVariant="destructive"
+          draft={draftCard}
+          isSaving={isSaving}
+          onClose={() => {
+            setModalVisible(false);
+            setTimeout(() => resetCreation(), 300);
+          }}
+          onSave={handleSaveCard}
+          onSecondaryAction={resetCreation}
+          onChangeField={updateDraftField}
+          onChangeExample={updateExample}
+          onAddExample={addExample}
+          onRemoveExample={removeExample}
+        />
       )}
 
       <CustomAlert
@@ -574,7 +495,17 @@ function getStyles(colors: typeof Colors.light, insets: { bottom: number }) {
     },
     cardCount: {
       fontSize: 14,
-      color: colors.textSecondary,
+      color: colors.primary,
+      fontWeight: "700",
+    },
+    cardCountPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 999,
+      backgroundColor: colors.primary + "12",
       marginBottom: 20,
     },
     startButton: {

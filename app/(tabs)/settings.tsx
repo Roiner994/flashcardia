@@ -204,17 +204,19 @@ export default function SettingsScreen() {
       >
         {/* Profile Section */}
         <View style={styles.profileCard}>
-          <Image
-            source={{
-              uri:
-                session?.user?.user_metadata?.avatar_url ||
-                "https://i.pravatar.cc/150?u=" + session.user.id,
-            }}
-            style={styles.profileImage}
-          />
+          {session?.user?.user_metadata?.avatar_url ? (
+            <Image
+              source={{ uri: session.user.user_metadata.avatar_url }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <View style={[styles.profileImage, styles.profileImagePlaceholder]}>
+              <Ionicons name="person" size={24} color={colors.white} />
+            </View>
+          )}
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>
-              {session?.user?.user_metadata?.full_name || "Premium Member"}
+              {session?.user?.user_metadata?.full_name || t("community.premiumMember")}
             </Text>
             <Text style={styles.profileEmail}>{session.user.email}</Text>
           </View>
@@ -472,6 +474,11 @@ const createStyles = (colors: typeof Colors.light) =>
       height: 60,
       borderRadius: 30,
       backgroundColor: colors.background,
+    },
+    profileImagePlaceholder: {
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
     },
     profileInfo: {
       flex: 1,

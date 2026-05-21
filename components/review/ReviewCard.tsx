@@ -2,6 +2,7 @@ import { Colors } from "@constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@hooks/useThemeColor";
 import { Card } from "@types";
+import { Image } from "expo-image";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -54,6 +55,9 @@ export const ReviewCard = ({
             <View style={styles.pillLabelContainer}>
               <Text style={styles.pillLabelText}>{t("review.concept")}</Text>
             </View>
+            {card.image_url ? (
+              <Image source={{ uri: card.image_url }} style={styles.frontImage} contentFit="cover" />
+            ) : null}
             <Text style={styles.frontWord}>{card.front_word}</Text>
 
             <View style={styles.tapToFlipContainer}>
@@ -85,6 +89,9 @@ export const ReviewCard = ({
                 </Text>
               </View>
                 <Text style={styles.definitionText}>{card.definition}</Text>
+                {card.image_url ? (
+                  <Image source={{ uri: card.image_url }} style={styles.backImage} contentFit="cover" />
+                ) : null}
                 
                 {card.spanish_meaning && (
                     <View style={styles.meaningContainer}>
@@ -200,6 +207,13 @@ const createStyles = (colors: typeof Colors.light) =>
       marginBottom: 40,
       lineHeight: 50,
     },
+    frontImage: {
+      width: "100%",
+      height: 150,
+      borderRadius: 24,
+      marginBottom: 24,
+      backgroundColor: colors.background,
+    },
     tapToFlipContainer: {
       position: "absolute",
       bottom: 40,
@@ -243,6 +257,13 @@ const createStyles = (colors: typeof Colors.light) =>
       textAlign: "center",
       lineHeight: 26,
       marginBottom: 12,
+    },
+    backImage: {
+      width: "100%",
+      height: 140,
+      borderRadius: 18,
+      marginBottom: 14,
+      backgroundColor: colors.background,
     },
     divider: {
       width: 40,

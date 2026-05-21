@@ -14,7 +14,7 @@ export interface AuthSlice {
     checkSession: () => Promise<void>;
     initAuthListener: () => () => void;
     signOut: () => Promise<void>;
-    updateProfile: (updates: { full_name?: string; avatar_url?: string }) => Promise<void>;
+    updateProfile: (updates: { full_name?: string; avatar_url?: string; username?: string }) => Promise<void>;
     updatePassword: (password: string) => Promise<void>;
 }
 
@@ -32,7 +32,7 @@ export interface DecksSlice {
     decks: Deck[];
     isDecksLoading: boolean;
     loadDecks: () => Promise<void>;
-    createDeck: (title: string) => Promise<void>;
+    createDeck: (title: string, isPublic?: boolean) => Promise<void>;
     updateDeck: (id: string, deckData: Partial<Deck>) => Promise<void>;
     deleteDeck: (id: string) => Promise<void>;
 }
@@ -44,6 +44,7 @@ export interface CardsSlice {
     loadCards: (deckId: string) => Promise<void>;
     loadAllCards: () => Promise<void>;
     addCard: (card: Omit<Card, 'id' | 'created_at'>) => Promise<void>;
+    updateCard: (id: string, updates: Partial<Omit<Card, 'id' | 'created_at'>>) => Promise<void>;
 }
 
 export interface ReviewSlice {

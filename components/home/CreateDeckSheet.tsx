@@ -18,7 +18,7 @@ import {
 interface CreateDeckSheetProps {
   visible: boolean;
   onClose: () => void;
-  onCreate: (title: string) => Promise<void>;
+  onCreate: (title: string, isPublic: boolean) => Promise<void>;
 }
 
 const width = Dimensions.get("window").width;
@@ -32,11 +32,13 @@ export function CreateDeckSheet({
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [title, setTitle] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
 
   const handleCreate = async () => {
     if (!title.trim()) return;
-    await onCreate(title);
+    await onCreate(title, isPublic);
     setTitle("");
+    setIsPublic(false);
     onClose();
   };
 
@@ -66,6 +68,16 @@ export function CreateDeckSheet({
                     onChangeText={setTitle}
                     autoFocus
                   />
+                </View>
+
+                <View style={styles.toggleContainer}>
+                  <Text style={styles.inputLabel}>{t("community.shareToCommunity")}</Text>
+                  <TouchableOpacity
+                    style={[styles.toggle, isPublic && styles.toggleActive]}
+                    onPress={() => setIsPublic(!isPublic)}
+                  >
+                    <View style={[styles.toggleThumb, isPublic && styles.toggleThumbActive]} />
+                  </TouchableOpacity>
                 </View>
 
                 <View style={styles.buttonRow}>
@@ -179,5 +191,30 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     buttonDisabled: {
       opacity: 0.5,
+    },
+    toggleContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    toggle: {
+      width: 50,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: colors.border,
+      padding: 2,
+    },
+    toggleActive: {
+      backgroundColor: colors.primary,
+    },
+    toggleThumb: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: "white",
+    },
+    toggleThumbActive: {
+      transform: [{ translateX: 20 }],
     },
   });

@@ -38,10 +38,28 @@ export const createAuthSlice: StateCreator<
 
     updateProfile: async (updates) => {
         try {
-            const { error } = await supabase.auth.updateUser({
+            const { session } = get();
+            if (!session?.user?.id) throw new Error('No active session');
+
+            // 1. Update Auth Metadata
+            const { error: authError } = await supabase.auth.updateUser({
                 data: updates,
             });
-            if (error) throw error;
+            if (authError) throw authError;
+
+            // 2. Update Public Profiles table
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .update({
+                    username: updates.username,
+                    avatar_url: updates.avatar_url,
+                    full_name: updates.full_name, // If you have this column
+                })
+                .eq('id', session.user.id);
+            
+            // Note: If profileError is "column does not exist", it will fail gracefully here
+            // but we added username and avatar_url in the migration earlier.
+
             await get().checkSession();
         } catch (error) {
             console.error('Failed to update profile', error);

@@ -1,9 +1,13 @@
 import { Colors } from "@constants/Colors";
+import { CardEditorModal } from "@components/deck/CardEditorModal";
 import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
 import { Ionicons } from "@expo/vector-icons";
+import { DataService } from "@services/DataService";
+import { Card, CardDraft } from "@types";
+import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FlatList,
@@ -17,6 +21,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 type FilterStatus = "all" | "new" | "learning" | "mastered";
 
+const createDraftFromCard = (card: Card): CardDraft => ({
+  front_word: card.front_word,
+  definition: card.definition,
+  spanish_meaning: card.spanish_meaning,
+  phonetic: card.phonetic || "",
+  examples: card.examples?.length ? card.examples : [""],
+  image_url: card.image_url ?? null,
+  audio_url: card.audio_url ?? null,
+  audio_source: card.audio_source ?? "tts",
+});
+
 export default function DeckCardsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -24,11 +39,18 @@ export default function DeckCardsScreen() {
   const colors = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const { allCards, decks } = useStore();
+  const { allCards, decks, loadAllCards, updateCard } = useStore();
   const deck = decks.find((d) => d.id === id);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [editingCard, setEditingCard] = useState<Card | null>(null);
+  const [draft, setDraft] = useState<CardDraft | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    loadAllCards();
+  }, [loadAllCards]);
 
   const deckCards = useMemo(() => {
     return allCards.filter((c) => c.deck_id === id);
@@ -104,6 +126,70 @@ export default function DeckCardsScreen() {
     );
   };
 
+  const updateDraftField = <K extends keyof CardDraft>(field: K, value: CardDraft[K]) => {
+    setDraft((current) => (current ? { ...current, [field]: value } : current));
+  };
+
+  const updateExample = (index: number, value: string) => {
+    setDraft((current) => {
+      if (!current) return current;
+      const nextExamples = [...current.examples];
+      nextExamples[index] = value;
+      return { ...current, examples: nextExamples };
+    });
+  };
+
+  const addExample = () => {
+    setDraft((current) => (current ? { ...current, examples: [...current.examples, ""] } : current));
+  };
+
+  const removeExample = (index: number) => {
+    setDraft((current) => {
+      if (!current) return current;
+      const nextExamples = current.examples.filter((_, itemIndex) => itemIndex !== index);
+      return { ...current, examples: nextExamples.length ? nextExamples : [""] };
+    });
+  };
+
+  const openEditor = (card: Card) => {
+    setEditingCard(card);
+    setDraft(createDraftFromCard(card));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCard || !draft) return;
+
+    try {
+      setIsSaving(true);
+      const imageUrl =
+        draft.image_url && draft.image_url !== editingCard.image_url
+          ? await DataService.uploadCardMedia(draft.image_url, editingCard.deck_id, "image")
+          : draft.image_url;
+      const audioUrl =
+        draft.audio_source === "recorded" && draft.audio_url && draft.audio_url !== editingCard.audio_url
+          ? await DataService.uploadCardMedia(draft.audio_url, editingCard.deck_id, "audio")
+          : draft.audio_url;
+
+      await updateCard(editingCard.id, {
+        front_word: draft.front_word.trim(),
+        definition: draft.definition.trim(),
+        spanish_meaning: draft.spanish_meaning.trim(),
+        phonetic: draft.phonetic.trim() || null,
+        examples: draft.examples.map((example) => example.trim()).filter(Boolean),
+        image_url: imageUrl || null,
+        audio_url: draft.audio_source === "recorded" ? audioUrl || null : null,
+        audio_source: draft.audio_source === "recorded" && audioUrl ? "recorded" : "tts",
+      });
+
+      setEditingCard(null);
+      setDraft(null);
+    } catch (error) {
+      console.error("Failed to update card", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -174,13 +260,28 @@ export default function DeckCardsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <View style={styles.cardItem}>
+          <TouchableOpacity style={styles.cardItem} activeOpacity={0.9} onPress={() => openEditor(item)}>
+            {item.image_url ? (
+              <Image source={{ uri: item.image_url }} style={styles.cardThumb} contentFit="cover" />
+            ) : (
+              <View style={styles.cardThumbPlaceholder}>
+                <Ionicons name="image-outline" size={18} color={colors.primary} />
+              </View>
+            )}
             <View style={styles.cardInfo}>
               <Text style={styles.cardFront}>{item.front_word}</Text>
               <Text style={styles.cardBack} numberOfLines={2}>
                 {item.definition}
               </Text>
             </View>
+            {item.audio_source === "recorded" && item.audio_url ? (
+              <Ionicons
+                name="mic"
+                size={18}
+                color={colors.primary}
+                style={styles.audioBadge}
+              />
+            ) : null}
             <View
               style={[
                 styles.statusDot,
@@ -194,7 +295,7 @@ export default function DeckCardsScreen() {
                 },
               ]}
             />
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={styles.emptyState}>
@@ -203,6 +304,28 @@ export default function DeckCardsScreen() {
             </Text>
           </View>
         }
+      />
+
+      <CardEditorModal
+        visible={!!editingCard}
+        title={t("cardEditor.editTitle")}
+        saveLabel={t("cardEditor.saveChanges")}
+        secondaryLabel={t("common.cancel")}
+        draft={draft}
+        isSaving={isSaving}
+        onClose={() => {
+          setEditingCard(null);
+          setDraft(null);
+        }}
+        onSave={handleSaveEdit}
+        onSecondaryAction={() => {
+          setEditingCard(null);
+          setDraft(null);
+        }}
+        onChangeField={updateDraftField}
+        onChangeExample={updateExample}
+        onAddExample={addExample}
+        onRemoveExample={removeExample}
       />
     </SafeAreaView>
   );
@@ -291,6 +414,22 @@ const createStyles = (colors: typeof Colors.light) =>
       shadowOpacity: 0.05,
       shadowRadius: 2,
     },
+    cardThumb: {
+      width: 48,
+      height: 48,
+      borderRadius: 14,
+      marginRight: 12,
+      backgroundColor: colors.background,
+    },
+    cardThumbPlaceholder: {
+      width: 48,
+      height: 48,
+      borderRadius: 14,
+      marginRight: 12,
+      backgroundColor: colors.primary + "14",
+      alignItems: "center",
+      justifyContent: "center",
+    },
     cardInfo: {
       flex: 1,
       marginRight: 12,
@@ -309,6 +448,9 @@ const createStyles = (colors: typeof Colors.light) =>
       width: 10,
       height: 10,
       borderRadius: 5,
+    },
+    audioBadge: {
+      marginRight: 12,
     },
     emptyState: {
       alignItems: "center",

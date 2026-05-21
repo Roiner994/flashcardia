@@ -24,9 +24,9 @@ export const createDecksSlice: StateCreator<
         }
     },
 
-    createDeck: async (title: string) => {
+    createDeck: async (title: string, isPublic?: boolean) => {
         try {
-            await DataService.createDeck(title);
+            await DataService.createDeck(title, isPublic);
             await get().loadDecks();
         } catch (error) {
             console.error('Failed to create deck', error);
