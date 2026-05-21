@@ -29,11 +29,25 @@ export interface Card {
   spanish_meaning: string; // "Meaning" in the UI
   phonetic: string | null;
   examples: string[]; // "Usage Examples" in the UI
+  image_url: string | null;
+  audio_url: string | null;
+  audio_source: 'tts' | 'recorded';
   status: 'new' | 'learning' | 'review' | 'mastered';
   next_review_at: string | null;
   interval: number; // in days
   ease_factor: number; // default 2.5
   created_at: string;
+}
+
+export interface CardDraft {
+  front_word: string;
+  definition: string;
+  spanish_meaning: string;
+  phonetic: string;
+  examples: string[];
+  image_url: string | null;
+  audio_url: string | null;
+  audio_source: 'tts' | 'recorded';
 }
 
 export interface Profile {
@@ -55,6 +69,9 @@ export interface PublicDeckPreviewCard {
   spanish_meaning: string;
   phonetic: string | null;
   examples: string[];
+  image_url?: string | null;
+  audio_url?: string | null;
+  audio_source?: 'tts' | 'recorded';
   example_sentence?: string | null;
 }
 

@@ -99,10 +99,10 @@ export default function ExploreScreen() {
       prev.map((deck) =>
         deck.id === deckId
           ? {
-              ...deck,
-              liked_by_user: !wasLiked,
-              likes_count: Math.max(0, (deck.likes_count || 0) + optimisticDelta),
-            }
+            ...deck,
+            liked_by_user: !wasLiked,
+            likes_count: Math.max(0, (deck.likes_count || 0) + optimisticDelta),
+          }
           : deck,
       ),
     );
@@ -113,13 +113,13 @@ export default function ExploreScreen() {
         prev.map((deck) =>
           deck.id === deckId
             ? {
-                ...deck,
-                liked_by_user: liked,
-                likes_count: Math.max(
-                  0,
-                  (deck.likes_count || 0) + (liked === wasLiked ? -optimisticDelta : 0),
-                ),
-              }
+              ...deck,
+              liked_by_user: liked,
+              likes_count: Math.max(
+                0,
+                (deck.likes_count || 0) + (liked === wasLiked ? -optimisticDelta : 0),
+              ),
+            }
             : deck,
         ),
       );
@@ -129,10 +129,10 @@ export default function ExploreScreen() {
         prev.map((deck) =>
           deck.id === deckId
             ? {
-                ...deck,
-                liked_by_user: wasLiked,
-                likes_count: Math.max(0, (deck.likes_count || 0) - optimisticDelta),
-              }
+              ...deck,
+              liked_by_user: wasLiked,
+              likes_count: Math.max(0, (deck.likes_count || 0) - optimisticDelta),
+            }
             : deck,
         ),
       );
@@ -177,25 +177,26 @@ export default function ExploreScreen() {
               end={{ x: 1, y: 1 }}
               style={styles.deckIcon}
             >
-              <Ionicons name="sparkles" size={18} color={colors.white} />
+              <Ionicons name="language" size={16} color={colors.white} />
             </LinearGradient>
 
             <View style={styles.cardTitleWrap}>
-              <Text style={styles.cardEyebrow}>{t("community.deckSpotlight")}</Text>
               <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardSubtitle}>{ownerName}</Text>
+              <View style={styles.ownerRow}>
+                <Ionicons name="person-circle-outline" size={13} color={colors.textSecondary} />
+                <Text style={styles.cardSubtitle}>{ownerName}</Text>
+              </View>
             </View>
 
-          </View>
-
-          <View style={styles.metricRow}>
-            <View style={styles.metricPill}>
-              <Ionicons name="heart-outline" size={14} color={colors.primary} />
-              <Text style={styles.metricText}>{item.likes_count || 0}</Text>
-            </View>
-            <View style={styles.metricPill}>
-              <Ionicons name="download-outline" size={14} color={colors.info} />
-              <Text style={styles.metricText}>{item.downloads_count || 0}</Text>
+            <View style={styles.rightStatsColumn}>
+              <View style={styles.metricPill}>
+                <Ionicons name="heart-outline" size={12} color={colors.primary} />
+                <Text style={styles.metricText}>{item.likes_count || 0}</Text>
+              </View>
+              <View style={styles.metricPill}>
+                <Ionicons name="download-outline" size={12} color={colors.info} />
+                <Text style={styles.metricText}>{item.downloads_count || 0}</Text>
+              </View>
             </View>
           </View>
 
@@ -206,7 +207,7 @@ export default function ExploreScreen() {
             >
               <Ionicons
                 name={item.liked_by_user ? "heart" : "heart-outline"}
-                size={18}
+                size={16}
                 color={colors.primary}
               />
               <Text style={styles.secondaryActionText}>{t("community.like")}</Text>
@@ -216,7 +217,7 @@ export default function ExploreScreen() {
               style={styles.primaryAction}
               onPress={() => handleFork(item.id)}
             >
-              <Ionicons name="download-outline" size={18} color={colors.white} />
+              <Ionicons name="download-outline" size={16} color={colors.white} />
               <Text style={styles.primaryActionText}>{t("community.add")}</Text>
             </TouchableOpacity>
           </View>
@@ -240,15 +241,24 @@ export default function ExploreScreen() {
           <View style={styles.personHeader}>
             <View style={styles.personIdentity}>
               {item.avatar_url ? (
-                <Image source={{ uri: item.avatar_url }} style={styles.avatar} />
+                <Image
+                  source={{ uri: item.avatar_url }}
+                  style={[
+                    styles.avatar,
+                    styles.defaultRing
+                  ]}
+                />
               ) : (
                 <LinearGradient
                   colors={[colors.primary, "#c4b5fd"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  style={styles.avatarPlaceholder}
+                  style={[
+                    styles.avatarPlaceholder,
+                    styles.defaultRing
+                  ]}
                 >
-                  <Ionicons name="person" size={20} color={colors.white} />
+                  <Ionicons name="person" size={16} color={colors.white} />
                 </LinearGradient>
               )}
 
@@ -262,6 +272,9 @@ export default function ExploreScreen() {
 
             <View style={styles.personMetaColumn}>
               <View style={[styles.rankBadge, isLeader && styles.rankBadgeHot]}>
+                {index === 0 && <Ionicons name="trophy" size={11} color="#b45309" style={{ marginRight: 2 }} />}
+                {index === 1 && <Ionicons name="star" size={11} color="#475569" style={{ marginRight: 2 }} />}
+                {index === 2 && <Ionicons name="star" size={11} color="#b45309" style={{ marginRight: 2 }} />}
                 <Text
                   style={[styles.rankText, isLeader && styles.rankTextHot]}
                 >
@@ -269,23 +282,13 @@ export default function ExploreScreen() {
                 </Text>
               </View>
               <View style={styles.deckCountBadge}>
-                <Ionicons name="albums-outline" size={14} color={colors.primary} />
+                <Ionicons name="albums-outline" size={12} color={colors.primary} />
                 <Text style={styles.deckCountText}>
                   {t("community.publicDeckCount", {
                     count: item.public_deck_count || 0,
                   })}
                 </Text>
               </View>
-            </View>
-          </View>
-
-          <View style={styles.streakPanel}>
-            <View>
-              <Text style={styles.streakValue}>{item.current_streak}</Text>
-              <Text style={styles.streakLabel}>{t("community.dayStreak")}</Text>
-            </View>
-            <View style={styles.streakIconWrap}>
-              <Ionicons name="flame" size={20} color="#f97316" />
             </View>
           </View>
         </TouchableOpacity>
@@ -490,60 +493,75 @@ const createStyles = (colors: typeof Colors.light) =>
       gap: 18,
     },
     cardShell: {
-      borderRadius: 28,
+      borderRadius: 20,
       shadowColor: "#0f172a",
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.08,
-      shadowRadius: 20,
-      elevation: 5,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.06,
+      shadowRadius: 16,
+      elevation: 4,
     },
     card: {
       backgroundColor: colors.surface,
-      borderRadius: 28,
-      padding: 18,
+      borderRadius: 20,
+      padding: 14,
       borderWidth: 1,
       borderColor: colors.border + "80",
     },
     cardTopRow: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 16,
+      marginBottom: 12,
     },
     deckIcon: {
-      width: 52,
-      height: 52,
-      borderRadius: 18,
+      width: 40,
+      height: 40,
+      borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
-      marginRight: 14,
+      marginRight: 12,
     },
     cardTitleWrap: {
       flex: 1,
     },
     cardEyebrow: {
-      fontSize: 11,
+      fontSize: 10,
       fontWeight: "700",
       color: colors.primary,
       textTransform: "uppercase",
       letterSpacing: 0.8,
-      marginBottom: 3,
+    },
+    eyebrowBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      backgroundColor: colors.primary + "12",
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 6,
+      alignSelf: "flex-start",
+      marginBottom: 6,
+    },
+    ownerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      marginTop: 4,
     },
     cardTitle: {
-      fontSize: 24,
+      fontSize: 18,
       fontWeight: "800",
       color: colors.text,
-      letterSpacing: -0.6,
+      letterSpacing: -0.4,
     },
     cardSubtitle: {
-      fontSize: 14,
+      fontSize: 13,
       color: colors.textSecondary,
-      marginTop: 4,
       fontWeight: "500",
     },
-    metricRow: {
-      flexDirection: "row",
-      gap: 10,
-      marginBottom: 18,
+    rightStatsColumn: {
+      alignItems: "flex-end",
+      gap: 6,
+      marginLeft: 12,
     },
     metricPill: {
       flexDirection: "row",
@@ -551,12 +569,12 @@ const createStyles = (colors: typeof Colors.light) =>
       gap: 6,
       backgroundColor: colors.background,
       borderRadius: 999,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
     },
     metricText: {
       color: colors.text,
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: "700",
     },
     cardFooter: {
@@ -569,13 +587,15 @@ const createStyles = (colors: typeof Colors.light) =>
       alignItems: "center",
       justifyContent: "center",
       gap: 8,
-      backgroundColor: colors.background,
-      borderRadius: 16,
-      paddingVertical: 14,
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: colors.primary + "30",
+      borderRadius: 12,
+      paddingVertical: 10,
     },
     secondaryActionText: {
       color: colors.primary,
-      fontSize: 15,
+      fontSize: 14,
       fontWeight: "700",
     },
     primaryAction: {
@@ -585,18 +605,18 @@ const createStyles = (colors: typeof Colors.light) =>
       justifyContent: "center",
       gap: 8,
       backgroundColor: colors.primary,
-      borderRadius: 16,
-      paddingVertical: 14,
+      borderRadius: 12,
+      paddingVertical: 10,
     },
     primaryActionText: {
       color: colors.white,
-      fontSize: 15,
+      fontSize: 14,
       fontWeight: "700",
     },
     personCard: {
       backgroundColor: colors.surface,
-      borderRadius: 28,
-      padding: 18,
+      borderRadius: 20,
+      padding: 14,
       borderWidth: 1,
       borderColor: colors.border + "80",
     },
@@ -604,7 +624,7 @@ const createStyles = (colors: typeof Colors.light) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: 18,
+      marginBottom: 12,
     },
     personIdentity: {
       flexDirection: "row",
@@ -613,55 +633,62 @@ const createStyles = (colors: typeof Colors.light) =>
       marginRight: 12,
     },
     avatar: {
-      width: 56,
-      height: 56,
-      borderRadius: 20,
-      marginRight: 14,
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      marginRight: 12,
     },
     avatarPlaceholder: {
-      width: 56,
-      height: 56,
-      borderRadius: 20,
+      width: 44,
+      height: 44,
+      borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
-      marginRight: 14,
+      marginRight: 12,
+    },
+    defaultRing: {
+      borderWidth: 2,
+      borderColor: colors.primary + "15",
     },
     personInfo: {
       flex: 1,
     },
     personMetaColumn: {
       alignItems: "flex-end",
-      gap: 10,
+      gap: 6,
     },
     personName: {
-      fontSize: 20,
+      fontSize: 16,
       fontWeight: "800",
       color: colors.text,
-      letterSpacing: -0.4,
+      letterSpacing: -0.3,
     },
     personCaption: {
-      fontSize: 13,
+      fontSize: 12,
       color: colors.textSecondary,
-      marginTop: 4,
+      marginTop: 2,
       fontWeight: "500",
     },
     deckCountBadge: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 6,
+      gap: 4,
       backgroundColor: colors.primary + "12",
       borderRadius: 999,
-      paddingHorizontal: 10,
-      paddingVertical: 7,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
     },
     deckCountText: {
-      fontSize: 12,
+      fontSize: 11,
       fontWeight: "700",
       color: colors.primary,
     },
     rankBadge: {
-      paddingHorizontal: 10,
-      paddingVertical: 7,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
       borderRadius: 999,
       backgroundColor: colors.background,
     },
@@ -669,7 +696,7 @@ const createStyles = (colors: typeof Colors.light) =>
       backgroundColor: "#fef3c7",
     },
     rankText: {
-      fontSize: 12,
+      fontSize: 11,
       fontWeight: "800",
       color: colors.textSecondary,
     },
@@ -681,27 +708,31 @@ const createStyles = (colors: typeof Colors.light) =>
       alignItems: "center",
       justifyContent: "space-between",
       backgroundColor: colors.background,
-      borderRadius: 22,
-      paddingVertical: 14,
-      paddingHorizontal: 16,
+      borderWidth: 1,
+      borderColor: colors.border + "60",
+      borderRadius: 16,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
     },
     streakValue: {
-      fontSize: 28,
+      fontSize: 22,
       fontWeight: "800",
       color: colors.text,
-      letterSpacing: -0.7,
+      letterSpacing: -0.5,
     },
     streakLabel: {
-      fontSize: 13,
+      fontSize: 12,
       color: colors.textSecondary,
       marginTop: 2,
       fontWeight: "600",
     },
     streakIconWrap: {
-      width: 42,
-      height: 42,
-      borderRadius: 16,
+      width: 32,
+      height: 32,
+      borderRadius: 10,
       backgroundColor: "#fff7ed",
+      borderWidth: 1,
+      borderColor: "#ffedd5",
       alignItems: "center",
       justifyContent: "center",
     },

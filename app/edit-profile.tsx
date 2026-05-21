@@ -183,6 +183,11 @@ export default function EditProfileScreen() {
       borderWidth: 1,
       borderColor: colors.border,
     },
+    avatarPlaceholder: {
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
     editIconBadge: {
       position: "absolute",
       bottom: 0,
@@ -238,14 +243,16 @@ export default function EditProfileScreen() {
               onPress={pickImage}
               style={styles.avatarContainer}
             >
-              <Image
-                source={{
-                  uri:
-                    avatarUrl ||
-                    "https://i.pravatar.cc/150?u=" + (session?.user?.id || ""),
-                }}
-                style={styles.avatar}
-              />
+              {avatarUrl ? (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                  <Ionicons name="person" size={48} color={colors.white} />
+                </View>
+              )}
               <View style={styles.editIconBadge}>
                 <Ionicons name="camera" size={16} color="white" />
               </View>

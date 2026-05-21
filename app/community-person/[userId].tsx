@@ -48,24 +48,26 @@ function PersonDeckCard({
             end={{ x: 1, y: 1 }}
             style={styles.deckIcon}
           >
-            <Ionicons name="sparkles" size={18} color={colors.white} />
+            <Ionicons name="language" size={16} color={colors.white} />
           </LinearGradient>
 
           <View style={styles.cardTitleWrap}>
-            <Text style={styles.cardEyebrow}>{t("community.deckSpotlight")}</Text>
             <Text style={styles.cardTitle}>{deck.title}</Text>
-            <Text style={styles.cardSubtitle}>{ownerName}</Text>
+            <View style={styles.ownerRow}>
+              <Ionicons name="person-circle-outline" size={13} color={colors.textSecondary} />
+              <Text style={styles.cardSubtitle}>{ownerName}</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.metricRow}>
-          <View style={styles.metricPill}>
-            <Ionicons name="heart-outline" size={14} color={colors.primary} />
-            <Text style={styles.metricText}>{deck.likes_count || 0}</Text>
-          </View>
-          <View style={styles.metricPill}>
-            <Ionicons name="download-outline" size={14} color={colors.info} />
-            <Text style={styles.metricText}>{deck.downloads_count || 0}</Text>
+          <View style={styles.rightStatsColumn}>
+            <View style={styles.metricPill}>
+              <Ionicons name="heart-outline" size={12} color={colors.primary} />
+              <Text style={styles.metricText}>{deck.likes_count || 0}</Text>
+            </View>
+            <View style={styles.metricPill}>
+              <Ionicons name="download-outline" size={12} color={colors.info} />
+              <Text style={styles.metricText}>{deck.downloads_count || 0}</Text>
+            </View>
           </View>
         </View>
 
@@ -76,7 +78,7 @@ function PersonDeckCard({
           >
             <Ionicons
               name={deck.liked_by_user ? "heart" : "heart-outline"}
-              size={18}
+              size={16}
               color={colors.primary}
             />
             <Text style={styles.secondaryActionText}>{t("community.like")}</Text>
@@ -86,7 +88,7 @@ function PersonDeckCard({
             style={styles.primaryAction}
             onPress={() => onAdd(deck.id)}
           >
-            <Ionicons name="download-outline" size={18} color={colors.white} />
+            <Ionicons name="download-outline" size={16} color={colors.white} />
             <Text style={styles.primaryActionText}>{t("community.add")}</Text>
           </TouchableOpacity>
         </View>
@@ -155,17 +157,17 @@ export default function CommunityPersonScreen() {
     setData((prev) =>
       prev
         ? {
-            ...prev,
-            decks: prev.decks.map((deck) =>
-              deck.id === deckId
-                ? {
-                    ...deck,
-                    liked_by_user: !wasLiked,
-                    likes_count: Math.max(0, (deck.likes_count || 0) + optimisticDelta),
-                  }
-                : deck,
-            ),
-          }
+          ...prev,
+          decks: prev.decks.map((deck) =>
+            deck.id === deckId
+              ? {
+                ...deck,
+                liked_by_user: !wasLiked,
+                likes_count: Math.max(0, (deck.likes_count || 0) + optimisticDelta),
+              }
+              : deck,
+          ),
+        }
         : prev,
     );
 
@@ -174,21 +176,21 @@ export default function CommunityPersonScreen() {
       setData((prev) =>
         prev
           ? {
-              ...prev,
-              decks: prev.decks.map((deck) =>
-                deck.id === deckId
-                  ? {
-                      ...deck,
-                      liked_by_user: liked,
-                      likes_count: Math.max(
-                        0,
-                        (deck.likes_count || 0) +
-                          (liked === wasLiked ? -optimisticDelta : 0),
-                      ),
-                    }
-                  : deck,
-              ),
-            }
+            ...prev,
+            decks: prev.decks.map((deck) =>
+              deck.id === deckId
+                ? {
+                  ...deck,
+                  liked_by_user: liked,
+                  likes_count: Math.max(
+                    0,
+                    (deck.likes_count || 0) +
+                    (liked === wasLiked ? -optimisticDelta : 0),
+                  ),
+                }
+                : deck,
+            ),
+          }
           : prev,
       );
     } catch (err) {
@@ -196,17 +198,17 @@ export default function CommunityPersonScreen() {
       setData((prev) =>
         prev
           ? {
-              ...prev,
-              decks: prev.decks.map((deck) =>
-                deck.id === deckId
-                  ? {
-                      ...deck,
-                      liked_by_user: wasLiked,
-                      likes_count: Math.max(0, (deck.likes_count || 0) - optimisticDelta),
-                    }
-                  : deck,
-              ),
-            }
+            ...prev,
+            decks: prev.decks.map((deck) =>
+              deck.id === deckId
+                ? {
+                  ...deck,
+                  liked_by_user: wasLiked,
+                  likes_count: Math.max(0, (deck.likes_count || 0) - optimisticDelta),
+                }
+                : deck,
+            ),
+          }
           : prev,
       );
       Alert.alert(t("common.error"), t("community.likeError"));
@@ -245,20 +247,40 @@ export default function CommunityPersonScreen() {
           </View>
 
           {person && (
-            <View style={styles.heroIdentityCard}>
-              {person.avatar_url ? (
-                <Image source={{ uri: person.avatar_url }} style={styles.avatar} />
-              ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <Ionicons name="person" size={28} color={colors.white} />
-                </View>
-              )}
+            <View style={styles.profileHeaderContent}>
+              <View style={styles.identityTopRow}>
+                {person.avatar_url ? (
+                  <Image source={{ uri: person.avatar_url }} style={styles.avatar} />
+                ) : (
+                  <View style={styles.avatarPlaceholder}>
+                    <Ionicons name="person" size={20} color={colors.white} />
+                  </View>
+                )}
 
-              <View style={styles.heroTextWrap}>
-                <Text style={styles.heroTitle}>{displayName}</Text>
-                <Text style={styles.heroSubtitle}>
-                  {t("community.publicDeckCreator")}
-                </Text>
+                <View style={styles.heroTextWrap}>
+                  <Text style={styles.heroTitle}>{displayName}</Text>
+                  <Text style={styles.heroSubtitle}>
+                    {t("community.publicDeckCreator")}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.identityDivider} />
+
+              <View style={styles.identityStatsRow}>
+                <View style={styles.identityStatBox}>
+                  <Text style={styles.identityStatValue}>
+                    {person.current_streak || 0}
+                  </Text>
+                  <Text style={styles.identityStatLabel}>{t("community.dayStreak")}</Text>
+                </View>
+                <View style={styles.identityStatDivider} />
+                <View style={styles.identityStatBox}>
+                  <Text style={styles.identityStatValue}>
+                    {person.public_deck_count || 0}
+                  </Text>
+                  <Text style={styles.identityStatLabel}>{t("community.publicDecks")}</Text>
+                </View>
               </View>
             </View>
           )}
@@ -300,24 +322,6 @@ export default function CommunityPersonScreen() {
             )}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
-            ListHeaderComponent={
-              person ? (
-                <View style={styles.summaryRow}>
-                  <View style={styles.summaryCard}>
-                    <Text style={styles.summaryValue}>
-                      {person.current_streak || 0}
-                    </Text>
-                    <Text style={styles.summaryLabel}>{t("community.dayStreak")}</Text>
-                  </View>
-                  <View style={styles.summaryCard}>
-                    <Text style={styles.summaryValue}>
-                      {person.public_deck_count || 0}
-                    </Text>
-                    <Text style={styles.summaryLabel}>{t("community.publicDecks")}</Text>
-                  </View>
-                </View>
-              ) : null
-            }
             ListEmptyComponent={
               <View style={styles.emptyCard}>
                 <Ionicons
@@ -343,7 +347,7 @@ const createStyles = (colors: typeof Colors.light) =>
       backgroundColor: colors.background,
     },
     heroGradient: {
-      paddingBottom: 24,
+      paddingBottom: 20,
       borderBottomLeftRadius: 30,
       borderBottomRightRadius: 30,
       shadowColor: "#7c3aed",
@@ -357,7 +361,7 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     heroHeader: {
       paddingTop: 8,
-      paddingBottom: 18,
+      paddingBottom: 10,
     },
     backButton: {
       width: 42,
@@ -369,27 +373,27 @@ const createStyles = (colors: typeof Colors.light) =>
       borderWidth: 1,
       borderColor: "rgba(255,255,255,0.15)",
     },
-    heroIdentityCard: {
+    profileHeaderContent: {
+      flexDirection: "column",
+      alignItems: "stretch",
+      paddingHorizontal: 4,
+    },
+    identityTopRow: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "rgba(255,255,255,0.16)",
-      padding: 20,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: "rgba(255,255,255,0.16)",
     },
     avatar: {
-      width: 72,
-      height: 72,
-      borderRadius: 24,
-      marginRight: 16,
+      width: 48,
+      height: 48,
+      borderRadius: 16,
+      marginRight: 12,
       backgroundColor: colors.white,
     },
     avatarPlaceholder: {
-      width: 72,
-      height: 72,
-      borderRadius: 24,
-      marginRight: 16,
+      width: 48,
+      height: 48,
+      borderRadius: 16,
+      marginRight: 12,
       backgroundColor: "rgba(255,255,255,0.22)",
       alignItems: "center",
       justifyContent: "center",
@@ -399,16 +403,45 @@ const createStyles = (colors: typeof Colors.light) =>
     },
     heroTitle: {
       color: colors.white,
-      fontSize: 28,
-      fontWeight: "800",
-      letterSpacing: -0.7,
+      fontSize: 20,
+      fontWeight: "700",
+      letterSpacing: -0.4,
     },
     heroSubtitle: {
       color: "rgba(255,255,255,0.86)",
-      fontSize: 14,
-      marginTop: 6,
+      fontSize: 12,
+      marginTop: 2,
       fontWeight: "500",
-      lineHeight: 20,
+      lineHeight: 18,
+    },
+    identityDivider: {
+      height: 1,
+      backgroundColor: "rgba(255,255,255,0.12)",
+      marginVertical: 12,
+    },
+    identityStatsRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    identityStatBox: {
+      flex: 1,
+      alignItems: "center",
+    },
+    identityStatDivider: {
+      width: 1,
+      height: 20,
+      backgroundColor: "rgba(255,255,255,0.12)",
+    },
+    identityStatValue: {
+      color: colors.white,
+      fontSize: 18,
+      fontWeight: "800",
+    },
+    identityStatLabel: {
+      color: "rgba(255,255,255,0.75)",
+      fontSize: 11,
+      fontWeight: "600",
+      marginTop: 2,
     },
     contentContainer: {
       flex: 1,
@@ -418,31 +451,6 @@ const createStyles = (colors: typeof Colors.light) =>
       paddingTop: 18,
       paddingBottom: 110,
       gap: 18,
-    },
-    summaryRow: {
-      flexDirection: "row",
-      gap: 12,
-      marginBottom: 18,
-    },
-    summaryCard: {
-      flex: 1,
-      backgroundColor: colors.surface,
-      borderRadius: 22,
-      padding: 18,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    summaryValue: {
-      color: colors.text,
-      fontSize: 28,
-      fontWeight: "800",
-      letterSpacing: -0.7,
-    },
-    summaryLabel: {
-      color: colors.textSecondary,
-      fontSize: 13,
-      fontWeight: "600",
-      marginTop: 4,
     },
     centerState: {
       flex: 1,
@@ -501,60 +509,57 @@ const createStyles = (colors: typeof Colors.light) =>
       maxWidth: 280,
     },
     cardShell: {
-      borderRadius: 28,
+      borderRadius: 20,
       shadowColor: "#0f172a",
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.08,
-      shadowRadius: 20,
-      elevation: 5,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.06,
+      shadowRadius: 16,
+      elevation: 4,
     },
     card: {
       backgroundColor: colors.surface,
-      borderRadius: 28,
-      padding: 18,
+      borderRadius: 20,
+      padding: 14,
       borderWidth: 1,
       borderColor: colors.border + "80",
     },
     cardTopRow: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 16,
+      marginBottom: 12,
     },
     deckIcon: {
-      width: 52,
-      height: 52,
-      borderRadius: 18,
+      width: 40,
+      height: 40,
+      borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
-      marginRight: 14,
+      marginRight: 12,
     },
     cardTitleWrap: {
       flex: 1,
     },
-    cardEyebrow: {
-      fontSize: 11,
-      fontWeight: "700",
-      color: colors.primary,
-      textTransform: "uppercase",
-      letterSpacing: 0.8,
-      marginBottom: 3,
+    ownerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      marginTop: 4,
     },
     cardTitle: {
-      fontSize: 24,
+      fontSize: 18,
       fontWeight: "800",
       color: colors.text,
-      letterSpacing: -0.6,
+      letterSpacing: -0.4,
     },
     cardSubtitle: {
-      fontSize: 14,
+      fontSize: 13,
       color: colors.textSecondary,
-      marginTop: 4,
       fontWeight: "500",
     },
-    metricRow: {
-      flexDirection: "row",
-      gap: 10,
-      marginBottom: 18,
+    rightStatsColumn: {
+      alignItems: "flex-end",
+      gap: 6,
+      marginLeft: 12,
     },
     metricPill: {
       flexDirection: "row",
@@ -562,12 +567,12 @@ const createStyles = (colors: typeof Colors.light) =>
       gap: 6,
       backgroundColor: colors.background,
       borderRadius: 999,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
     },
     metricText: {
       color: colors.text,
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: "700",
     },
     cardFooter: {
@@ -580,13 +585,15 @@ const createStyles = (colors: typeof Colors.light) =>
       alignItems: "center",
       justifyContent: "center",
       gap: 8,
-      backgroundColor: colors.background,
-      borderRadius: 16,
-      paddingVertical: 14,
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: colors.primary + "30",
+      borderRadius: 12,
+      paddingVertical: 10,
     },
     secondaryActionText: {
       color: colors.primary,
-      fontSize: 15,
+      fontSize: 14,
       fontWeight: "700",
     },
     primaryAction: {
@@ -596,12 +603,12 @@ const createStyles = (colors: typeof Colors.light) =>
       justifyContent: "center",
       gap: 8,
       backgroundColor: colors.primary,
-      borderRadius: 16,
-      paddingVertical: 14,
+      borderRadius: 12,
+      paddingVertical: 10,
     },
     primaryActionText: {
       color: colors.white,
-      fontSize: 15,
+      fontSize: 14,
       fontWeight: "700",
     },
   });

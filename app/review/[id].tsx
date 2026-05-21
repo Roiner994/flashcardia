@@ -105,7 +105,7 @@ export default function ReviewScreen() {
   };
 
   const speak = () => {
-    if (currentCard?.front_word) {
+    if (currentCard.front_word) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       Speech.stop();
       Speech.speak(currentCard.front_word, {

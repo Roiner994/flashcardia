@@ -3,6 +3,28 @@ import { Card } from '@types';
 import { StateCreator } from 'zustand';
 import { CardsSlice, StoreState } from '../types';
 
+const selectCurrentCards = (
+    allDeckCards: Card[],
+    deckId: string,
+    get: () => StoreState,
+) => {
+    const now = new Date();
+
+    const dueCards = allDeckCards.filter((card) => {
+        if (card.status === 'new') return false;
+        if (!card.next_review_at) return true;
+        return new Date(card.next_review_at) <= now;
+    });
+
+    const deck = get().decks.find((item) => item.id === deckId);
+    const newCardsLimit = deck?.daily_new_limit ?? get().dailyNewLimit;
+    const newCards = allDeckCards
+        .filter((card) => card.status === 'new')
+        .slice(0, newCardsLimit);
+
+    return [...dueCards, ...newCards];
+};
+
 export const createCardsSlice: StateCreator<
     StoreState,
     [],
@@ -17,21 +39,7 @@ export const createCardsSlice: StateCreator<
         set({ isCardsLoading: true });
         try {
             const allDeckCards = await DataService.getCards(deckId);
-            const now = new Date();
-
-            // 1. Due Cards: cards with status learning/review/mastered where next_review_at <= now
-            const dueCards = allDeckCards.filter(c => {
-                if (c.status === 'new') return false;
-                if (!c.next_review_at) return true;
-                return new Date(c.next_review_at) <= now;
-            });
-
-            // 2. New Cards: Up to deck-specific or global limit
-            const deck = get().decks.find(d => d.id === deckId);
-            const newCardsLimit = deck?.daily_new_limit ?? get().dailyNewLimit;
-            const newCards = allDeckCards.filter(c => c.status === 'new').slice(0, newCardsLimit);
-
-            set({ currentCards: [...dueCards, ...newCards] });
+            set({ currentCards: selectCurrentCards(allDeckCards, deckId, get) });
         } catch (error) {
             console.error('Failed to load cards', error);
         } finally {
@@ -53,17 +61,42 @@ export const createCardsSlice: StateCreator<
 
     addCard: async (card: Omit<Card, 'id' | 'created_at'>) => {
         try {
-            await DataService.createCard(card);
+            const createdCard = await DataService.createCard(card);
+            const previousAllCards = get().allCards.filter((item) => item.id !== createdCard.id);
 
-            // Forcefully refetch all cards from the database to ensure 100% accurate synchronization
-            await get().loadAllCards();
+            set({
+                allCards: [createdCard, ...previousAllCards],
+            });
 
-            // If we are currently viewing this deck's due cards, reload them
-            if (get().currentCards.length > 0 && get().currentCards[0].deck_id === card.deck_id) {
-                await get().loadCards(card.deck_id);
-            }
+            const deckCards = await DataService.getCards(card.deck_id);
+            set({
+                currentCards: selectCurrentCards(deckCards, card.deck_id, get),
+            });
         } catch (error) {
             console.error('Failed to add card', error);
+            throw error;
+        }
+    },
+
+    updateCard: async (id: string, updates: Partial<Omit<Card, 'id' | 'created_at'>>) => {
+        try {
+            const updatedCard = await DataService.updateCard(id, updates);
+            if (!updatedCard) return;
+
+            const replaceCard = (cards: Card[]) =>
+                cards.map((card) => (card.id === id ? updatedCard : card));
+
+            set({
+                allCards: replaceCard(get().allCards),
+                currentCards: replaceCard(get().currentCards),
+            });
+
+            const deckCards = await DataService.getCards(updatedCard.deck_id);
+            set({
+                currentCards: selectCurrentCards(deckCards, updatedCard.deck_id, get),
+            });
+        } catch (error) {
+            console.error('Failed to update card', error);
             throw error;
         }
     },

@@ -124,6 +124,28 @@
     "errorBody": "Failed to generate card. Please try again.",
     "total": "Total"
   },
+  "cardEditor": {
+    "editTitle": "Edit Card",
+    "saveChanges": "Save Changes",
+    "addImage": "Add an image",
+    "addImageHint": "Give the card a stronger visual memory anchor.",
+    "changeImage": "Change image",
+    "removeImage": "Remove image",
+    "wordPlaceholder": "Word or phrase",
+    "phoneticPlaceholder": "/fəˈnɛtɪk/",
+    "recordAudio": "Record audio",
+    "stopRecording": "Stop",
+    "rerecordAudio": "Re-record",
+    "recordingUnavailable": "Audio recording unavailable in this build",
+    "useTts": "Use TTS instead",
+    "ttsFallback": "No custom audio yet. Playback will use text-to-speech.",
+    "definitionPlaceholder": "Describe the concept clearly and naturally.",
+    "meaningPlaceholder": "Add the meaning or translation you want to remember.",
+    "addExample": "Add example",
+    "examplePlaceholder": "Write a memorable usage example.",
+    "savingTitle": "Saving your card",
+    "savingBody": "We are adding it to the deck and getting everything ready."
+  },
   "community": {
     "title": "Explore",
     "decks": "Decks",

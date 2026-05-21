@@ -124,6 +124,28 @@
     "errorBody": "Error al generar tarjeta. Intenta de nuevo.",
     "total": "Total"
   },
+  "cardEditor": {
+    "editTitle": "Editar Tarjeta",
+    "saveChanges": "Guardar Cambios",
+    "addImage": "Agregar imagen",
+    "addImageHint": "Dale a la tarjeta un ancla visual mas fuerte.",
+    "changeImage": "Cambiar imagen",
+    "removeImage": "Eliminar imagen",
+    "wordPlaceholder": "Palabra o frase",
+    "phoneticPlaceholder": "/fəˈnɛtɪk/",
+    "recordAudio": "Grabar audio",
+    "stopRecording": "Detener",
+    "rerecordAudio": "Volver a grabar",
+    "recordingUnavailable": "La grabacion de audio no esta disponible en esta version",
+    "useTts": "Usar TTS",
+    "ttsFallback": "Aun no hay audio personalizado. La reproduccion usara texto a voz.",
+    "definitionPlaceholder": "Describe el concepto de forma clara y natural.",
+    "meaningPlaceholder": "Agrega el significado o traduccion que quieres recordar.",
+    "addExample": "Agregar ejemplo",
+    "examplePlaceholder": "Escribe un ejemplo memorable de uso.",
+    "savingTitle": "Guardando tu tarjeta",
+    "savingBody": "La estamos agregando al mazo y dejando todo listo."
+  },
   "community": {
     "title": "Explorar",
     "decks": "Mazos",
