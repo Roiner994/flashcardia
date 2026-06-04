@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import "../../global.css";
 
@@ -10,6 +11,8 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const colors = useTheme();
   const insets = useSafeAreaInsets();
+  // Ensure minimum padding for labels on all platforms where bottom inset might be 0
+  const bottomPadding = Math.max(insets.bottom, 16);
 
   return (
     <Tabs
@@ -21,12 +24,12 @@ export default function TabLayout() {
           backgroundColor: colors.surface,
           borderTopWidth: 0,
           elevation: 0,
-          height: 60 + insets.bottom,
-          paddingBottom: insets.bottom,
+          minHeight: 65 + bottomPadding,
+          paddingBottom: bottomPadding,
           paddingTop: 10,
         },
         tabBarLabelStyle: {
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: "600",
           marginTop: 4,
         },

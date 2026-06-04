@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Ensure the app fills exactly the viewport on web */
+html {
+  height: 100%;
+  height: 100dvh;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* React Native Web wraps everything in deeply nested divs with display:flex.
+   Ensure the full chain inherits the viewport height. */
+#root > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: 100dvh;
+  max-height: 100vh;
+  overflow: hidden;
+}

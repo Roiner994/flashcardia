@@ -3,13 +3,14 @@ import { useTheme } from "@hooks/useThemeColor";
 import { useStore } from "@store/useStore";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
     FlatList,
+    Platform,
     StyleSheet,
     Text,
+    useWindowDimensions,
     View,
     ViewToken
 } from "react-native";
@@ -22,8 +23,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width } = Dimensions.get("window");
-
 interface Slide {
   id: string;
   title: string;
@@ -32,26 +31,64 @@ interface Slide {
   color: string;
 }
 
+// Individual dot component to avoid hooks-in-map violation
+const PaginatorDot = ({ index, scrollX, color, itemWidth }: { index: number, scrollX: SharedValue<number>, color: string, itemWidth: number }) => {
+    const inputRange = [(index - 1) * itemWidth, index * itemWidth, (index + 1) * itemWidth];
 
+    const dotWidth = useAnimatedStyle(() => {
+        const w = interpolate(
+            scrollX.value,
+            inputRange,
+            [10, 20, 10],
+            Extrapolation.CLAMP
+        );
+        return { width: w };
+    });
 
-const OnboardingItem = ({ item, index, scrollX, currentIndex }: { item: Slide, index: number, scrollX: SharedValue<number>, currentIndex: number }) => {
+    const opacity = useAnimatedStyle(() => {
+        const op = interpolate(
+            scrollX.value,
+            inputRange,
+            [0.3, 1, 0.3],
+            Extrapolation.CLAMP
+        );
+        return { opacity: op };
+    });
+
+    return (
+        <Animated.View
+            style={[
+                styles.dot,
+                { backgroundColor: color },
+                dotWidth,
+                opacity
+            ]}
+        />
+    );
+};
+
+const OnboardingItem = ({ item, index, scrollX, currentIndex, itemWidth }: { item: Slide, index: number, scrollX: SharedValue<number>, currentIndex: number, itemWidth: number }) => {
     const colors = useTheme();
     const lottieRef = useRef<LottieView>(null);
+    const isWeb = Platform.OS === 'web';
 
     React.useEffect(() => {
+        // On web, lottie-react-native's reset()/play() don't work correctly
+        // and can destroy the animation state. Let autoPlay+loop handle it.
+        if (isWeb) return;
         
         if (index === currentIndex) {
             lottieRef.current?.play(0);
         } else {
             lottieRef.current?.reset();
         }
-    }, [currentIndex, index]);
+    }, [currentIndex, index, isWeb]);
     
     const rnStyle = useAnimatedStyle(() => {
         const inputRange = [
-            (index - 1) * width,
-            index * width,
-            (index + 1) * width
+            (index - 1) * itemWidth,
+            index * itemWidth,
+            (index + 1) * itemWidth
         ];
         
         const scale = interpolate(
@@ -75,9 +112,9 @@ const OnboardingItem = ({ item, index, scrollX, currentIndex }: { item: Slide, i
     });
 
     return (
-        <View style={[styles.itemContainer, { width }]}>
+        <View style={[styles.itemContainer, { width: itemWidth }]}>
             <Animated.View style={[styles.iconContainer, { backgroundColor: item.color + '20' }, rnStyle]}>
-                 <LottieView
+                <LottieView
                     ref={lottieRef}
                     source={item.animation}
                     autoPlay
@@ -93,45 +130,19 @@ const OnboardingItem = ({ item, index, scrollX, currentIndex }: { item: Slide, i
     );
 };
 
-const Paginator = ({ data, scrollX }: { data: Slide[], scrollX: SharedValue<number> }) => {
+const Paginator = ({ data, scrollX, itemWidth }: { data: Slide[], scrollX: SharedValue<number>, itemWidth: number }) => {
     const colors = useTheme();
     return (
-        <View style={{ flexDirection: 'row', height: 64 }}>
-            {data.map((_, i) => {
-                const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
-                
-                const dotWidth = useAnimatedStyle(() => {
-                    const w = interpolate(
-                        scrollX.value,
-                        inputRange,
-                        [10, 20, 10],
-                        Extrapolation.CLAMP
-                    );
-                    return { width: w };
-                });
-
-                const opacity = useAnimatedStyle(() => {
-                     const op = interpolate(
-                        scrollX.value,
-                        inputRange,
-                        [0.3, 1, 0.3],
-                        Extrapolation.CLAMP
-                    );
-                    return { opacity: op };
-                });
-
-                return (
-                    <Animated.View
-                        key={i.toString()}
-                        style={[
-                            styles.dot,
-                            { backgroundColor: colors.primary },
-                            dotWidth,
-                            opacity
-                        ]}
-                    />
-                );
-            })}
+        <View style={{ flexDirection: 'row', height: 64, justifyContent: 'center', alignItems: 'center' }}>
+            {data.map((_, i) => (
+                <PaginatorDot
+                    key={i.toString()}
+                    index={i}
+                    scrollX={scrollX}
+                    color={colors.primary}
+                    itemWidth={itemWidth}
+                />
+            ))}
         </View>
     );
 };
@@ -144,6 +155,11 @@ export default function OnboardingScreen() {
   const { completeOnboarding, session } = useStore();
   const router = useRouter();
   const colors = useTheme();
+  const { width: windowWidth } = useWindowDimensions();
+  const isWeb = Platform.OS === 'web';
+
+  // On web, constrain to a max width for a mobile-like experience
+  const itemWidth = isWeb ? Math.min(windowWidth, 480) : windowWidth;
 
   const slides: Slide[] = useMemo(() => [
     {
@@ -194,15 +210,30 @@ export default function OnboardingScreen() {
       router.replace("/(tabs)");
   };
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+  const getItemLayout = useCallback((_: any, index: number) => ({
+    length: itemWidth,
+    offset: itemWidth * index,
+    index,
+  }), [itemWidth]);
+
+  // Web: use a centered container with max-width; Native: full screen
+  const containerContent = (
+    <>
         <View style={{ flex: 3 }}>
             <FlatList
                 data={slides}
-                renderItem={({ item, index }) => <OnboardingItem item={item} index={index} scrollX={scrollX} currentIndex={currentIndex} />}
+                renderItem={({ item, index }) => (
+                    <OnboardingItem
+                        item={item}
+                        index={index}
+                        scrollX={scrollX}
+                        currentIndex={currentIndex}
+                        itemWidth={itemWidth}
+                    />
+                )}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                pagingEnabled
+                pagingEnabled={!isWeb}
                 bounces={false}
                 keyExtractor={(item) => item.id}
                 onScroll={handleScroll}
@@ -210,12 +241,20 @@ export default function OnboardingScreen() {
                 viewabilityConfig={viewConfig}
                 ref={slidesRef}
                 scrollEventThrottle={32}
+                getItemLayout={getItemLayout}
+                // On web, use snap to simulate paging
+                {...(isWeb ? {
+                    snapToInterval: itemWidth,
+                    decelerationRate: "fast",
+                    snapToAlignment: "start" as const,
+                } : {})}
+                style={isWeb ? { maxWidth: itemWidth } : undefined}
             />
         </View>
 
-        <Paginator data={slides} scrollX={scrollX} />
+        <Paginator data={slides} scrollX={scrollX} itemWidth={itemWidth} />
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, isWeb && { maxWidth: itemWidth }]}>
             <Button
                 title={currentIndex === slides.length - 1 ? t("onboarding.getStarted") : t("onboarding.next")}
                 onPress={scrollToNext}
@@ -231,6 +270,18 @@ export default function OnboardingScreen() {
                 />
             )}
         </View>
+    </>
+  );
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        {isWeb ? (
+            <View style={styles.webWrapper}>
+                {containerContent}
+            </View>
+        ) : (
+            containerContent
+        )}
     </SafeAreaView>
   );
 }
@@ -238,6 +289,14 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  webWrapper: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
     justifyContent: "center",
     alignItems: "center",
   },

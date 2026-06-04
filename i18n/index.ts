@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getLocales } from "expo-localization";
 import i18n from "i18next";
+import { Platform } from "react-native";
 import { initReactI18next } from "react-i18next";
 
 import en from "./locales/en.json";
@@ -30,6 +31,10 @@ i18n.use(initReactI18next).init({
 
 // Load saved user preference asynchronously
 const loadUserLanguage = async () => {
+    // Skip on web during SSR/static generation where window is not defined
+    if (Platform.OS === 'web' && typeof window === 'undefined') {
+        return;
+    }
     try {
         const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
         if (savedLanguage) {
