@@ -29,14 +29,16 @@ export default function LoginScreen() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId:
-        "721182632268-41uhb3lj14scl6i0de3ickrdp3as7fuh.apps.googleusercontent.com",
-      iosClientId:
-        "721182632268-5jbumntlanoqemr9ft2qf2undj7c1tor.apps.googleusercontent.com",
-      offlineAccess: true,
-      forceCodeForRefreshToken: true,
-    });
+    if (Platform.OS !== "web") {
+      GoogleSignin.configure({
+        webClientId:
+          "721182632268-41uhb3lj14scl6i0de3ickrdp3as7fuh.apps.googleusercontent.com",
+        iosClientId:
+          "721182632268-5jbumntlanoqemr9ft2qf2undj7c1tor.apps.googleusercontent.com",
+        offlineAccess: true,
+        forceCodeForRefreshToken: true,
+      });
+    }
   }, []);
 
 
@@ -78,6 +80,16 @@ export default function LoginScreen() {
   }
 
   async function handleGoogleLogin() {
+    if (Platform.OS === "web") {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+      });
+      if (error) {
+        Alert.alert(t("common.error"), error.message);
+      }
+      return;
+    }
+
     setLoading(true);
     try {
       await GoogleSignin.hasPlayServices();
@@ -122,7 +134,9 @@ export default function LoginScreen() {
   }
 
   const googleLogout = async () => {
-    await GoogleSignin.signOut();
+    if (Platform.OS !== "web") {
+      await GoogleSignin.signOut();
+    }
   }
 
   return (
