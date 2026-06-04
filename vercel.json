@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/((?!assets/|static/|favicon.png|manifest.json|_expo/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
